@@ -2,7 +2,9 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 
 import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { limitField, returnAllField } from './shared';
+import { limitField, pick, returnAllField, simplifyField } from './shared';
+
+const COMPANY_SIMPLIFY_FIELDS = ['id', 'companyId', 'name', 'monthlySpend', 'industry', 'website', 'plan', 'companySize'];
 
 export const companyOperations: INodeProperties = {
 	displayName: 'Operation',
@@ -87,19 +89,28 @@ export const companyFields: INodeProperties[] = [
 		...limitField,
 		displayOptions: { show: { resource: ['company'], operation: ['getMany', 'listContacts'], returnAll: [false] } },
 	},
+	{
+		...simplifyField,
+		displayOptions: { show: { resource: ['company'], operation: ['get', 'getMany', 'upsert'] } },
+	},
 ];
 
 export async function executeCompany(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const simplify = ['get', 'getMany', 'upsert'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
+	const finalize = (company: IDataObject): IDataObject => (simplify ? pick(company, COMPANY_SIMPLIFY_FIELDS) : company);
+
 	switch (operation) {
 		case 'getMany': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
 			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			return (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/companies', {}, returnAll, limit);
+			const companies = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/companies', {}, returnAll, limit);
+			return companies.map(finalize);
 		}
 
 		case 'get': {
 			const companyId = this.getNodeParameter('companyId', index) as string;
-			return featurebaseApiRequest.call(this, 'GET', `/v2/companies/${companyId}`);
+			const company = (await featurebaseApiRequest.call(this, 'GET', `/v2/companies/${companyId}`)) as IDataObject;
+			return finalize(company);
 		}
 
 		case 'upsert': {
@@ -115,7 +126,8 @@ export async function executeCompany(this: IExecuteFunctions, index: number, ope
 				body.customFields = typeof additionalFields.customFields === 'string' ? JSON.parse(additionalFields.customFields) : additionalFields.customFields;
 			}
 
-			return featurebaseApiRequest.call(this, 'POST', '/v2/companies', body);
+			const company = (await featurebaseApiRequest.call(this, 'POST', '/v2/companies', body)) as IDataObject;
+			return finalize(company);
 		}
 
 		case 'delete': {
