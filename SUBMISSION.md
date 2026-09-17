@@ -45,7 +45,9 @@ Pick one:
 npm run release
 ```
 
-This lints, builds, prompts for a version bump, updates the changelog, commits, tags, and pushes. The tag push triggers `.github/workflows/publish.yml`, which installs dependencies and runs the release step again inside CI, publishing to npm with a provenance attestation.
+Run locally, this lints, builds, prompts for a version bump, updates the changelog, commits, tags, and pushes - it does **not** publish to npm. The tag push triggers `.github/workflows/publish.yml`, which runs the same `n8n-node release` command again, but this time inside GitHub Actions (detected via the `GITHUB_ACTIONS` environment variable), where it publishes to npm with a provenance attestation instead.
+
+`package.json`'s `prepublishOnly` script (`n8n-node prerelease`) deliberately makes a direct `npm publish` fail locally, printing "Run `npm run release` to publish the package" - this is intentional, not a bug: it forces every release through the GitHub Actions path required for verification. `n8n-node release` has a `--publish` flag for a direct local npm publish, but it explicitly forfeits provenance and verification eligibility, so this package does not use it.
 
 ## Verify locally before tagging a release
 
