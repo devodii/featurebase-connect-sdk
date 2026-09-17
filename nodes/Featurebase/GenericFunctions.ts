@@ -271,3 +271,19 @@ export async function searchPosts(
 		})),
 	};
 }
+
+export async function searchComments(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	const comments = await featurebaseApiRequestAllItems.call(this, '/v2/comments', { limit: 50 }, false, 50);
+
+	const results = (comments as IDataObject[])
+		.map((comment) => {
+			const text = String(comment.content ?? '').replace(/<[^>]+>/g, '');
+			return { name: text.length > 60 ? `${text.slice(0, 60)}...` : text || String(comment.id), value: String(comment.id) };
+		})
+		.filter((item) => !filter || item.name.toLowerCase().includes(filter.toLowerCase()));
+
+	return { results };
+}
