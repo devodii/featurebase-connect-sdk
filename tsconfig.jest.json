@@ -1,0 +1,8 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noUnusedLocals": false
+	},
+	"include": ["credentials/**/*", "nodes/**/*", "test/**/*"],
+	"exclude": ["dist", "node_modules"]
+}
