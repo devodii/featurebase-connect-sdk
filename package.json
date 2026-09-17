@@ -16,7 +16,6 @@
 		"type": "git",
 		"url": "https://github.com/devodii/n8n-nodes-featurebase.git"
 	},
-	"main": "index.js",
 	"scripts": {
 		"build": "n8n-node build",
 		"clean": "rm -rf dist .tsbuildinfo",
