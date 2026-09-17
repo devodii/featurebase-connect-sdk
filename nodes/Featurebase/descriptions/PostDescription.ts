@@ -23,11 +23,11 @@ const integrationsField: INodeProperties = {
 	default: {},
 	description: 'Push the created post to third-party integrations configured on your organization (reference/FINDINGS.md section 9)',
 	options: [
-		{ displayName: 'Linear', name: 'linear', type: 'boolean', default: false },
 		{ displayName: 'ClickUp', name: 'clickup', type: 'boolean', default: false },
+		{ displayName: 'Discord', name: 'discord', type: 'boolean', default: false },
 		{ displayName: 'GitHub', name: 'github', type: 'boolean', default: false },
 		{ displayName: 'Jira', name: 'jira', type: 'boolean', default: false },
-		{ displayName: 'Discord', name: 'discord', type: 'boolean', default: false },
+		{ displayName: 'Linear', name: 'linear', type: 'boolean', default: false },
 		{ displayName: 'Slack', name: 'slack', type: 'boolean', default: false },
 	],
 };
@@ -35,12 +35,13 @@ const integrationsField: INodeProperties = {
 function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 	return [
 		{
-			displayName: 'Tags',
+			displayName: 'Tag Names or IDs',
 			name: 'tags',
 			type: 'multiOptions',
 			typeOptions: { loadOptionsMethod: 'getPostTags' },
 			default: [],
-			description: 'Tag names to attach (replaces existing on update). Switch to Expression mode to use tag names that do not exist yet.',
+			description:
+				'Tag names to attach (replaces existing on update). Switch to Expression mode to use tag names that do not exist yet. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		},
 		resourceLocatorField('statusId', 'Status', 'searchPostStatuses', {
 			required: false,
@@ -67,9 +68,10 @@ function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 					name: 'field',
 					values: [
 						{
-							displayName: 'Field',
+							displayName: 'Field Name or ID',
 							name: 'fieldId',
 							type: 'options',
+							description: 'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 							typeOptions: { loadOptionsMethod: 'getCustomFields' },
 							default: '',
 						},
@@ -156,16 +158,16 @@ export const postOperations: INodeProperties = {
 	displayOptions: { show: { resource: ['post'] } },
 	default: 'getMany',
 	options: [
-		{ name: 'Get Many', value: 'getMany', description: 'List posts with filters', action: 'Get many posts' },
+		{ name: 'Add Upvoter', value: 'addUpvoter', description: 'Add a voter to a post', action: 'Add an upvoter to a post' },
+		{ name: 'Create', value: 'create', description: 'Create a new post', action: 'Create a post' },
+		{ name: 'Delete', value: 'delete', description: 'Delete a post', action: 'Delete a post' },
 		{ name: 'Get', value: 'get', description: 'Get a post by ID', action: 'Get a post' },
 		{ name: 'Get by Slug', value: 'getBySlug', description: 'Get a post by its URL slug', action: 'Get a post by slug' },
-		{ name: 'Search', value: 'search', description: 'Search posts by text', action: 'Search posts' },
-		{ name: 'Create', value: 'create', description: 'Create a new post', action: 'Create a post' },
-		{ name: 'Update', value: 'update', description: 'Update a post', action: 'Update a post' },
-		{ name: 'Delete', value: 'delete', description: 'Delete a post', action: 'Delete a post' },
-		{ name: 'Add Upvoter', value: 'addUpvoter', description: 'Add a voter to a post', action: 'Add an upvoter to a post' },
-		{ name: 'Remove Upvoter', value: 'removeUpvoter', description: 'Remove a voter from a post', action: 'Remove an upvoter from a post' },
+		{ name: 'Get Many', value: 'getMany', description: 'List posts with filters', action: 'Get many posts' },
 		{ name: 'Get Upvoters', value: 'getUpvoters', description: 'List voters on a post', action: 'Get upvoters for a post' },
+		{ name: 'Remove Upvoter', value: 'removeUpvoter', description: 'Remove a voter from a post', action: 'Remove an upvoter from a post' },
+		{ name: 'Search', value: 'search', description: 'Search posts by text', action: 'Search posts' },
+		{ name: 'Update', value: 'update', description: 'Update a post', action: 'Update a post' },
 	],
 };
 
@@ -257,19 +259,26 @@ export const postFields: INodeProperties[] = [
 				type: 'multiOptions',
 				typeOptions: { loadOptionsMethod: 'getBoards' },
 				default: [],
-				description: 'Choose from the list, or specify IDs using an expression',
+				description: 'Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
+			{ displayName: 'Include In-Review Posts', name: 'inReview', type: 'boolean', default: false },
+			{ displayName: 'Query', name: 'q', type: 'string', default: '', description: 'Filter posts by title/content text' },
 			{
 				displayName: 'Status Names or IDs',
 				name: 'statusId',
 				type: 'multiOptions',
 				typeOptions: { loadOptionsMethod: 'getPostStatuses' },
 				default: [],
-				description: 'Choose from the list, or specify IDs using an expression',
+				description: 'Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
-			{ displayName: 'Tag Names or IDs', name: 'tags', type: 'multiOptions', typeOptions: { loadOptionsMethod: 'getPostTags' }, default: [] },
-			{ displayName: 'Query', name: 'q', type: 'string', default: '', description: 'Filter posts by title/content text' },
-			{ displayName: 'Include In-Review Posts', name: 'inReview', type: 'boolean', default: false },
+			{
+				displayName: 'Tag Names or IDs',
+				name: 'tags',
+				type: 'multiOptions',
+				typeOptions: { loadOptionsMethod: 'getPostTags' },
+				default: [],
+				description: 'Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+			},
 		],
 	},
 	{

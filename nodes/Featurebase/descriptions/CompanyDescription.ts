@@ -12,13 +12,18 @@ export const companyOperations: INodeProperties = {
 	displayOptions: { show: { resource: ['company'] } },
 	default: 'getMany',
 	options: [
-		{ name: 'Get Many', value: 'getMany', description: 'List companies', action: 'Get many companies' },
-		{ name: 'Get', value: 'get', description: 'Get a company by ID', action: 'Get a company' },
-		{ name: 'Upsert', value: 'upsert', description: 'Create or update a company by external company ID', action: 'Upsert a company' },
-		{ name: 'Delete', value: 'delete', description: 'Delete a company by ID', action: 'Delete a company' },
-		{ name: 'List Contacts', value: 'listContacts', description: 'List contacts attached to a company', action: 'List company contacts' },
 		{ name: 'Attach Contact', value: 'attachContact', description: 'Attach a contact to a company', action: 'Attach a contact to a company' },
+		{
+			name: 'Create or Update',
+			value: 'upsert',
+			description: 'Create a new record, or update the current one if it already exists (upsert)',
+			action: 'Upsert a company',
+		},
+		{ name: 'Delete', value: 'delete', description: 'Delete a company by ID', action: 'Delete a company' },
 		{ name: 'Detach Contact', value: 'detachContact', description: 'Remove a contact from a company', action: 'Detach a contact from a company' },
+		{ name: 'Get', value: 'get', description: 'Get a company by ID', action: 'Get a company' },
+		{ name: 'Get Many', value: 'getMany', description: 'List companies', action: 'Get many companies' },
+		{ name: 'List Contacts', value: 'listContacts', description: 'List contacts attached to a company', action: 'List company contacts' },
 	],
 };
 
@@ -65,13 +70,13 @@ export const companyFields: INodeProperties[] = [
 		default: {},
 		displayOptions: { show: { resource: ['company'], operation: ['upsert'] } },
 		options: [
-			{ displayName: 'Monthly Spend', name: 'monthlySpend', type: 'number', typeOptions: { minValue: 0 }, default: 0 },
-			{ displayName: 'Industry', name: 'industry', type: 'string', default: '' },
-			{ displayName: 'Website', name: 'website', type: 'string', default: '' },
-			{ displayName: 'Plan', name: 'plan', type: 'string', default: '' },
 			{ displayName: 'Company Size', name: 'companySize', type: 'number', typeOptions: { minValue: 0 }, default: 0 },
 			{ displayName: 'Created At', name: 'createdAt', type: 'dateTime', default: '' },
 			{ displayName: 'Custom Fields (JSON)', name: 'customFields', type: 'json', default: '{}' },
+			{ displayName: 'Industry', name: 'industry', type: 'string', default: '' },
+			{ displayName: 'Monthly Spend', name: 'monthlySpend', type: 'number', typeOptions: { minValue: 0 }, default: 0 },
+			{ displayName: 'Plan', name: 'plan', type: 'string', default: '' },
+			{ displayName: 'Website', name: 'website', type: 'string', default: '' },
 		],
 	},
 	{

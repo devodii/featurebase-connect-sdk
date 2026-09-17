@@ -137,7 +137,14 @@ export const workflowHelperFields: INodeProperties[] = [
 				],
 			},
 			{ displayName: 'Query', name: 'q', type: 'string', default: '' },
-			{ displayName: 'Limit', name: 'limit', type: 'number', typeOptions: { minValue: 1, maxValue: 100 }, default: 10 },
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				description: 'Max number of results to return',
+				typeOptions: { minValue: 1, maxValue: 100 },
+				default: 50,
+			},
 		],
 	},
 	{
@@ -147,7 +154,7 @@ export const workflowHelperFields: INodeProperties[] = [
 		typeOptions: { minValue: 1 },
 		default: 1000,
 		displayOptions: { show: { resource: ['workflowHelper'], operation: ['revenueWeightedScore'] } },
-		description: 'arrWeight = upvotes + openPipeline / divisor',
+		description: 'ArrWeight = upvotes + openPipeline / divisor',
 	},
 
 	// --- Bulk Import ---

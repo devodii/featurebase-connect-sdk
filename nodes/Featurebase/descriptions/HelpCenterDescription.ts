@@ -12,16 +12,16 @@ export const helpCenterOperations: INodeProperties = {
 	displayOptions: { show: { resource: ['helpCenterArticle'] } },
 	default: 'getMany',
 	options: [
-		{ name: 'Get Many', value: 'getMany', description: 'List articles', action: 'Get many articles' },
-		{ name: 'Get', value: 'get', description: 'Get an article by ID', action: 'Get an article' },
 		{ name: 'Create', value: 'create', description: 'Create an article', action: 'Create an article' },
-		{ name: 'Update', value: 'update', description: 'Update an article', action: 'Update an article' },
-		{ name: 'Delete', value: 'delete', description: 'Delete an article', action: 'Delete an article' },
-		{ name: 'Get Many Collections', value: 'getManyCollections', description: 'List collections', action: 'Get many collections' },
-		{ name: 'Get Collection', value: 'getCollection', description: 'Get a collection by ID', action: 'Get a collection' },
 		{ name: 'Create Collection', value: 'createCollection', description: 'Create a collection', action: 'Create a collection' },
-		{ name: 'Update Collection', value: 'updateCollection', description: 'Update a collection', action: 'Update a collection' },
+		{ name: 'Delete', value: 'delete', description: 'Delete an article', action: 'Delete an article' },
 		{ name: 'Delete Collection', value: 'deleteCollection', description: 'Delete a collection', action: 'Delete a collection' },
+		{ name: 'Get', value: 'get', description: 'Get an article by ID', action: 'Get an article' },
+		{ name: 'Get Collection', value: 'getCollection', description: 'Get a collection by ID', action: 'Get a collection' },
+		{ name: 'Get Many', value: 'getMany', description: 'List articles', action: 'Get many articles' },
+		{ name: 'Get Many Collections', value: 'getManyCollections', description: 'List collections', action: 'Get many collections' },
+		{ name: 'Update', value: 'update', description: 'Update an article', action: 'Update an article' },
+		{ name: 'Update Collection', value: 'updateCollection', description: 'Update a collection', action: 'Update a collection' },
 	],
 };
 

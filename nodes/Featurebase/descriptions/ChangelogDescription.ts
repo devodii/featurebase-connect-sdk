@@ -12,15 +12,15 @@ export const changelogOperations: INodeProperties = {
 	displayOptions: { show: { resource: ['changelog'] } },
 	default: 'getMany',
 	options: [
-		{ name: 'Get Many', value: 'getMany', description: 'List changelogs', action: 'Get many changelogs' },
-		{ name: 'Get', value: 'get', description: 'Get a changelog by ID or slug', action: 'Get a changelog' },
-		{ name: 'Create', value: 'create', description: 'Create a draft changelog', action: 'Create a changelog' },
-		{ name: 'Update', value: 'update', description: 'Update a changelog', action: 'Update a changelog' },
-		{ name: 'Publish', value: 'publish', description: 'Publish a draft changelog', action: 'Publish a changelog' },
-		{ name: 'Unpublish', value: 'unpublish', description: 'Move a changelog back to draft', action: 'Unpublish a changelog' },
-		{ name: 'Delete', value: 'delete', description: 'Delete a changelog', action: 'Delete a changelog' },
 		{ name: 'Add Subscribers', value: 'addSubscribers', description: 'Subscribe emails to the changelog', action: 'Add changelog subscribers' },
+		{ name: 'Create', value: 'create', description: 'Create a draft changelog', action: 'Create a changelog' },
+		{ name: 'Delete', value: 'delete', description: 'Delete a changelog', action: 'Delete a changelog' },
+		{ name: 'Get', value: 'get', description: 'Get a changelog by ID or slug', action: 'Get a changelog' },
+		{ name: 'Get Many', value: 'getMany', description: 'List changelogs', action: 'Get many changelogs' },
+		{ name: 'Publish', value: 'publish', description: 'Publish a draft changelog', action: 'Publish a changelog' },
 		{ name: 'Remove Subscribers', value: 'removeSubscribers', description: 'Unsubscribe emails from the changelog', action: 'Remove changelog subscribers' },
+		{ name: 'Unpublish', value: 'unpublish', description: 'Move a changelog back to draft', action: 'Unpublish a changelog' },
+		{ name: 'Update', value: 'update', description: 'Update a changelog', action: 'Update a changelog' },
 	],
 };
 
@@ -130,9 +130,11 @@ export const changelogFields: INodeProperties[] = [
 		default: {},
 		displayOptions: { show: { resource: ['changelog'], operation: ['getMany'] } },
 		options: [
-			{ displayName: 'Query', name: 'q', type: 'string', default: '' },
 			{ displayName: 'Categories', name: 'categories', type: 'string', default: '', description: 'Comma-separated category names' },
+			{ displayName: 'End Date', name: 'endDate', type: 'dateTime', default: '' },
 			{ displayName: 'Locale', name: 'locale', type: 'string', default: '' },
+			{ displayName: 'Query', name: 'q', type: 'string', default: '' },
+			{ displayName: 'Start Date', name: 'startDate', type: 'dateTime', default: '' },
 			{
 				displayName: 'State',
 				name: 'state',
@@ -144,8 +146,6 @@ export const changelogFields: INodeProperties[] = [
 					{ name: 'All', value: 'all' },
 				],
 			},
-			{ displayName: 'Start Date', name: 'startDate', type: 'dateTime', default: '' },
-			{ displayName: 'End Date', name: 'endDate', type: 'dateTime', default: '' },
 		],
 	},
 	{

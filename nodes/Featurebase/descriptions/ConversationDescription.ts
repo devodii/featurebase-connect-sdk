@@ -12,27 +12,27 @@ export const conversationOperations: INodeProperties = {
 	displayOptions: { show: { resource: ['conversation'] } },
 	default: 'getMany',
 	options: [
-		{ name: 'Get Many', value: 'getMany', description: 'List conversations', action: 'Get many conversations' },
-		{ name: 'Get', value: 'get', description: 'Get a conversation by ID', action: 'Get a conversation' },
-		{ name: 'Create', value: 'create', description: 'Start a new conversation', action: 'Create a conversation' },
-		{
-			name: 'Update',
-			value: 'update',
-			description: 'Update state (open/close/snooze), assignee, title, or attributes',
-			action: 'Update a conversation',
-		},
-		{ name: 'Delete', value: 'delete', description: 'Delete a conversation', action: 'Delete a conversation' },
-		{ name: 'Reply', value: 'reply', description: 'Reply to a conversation as an admin', action: 'Reply to a conversation' },
 		{ name: 'Add Note', value: 'note', description: 'Add an internal note visible only to admins', action: 'Add a note to a conversation' },
 		{ name: 'Add Participant', value: 'addParticipant', description: 'Add a contact to the conversation', action: 'Add a participant to a conversation' },
+		{ name: 'Attach Tag', value: 'attachTag', description: 'Attach a tag to the conversation', action: 'Attach a tag to a conversation' },
+		{ name: 'Create', value: 'create', description: 'Start a new conversation', action: 'Create a conversation' },
+		{ name: 'Delete', value: 'delete', description: 'Delete a conversation', action: 'Delete a conversation' },
+		{ name: 'Detach Tag', value: 'detachTag', description: 'Remove a tag from the conversation', action: 'Detach a tag from a conversation' },
+		{ name: 'Get', value: 'get', description: 'Get a conversation by ID', action: 'Get a conversation' },
+		{ name: 'Get Many', value: 'getMany', description: 'List conversations', action: 'Get many conversations' },
 		{
 			name: 'Remove Participant',
 			value: 'removeParticipant',
 			description: 'Remove a contact from the conversation',
 			action: 'Remove a participant from a conversation',
 		},
-		{ name: 'Attach Tag', value: 'attachTag', description: 'Attach a tag to the conversation', action: 'Attach a tag to a conversation' },
-		{ name: 'Detach Tag', value: 'detachTag', description: 'Remove a tag from the conversation', action: 'Detach a tag from a conversation' },
+		{ name: 'Reply', value: 'reply', description: 'Reply to a conversation as an admin', action: 'Reply to a conversation' },
+		{
+			name: 'Update',
+			value: 'update',
+			description: 'Update state (open/close/snooze), assignee, title, or attributes',
+			action: 'Update a conversation',
+		},
 	],
 };
 
@@ -172,7 +172,7 @@ export const conversationFields: INodeProperties[] = [
 		options: [
 			{ displayName: 'Featurebase Contact ID', name: 'id', type: 'string', default: '' },
 			{ displayName: 'External User ID', name: 'userId', type: 'string', default: '' },
-			{ displayName: 'Email', name: 'email', type: 'string', default: '' },
+			{ displayName: 'Email', name: 'email', type: 'string', placeholder: 'name@email.com', default: '' },
 		],
 	},
 	{

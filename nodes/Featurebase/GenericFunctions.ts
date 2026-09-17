@@ -9,7 +9,7 @@ import type {
 	IWebhookFunctions,
 	JsonObject,
 } from 'n8n-workflow';
-import { NodeApiError } from 'n8n-workflow';
+import { NodeApiError, sleep } from 'n8n-workflow';
 
 import type { CursorPage } from './utils/pagination';
 import { collectAllPages } from './utils/pagination';
@@ -28,10 +28,6 @@ interface FeaturebaseErrorBody {
 
 const MAX_RATE_LIMIT_RETRIES = 5;
 const BASE_BACKOFF_MS = 500;
-
-function sleep(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function extractErrorBody(error: unknown): FeaturebaseErrorBody | undefined {
 	const err = error as {
@@ -82,7 +78,6 @@ function buildReadableMessage(error: unknown): string {
 async function requestWithRetry(context: FeaturebaseContext, options: IDataObject): Promise<IDataObject> {
 	let attempt = 0;
 
-	// eslint-disable-next-line no-constant-condition
 	while (true) {
 		try {
 			return (await context.helpers.httpRequestWithAuthentication.call(context, 'featurebaseApi', options as never)) as IDataObject;
@@ -253,7 +248,10 @@ export async function searchComments(this: ILoadOptionsFunctions, filter?: strin
 	const results = (comments as IDataObject[])
 		.map((comment) => {
 			const text = String(comment.content ?? '').replace(/<[^>]+>/g, '');
-			return { name: text.length > 60 ? `${text.slice(0, 60)}...` : text || String(comment.id), value: String(comment.id) };
+			return {
+				name: text.length > 60 ? `${text.slice(0, 60)}...` : text || String(comment.id),
+				value: String(comment.id),
+			};
 		})
 		.filter((item) => !filter || item.name.toLowerCase().includes(filter.toLowerCase()));
 

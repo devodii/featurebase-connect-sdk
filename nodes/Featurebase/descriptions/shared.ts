@@ -95,11 +95,12 @@ export function authorCollectionField(name: string, displayName: string): INodeP
 		default: {},
 		options: [
 			{
-				displayName: 'Featurebase User ID',
-				name: 'id',
+				displayName: 'Email',
+				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
-				description: 'Existing Featurebase user ID to attribute to. Takes priority over User ID and Email.',
+				description: 'Used to find or create the user if no ID matches',
 			},
 			{
 				displayName: 'External User ID',
@@ -109,11 +110,11 @@ export function authorCollectionField(name: string, displayName: string): INodeP
 				description: 'External user ID from your system, matched via SSO. Takes priority over Email.',
 			},
 			{
-				displayName: 'Email',
-				name: 'email',
+				displayName: 'Featurebase User ID',
+				name: 'id',
 				type: 'string',
 				default: '',
-				description: 'Used to find or create the user if no ID matches',
+				description: 'Existing Featurebase user ID to attribute to. Takes priority over User ID and Email.',
 			},
 			{
 				displayName: 'Name',

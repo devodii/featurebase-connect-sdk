@@ -13,17 +13,17 @@ export const webhookOperations: INodeProperties = {
 	displayOptions: { show: { resource: ['webhook'] } },
 	default: 'getMany',
 	options: [
-		{ name: 'Get Many', value: 'getMany', description: 'List webhook endpoints', action: 'Get many webhooks' },
-		{ name: 'Get', value: 'get', description: 'Get a webhook by ID', action: 'Get a webhook' },
 		{ name: 'Create', value: 'create', description: 'Create a webhook endpoint', action: 'Create a webhook' },
-		{ name: 'Update', value: 'update', description: 'Update a webhook endpoint', action: 'Update a webhook' },
 		{ name: 'Delete', value: 'delete', description: 'Delete a webhook endpoint', action: 'Delete a webhook' },
+		{ name: 'Get', value: 'get', description: 'Get a webhook by ID', action: 'Get a webhook' },
+		{ name: 'Get Many', value: 'getMany', description: 'List webhook endpoints', action: 'Get many webhooks' },
 		{
 			name: 'Refresh Secret',
 			value: 'refreshSecret',
 			description: 'Generate a new signing secret, invalidating the old one',
 			action: 'Refresh a webhook secret',
 		},
+		{ name: 'Update', value: 'update', description: 'Update a webhook endpoint', action: 'Update a webhook' },
 	],
 };
 
@@ -79,16 +79,8 @@ export const webhookFields: INodeProperties[] = [
 		default: {},
 		displayOptions: { show: { resource: ['webhook'], operation: ['update'] } },
 		options: [
-			{ displayName: 'Name', name: 'name', type: 'string', default: '' },
-			{ displayName: 'URL', name: 'url', type: 'string', default: '' },
 			{ displayName: 'Description', name: 'description', type: 'string', default: '' },
-			{
-				displayName: 'Topics',
-				name: 'topics',
-				type: 'multiOptions',
-				default: [],
-				options: WEBHOOK_TOPICS.map(({ name, value, group }) => ({ name: `${group}: ${name}`, value })),
-			},
+			{ displayName: 'Name', name: 'name', type: 'string', default: '' },
 			{
 				displayName: 'Status',
 				name: 'status',
@@ -100,6 +92,14 @@ export const webhookFields: INodeProperties[] = [
 					{ name: 'Paused', value: 'paused' },
 				],
 			},
+			{
+				displayName: 'Topics',
+				name: 'topics',
+				type: 'multiOptions',
+				default: [],
+				options: WEBHOOK_TOPICS.map(({ name, value, group }) => ({ name: `${group}: ${name}`, value })),
+			},
+			{ displayName: 'URL', name: 'url', type: 'string', default: '' },
 		],
 	},
 	{
