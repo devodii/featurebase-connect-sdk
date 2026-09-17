@@ -151,6 +151,7 @@ export class FeaturebaseTrigger implements INodeType {
 				type: 'options',
 				default: '',
 				description: "Optional higher-level event built on top of the raw topics using the payload's changes array",
+				hint: 'Make sure the required raw Topic above is also selected, or this event will never match',
 				options: [
 					{ name: '(None - Use Raw Topics Only)', value: '' },
 					{ name: 'AI Handover Requested', value: 'aiHandoverRequested' },

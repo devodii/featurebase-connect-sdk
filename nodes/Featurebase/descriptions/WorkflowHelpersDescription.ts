@@ -163,6 +163,7 @@ export const workflowHelperFields: INodeProperties[] = [
 		required: true,
 		displayOptions: { show: { resource: ['workflowHelper'], operation: ['bulkImport'] } },
 		description: 'Array of { title, content, board, authorEmail, authorName, createdAt, upvotes, status, tags }. "board" and "status" match by name or ID.',
+		hint: 'Use an upstream Aggregate node to combine one item per row into a single array before this field, e.g. {{ $json.items }}',
 	},
 
 	{

@@ -115,6 +115,7 @@ function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 			typeOptions: { minValue: 0 },
 			default: 1,
 			description: 'Initial upvote count. Defaults to 1 (author auto-voted); use 0 for none.',
+			hint: 'Useful when migrating posts from another tool and preserving their existing vote counts',
 		},
 		{
 			displayName: 'Created At',

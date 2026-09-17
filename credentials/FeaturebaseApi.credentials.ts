@@ -32,6 +32,7 @@ export class FeaturebaseApi implements ICredentialType {
 			type: 'string',
 			default: 'https://do.featurebase.app',
 			description: 'Advanced: only change this for a self-hosted or region-specific Featurebase deployment.',
+			hint: 'Leave this as the default unless Featurebase told you to use a different API host',
 		},
 	];
 
