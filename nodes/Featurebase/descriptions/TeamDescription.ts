@@ -10,4 +10,5 @@ export const {
 	endpoint: '/v2/teams',
 	searchListMethod: 'searchTeams',
 	idFieldDescription: 'The team to look up',
+	simplifyFields: ['id', 'name', 'color', 'members'],
 });

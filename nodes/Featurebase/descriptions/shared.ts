@@ -154,3 +154,12 @@ export function withContentText<T extends IDataObject>(item: T, field = 'content
 	}
 	return item;
 }
+
+/** Trims a response object down to the given fields when Simplify is on. */
+export function pick(item: IDataObject, fields: string[]): IDataObject {
+	const result: IDataObject = {};
+	for (const field of fields) {
+		if (field in item) result[field] = item[field];
+	}
+	return result;
+}

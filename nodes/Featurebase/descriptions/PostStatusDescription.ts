@@ -10,4 +10,5 @@ export const {
 	endpoint: '/v2/post_statuses',
 	searchListMethod: 'searchPostStatuses',
 	idFieldDescription: 'The post status to look up',
+	simplifyFields: ['id', 'name', 'color', 'type', 'isDefault'],
 });

@@ -10,4 +10,5 @@ export const {
 	endpoint: '/v2/brands',
 	searchListMethod: 'searchBrands',
 	idFieldDescription: 'The brand to look up',
+	simplifyFields: ['id', 'name', 'isDefault', 'helpCenterId'],
 });

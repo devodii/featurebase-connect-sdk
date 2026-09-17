@@ -1,7 +1,7 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 
 import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { extractId, limitField, resourceLocatorField, returnAllField } from './shared';
+import { extractId, limitField, pick, resourceLocatorField, returnAllField, simplifyField } from './shared';
 
 export interface SimpleResourceConfig {
 	resource: string;
@@ -9,6 +9,7 @@ export interface SimpleResourceConfig {
 	endpoint: string;
 	searchListMethod: string;
 	idFieldDescription: string;
+	simplifyFields: string[];
 }
 
 /**
@@ -22,7 +23,7 @@ export function buildSimpleResource(config: SimpleResourceConfig): {
 	fields: INodeProperties[];
 	execute: (this: IExecuteFunctions, index: number, operation: string) => Promise<IDataObject | IDataObject[]>;
 } {
-	const { resource, resourceName, endpoint, searchListMethod, idFieldDescription } = config;
+	const { resource, resourceName, endpoint, searchListMethod, idFieldDescription, simplifyFields } = config;
 	const idField = `${resource}Id`;
 
 	const operations: INodeProperties = {
@@ -63,17 +64,26 @@ export function buildSimpleResource(config: SimpleResourceConfig): {
 			...limitField,
 			displayOptions: { show: { resource: [resource], operation: ['getMany'], returnAll: [false] } },
 		},
+		{
+			...simplifyField,
+			displayOptions: { show: { resource: [resource], operation: ['get', 'getMany'] } },
+		},
 	];
 
 	async function execute(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+		const simplify = this.getNodeParameter('simplify', index, true) as boolean;
+		const finalize = (item: IDataObject): IDataObject => (simplify ? pick(item, simplifyFields) : item);
+
 		if (operation === 'get') {
 			const id = extractId(this.getNodeParameter(idField, index));
-			return featurebaseApiRequest.call(this, 'GET', `${endpoint}/${id}`);
+			const item = (await featurebaseApiRequest.call(this, 'GET', `${endpoint}/${id}`)) as IDataObject;
+			return finalize(item);
 		}
 
 		const returnAll = this.getNodeParameter('returnAll', index) as boolean;
 		const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-		return (featurebaseApiRequestAllItems<IDataObject>).call(this, endpoint, {}, returnAll, limit);
+		const items = await (featurebaseApiRequestAllItems<IDataObject>).call(this, endpoint, {}, returnAll, limit);
+		return items.map(finalize);
 	}
 
 	return { operations, fields, execute };

@@ -10,4 +10,5 @@ export const {
 	endpoint: '/v2/boards',
 	searchListMethod: 'searchBoards',
 	idFieldDescription: 'The board (category) to look up',
+	simplifyFields: ['id', 'name'],
 });

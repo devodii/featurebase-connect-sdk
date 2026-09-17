@@ -10,4 +10,5 @@ export const {
 	endpoint: '/v2/admins',
 	searchListMethod: 'searchAdmins',
 	idFieldDescription: 'The admin to look up',
+	simplifyFields: ['id', 'name', 'email', 'roleId'],
 });
