@@ -145,8 +145,8 @@ export function cleanAuthorInput(value: IDataObject | undefined): IDataObject | 
 }
 
 /**
- * "contentText added to every post/comment/changelog output" - a plain-text
- * version of the HTML content field, useful for AI nodes downstream.
+ * Adds a plain-text version of the HTML content field, so downstream AI
+ * nodes don't have to strip markup themselves.
  */
 export function withContentText<T extends IDataObject>(item: T, field = 'content'): T {
 	if (typeof item[field] === 'string') {

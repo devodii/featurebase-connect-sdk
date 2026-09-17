@@ -42,7 +42,6 @@ export const workflowHelperOperations: INodeProperties = {
 };
 
 export const workflowHelperFields: INodeProperties[] = [
-	// --- Upsert Feedback ---
 	{
 		displayName: 'Title',
 		name: 'title',
@@ -100,7 +99,6 @@ export const workflowHelperFields: INodeProperties[] = [
 		],
 	},
 
-	// --- Revenue-Weighted Score ---
 	{
 		displayName: 'Source',
 		name: 'source',
@@ -157,7 +155,6 @@ export const workflowHelperFields: INodeProperties[] = [
 		description: 'ArrWeight = upvotes + openPipeline / divisor',
 	},
 
-	// --- Bulk Import ---
 	{
 		displayName: 'Items',
 		name: 'items',
@@ -168,7 +165,6 @@ export const workflowHelperFields: INodeProperties[] = [
 		description: 'Array of { title, content, board, authorEmail, authorName, createdAt, upvotes, status, tags }. "board" and "status" match by name or ID.',
 	},
 
-	// --- Set Status with Changelog Draft ---
 	{
 		...resourceLocatorField('postId', 'Post', 'searchPosts', {}),
 		displayOptions: { show: { resource: ['workflowHelper'], operation: ['setStatusWithChangelogDraft'] } },
