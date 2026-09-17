@@ -6,7 +6,7 @@
     "description": "Welcome to the Featurebase API. This API allows you to programmatically interact with your Featurebase organization.\n\nThis documentation reflects API version **2026-01-01.nova**.",
     "contact": {
       "name": "Featurebase Support",
-      "url": "https://web.archive.org/web/20260613221806/https://featurebase.app"
+      "url": "https://featurebase.app"
     },
     "license": {
       "name": "Proprietary"
@@ -14,7 +14,7 @@
   },
   "servers": [
     {
-      "url": "https://web.archive.org/web/20260613221806/https://do.featurebase.app",
+      "url": "https://do.featurebase.app",
       "description": "Production"
     }
   ],
@@ -585,7 +585,7 @@
                     "type": "string",
                     "format": "uri",
                     "description": "HTTPS URL to a custom icon image (PNG, SVG, or WebP recommended)",
-                    "example": "https://web.archive.org/web/20260613221806/https://cdn.example.com/icons/custom-board-icon.png"
+                    "example": "https://cdn.example.com/icons/custom-board-icon.png"
                   }
                 },
                 "required": [
@@ -596,7 +596,7 @@
                 "title": "UrlIcon",
                 "example": {
                   "type": "url",
-                  "value": "https://web.archive.org/web/20260613221806/https://cdn.example.com/icons/custom-board-icon.png"
+                  "value": "https://cdn.example.com/icons/custom-board-icon.png"
                 }
               },
               {
@@ -687,7 +687,7 @@
               "null"
             ],
             "description": "Author profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://cdn.example.com/avatars/john.png"
+            "example": "https://cdn.example.com/avatars/john.png"
           },
           "type": {
             "type": "string",
@@ -854,7 +854,7 @@
           "postUrl": {
             "type": "string",
             "description": "Full URL to view the post",
-            "example": "https://web.archive.org/web/20260613221806/https://feedback.example.com/p/add-dark-mode-support"
+            "example": "https://feedback.example.com/p/add-dark-mode-support"
           },
           "title": {
             "type": "string",
@@ -971,7 +971,7 @@
                         "null"
                       ],
                       "description": "URL to the Linear issue",
-                      "example": "https://web.archive.org/web/20260613221806/https://linear.app/team/issue/ENG-123"
+                      "example": "https://linear.app/team/issue/ENG-123"
                     }
                   },
                   "required": [
@@ -996,7 +996,7 @@
                         "null"
                       ],
                       "description": "URL to the Jira issue",
-                      "example": "https://web.archive.org/web/20260613221806/https://myteam.atlassian.net/browse/PROJ-123"
+                      "example": "https://myteam.atlassian.net/browse/PROJ-123"
                     }
                   },
                   "required": [
@@ -1018,7 +1018,7 @@
                     "url": {
                       "type": "string",
                       "description": "URL to the ClickUp task",
-                      "example": "https://web.archive.org/web/20260613221806/https://app.clickup.com/t/86a1b2c3d"
+                      "example": "https://app.clickup.com/t/86a1b2c3d"
                     },
                     "title": {
                       "type": "string",
@@ -1061,7 +1061,7 @@
                     "url": {
                       "type": "string",
                       "description": "URL to the GitHub issue",
-                      "example": "https://web.archive.org/web/20260613221806/https://github.com/acme/backend/issues/42"
+                      "example": "https://github.com/acme/backend/issues/42"
                     },
                     "title": {
                       "type": "string",
@@ -1092,7 +1092,7 @@
                     "url": {
                       "type": "string",
                       "description": "URL to the work item",
-                      "example": "https://web.archive.org/web/20260613221806/https://dev.azure.com/org/project/_workitems/edit/1234"
+                      "example": "https://dev.azure.com/org/project/_workitems/edit/1234"
                     },
                     "projectId": {
                       "type": "string",
@@ -1354,7 +1354,7 @@
           "profilePicture": {
             "type": "string",
             "description": "Author profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/avatar.png"
+            "example": "https://example.com/avatar.png"
           }
         },
         "description": "Author to attribute the post to. If not provided, uses the authenticated user. Supports multiple identification methods: id (Featurebase ID), userId (external SSO ID), or email."
@@ -1816,7 +1816,7 @@
               "null"
             ],
             "description": "Company website URL",
-            "example": "https://web.archive.org/web/20260613221806/https://acme.com"
+            "example": "https://acme.com"
           },
           "plan": {
             "type": [
@@ -1944,7 +1944,7 @@
               "null"
             ],
             "description": "Profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://fb-usercontent.fra1.cdn.digitaloceanspaces.com/anon_23.png"
+            "example": "https://fb-usercontent.fra1.cdn.digitaloceanspaces.com/anon_23.png"
           },
           "commentsCreated": {
             "type": "number",
@@ -2152,7 +2152,7 @@
           "profilePicture": {
             "type": "string",
             "description": "Voter profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/avatar.png"
+            "example": "https://example.com/avatar.png"
           }
         },
         "additionalProperties": false
@@ -2248,7 +2248,7 @@
               "null"
             ],
             "description": "Author profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://cdn.example.com/avatars/john.png"
+            "example": "https://cdn.example.com/avatars/john.png"
           },
           "type": {
             "type": "string",
@@ -2721,7 +2721,7 @@
           "url": {
             "type": "string",
             "description": "Public URL to view the changelog",
-            "example": "https://web.archive.org/web/20260613221806/https://myorg.featurebase.app/en/changelog/your-awesome-changelog"
+            "example": "https://myorg.featurebase.app/en/changelog/your-awesome-changelog"
           },
           "content": {
             "type": "string",
@@ -2742,7 +2742,7 @@
               "null"
             ],
             "description": "Featured image URL",
-            "example": "https://web.archive.org/web/20260613221806/https://cdn.example.com/images/feature.png"
+            "example": "https://cdn.example.com/images/feature.png"
           },
           "date": {
             "type": "string",
@@ -3030,7 +3030,7 @@
           "featuredImage": {
             "type": "string",
             "description": "The URL of the featured image for the changelog. External URLs will be uploaded to our storage.",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/image.png"
+            "example": "https://example.com/image.png"
           },
           "allowedSegmentIds": {
             "type": "array",
@@ -3153,7 +3153,7 @@
           "featuredImage": {
             "type": "string",
             "description": "The URL of the featured image for the changelog. External URLs will be uploaded to our storage.",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/image.png"
+            "example": "https://example.com/image.png"
           },
           "allowedSegmentIds": {
             "type": "array",
@@ -3556,7 +3556,7 @@
               "null"
             ],
             "description": "Profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/avatar.png"
+            "example": "https://example.com/avatar.png"
           },
           "roleId": {
             "type": "string",
@@ -4310,7 +4310,7 @@
           "linkRedirectUrl": {
             "type": "string",
             "description": "URL to redirect to",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com"
+            "example": "https://example.com"
           },
           "linkTarget": {
             "type": "string",
@@ -4551,7 +4551,7 @@
               "null"
             ],
             "description": "Profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://fb-usercontent.fra1.cdn.digitaloceanspaces.com/anon_23.png"
+            "example": "https://fb-usercontent.fra1.cdn.digitaloceanspaces.com/anon_23.png"
           },
           "commentsCreated": {
             "type": "number",
@@ -4783,7 +4783,7 @@
           "url": {
             "type": "string",
             "description": "Navigation item URL",
-            "example": "https://web.archive.org/web/20260613221806/https://developers.featurebase.app/install"
+            "example": "https://developers.featurebase.app/install"
           },
           "icon": {
             "type": [
@@ -5309,7 +5309,7 @@
               "null"
             ],
             "description": "Author avatar URL",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/avatar.png"
+            "example": "https://example.com/avatar.png"
           }
         }
       },
@@ -5334,12 +5334,12 @@
           "featurebaseUrl": {
             "type": "string",
             "description": "Featurebase URL",
-            "example": "https://web.archive.org/web/20260613221806/https://yourorg.featurebase.app/en/help/collections/3416135-english-collection"
+            "example": "https://yourorg.featurebase.app/en/help/collections/3416135-english-collection"
           },
           "externalUrl": {
             "type": "string",
             "description": "External URL",
-            "example": "https://web.archive.org/web/20260613221806/https://help.yourdomain.com/en/collections/3416135-english-collection"
+            "example": "https://help.yourdomain.com/en/collections/3416135-english-collection"
           },
           "articleCount": {
             "type": "number",
@@ -5570,12 +5570,12 @@
           "featurebaseUrl": {
             "type": "string",
             "description": "Featurebase URL",
-            "example": "https://web.archive.org/web/20260613221806/https://yourorg.featurebase.app/en/help/collections/6474684-english-version"
+            "example": "https://yourorg.featurebase.app/en/help/collections/6474684-english-version"
           },
           "externalUrl": {
             "type": "string",
             "description": "External URL",
-            "example": "https://web.archive.org/web/20260613221806/https://help.yourdomain.com/en/collections/6474684-english-version"
+            "example": "https://help.yourdomain.com/en/collections/6474684-english-version"
           },
           "articleCount": {
             "type": "number",
@@ -6289,12 +6289,12 @@
           "featurebaseUrl": {
             "type": "string",
             "description": "Featurebase URL",
-            "example": "https://web.archive.org/web/20260613221806/https://yourorg.featurebase.app/en/help/articles/1234567-getting-started-guide"
+            "example": "https://yourorg.featurebase.app/en/help/articles/1234567-getting-started-guide"
           },
           "externalUrl": {
             "type": "string",
             "description": "External URL",
-            "example": "https://web.archive.org/web/20260613221806/https://help.yourdomain.com/en/articles/1234567-getting-started-guide"
+            "example": "https://help.yourdomain.com/en/articles/1234567-getting-started-guide"
           },
           "author": {
             "allOf": [
@@ -6598,12 +6598,12 @@
           "featurebaseUrl": {
             "type": "string",
             "description": "Featurebase URL",
-            "example": "https://web.archive.org/web/20260613221806/https://yourorg.featurebase.app/en/help/articles/1234567-getting-started-guide"
+            "example": "https://yourorg.featurebase.app/en/help/articles/1234567-getting-started-guide"
           },
           "externalUrl": {
             "type": "string",
             "description": "External URL",
-            "example": "https://web.archive.org/web/20260613221806/https://help.yourdomain.com/en/articles/1234567-getting-started-guide"
+            "example": "https://help.yourdomain.com/en/articles/1234567-getting-started-guide"
           },
           "author": {
             "$ref": "#/components/schemas/ArticleAuthor"
@@ -7393,7 +7393,7 @@
           "fromUrl": {
             "type": "string",
             "description": "Canonical source URL being redirected from (query and hash stripped)",
-            "example": "https://web.archive.org/web/20260613221806/https://help.example.com/en/old/getting-started"
+            "example": "https://help.example.com/en/old/getting-started"
           },
           "targetType": {
             "type": "string",
@@ -7530,7 +7530,7 @@
             "type": "string",
             "maxLength": 2048,
             "description": "Full absolute URL to redirect from. Must use http or https protocol. Query parameters and hash fragments are stripped during normalization. The hostname must match the Help Center custom domain.",
-            "example": "https://web.archive.org/web/20260613221806/https://help.example.com/en/old/getting-started"
+            "example": "https://help.example.com/en/old/getting-started"
           },
           "targetType": {
             "type": "string",
@@ -7623,7 +7623,7 @@
             "type": "string",
             "maxLength": 2048,
             "description": "Full absolute URL to redirect from. Must use http or https protocol. Query parameters and hash fragments are stripped during normalization. The hostname must match the Help Center custom domain.",
-            "example": "https://web.archive.org/web/20260613221806/https://help.example.com/en/old/getting-started"
+            "example": "https://help.example.com/en/old/getting-started"
           },
           "targetType": {
             "type": "string",
@@ -7791,7 +7791,7 @@
             "type": "string",
             "maxLength": 500,
             "description": "Company website URL",
-            "example": "https://web.archive.org/web/20260613221806/https://acme.com"
+            "example": "https://acme.com"
           },
           "plan": {
             "type": "string",
@@ -7841,7 +7841,7 @@
             ],
             "format": "uri",
             "description": "Profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/avatar.png"
+            "example": "https://example.com/avatar.png"
           },
           "companies": {
             "type": "array",
@@ -8393,7 +8393,7 @@
             "type": "string",
             "maxLength": 500,
             "description": "Company website URL",
-            "example": "https://web.archive.org/web/20260613221806/https://acme.com"
+            "example": "https://acme.com"
           },
           "plan": {
             "type": "string",
@@ -8664,7 +8664,7 @@
           "url": {
             "type": "string",
             "description": "URL where the conversation was initiated",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/pricing"
+            "example": "https://example.com/pricing"
           }
         },
         "required": [
@@ -9093,7 +9093,7 @@
               "null"
             ],
             "description": "Author profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://cdn.example.com/avatars/user.png"
+            "example": "https://cdn.example.com/avatars/user.png"
           }
         },
         "required": [
@@ -11729,7 +11729,7 @@
               "null"
             ],
             "description": "Author profile picture URL",
-            "example": "https://web.archive.org/web/20260613221806/https://cdn.example.com/avatars/john.png"
+            "example": "https://cdn.example.com/avatars/john.png"
           },
           "type": {
             "type": "string",
@@ -11827,7 +11827,7 @@
           "ticketUrl": {
             "type": "string",
             "description": "Full URL to view the ticket",
-            "example": "https://web.archive.org/web/20260613221806/https://feedback.example.com/p/cannot-login"
+            "example": "https://feedback.example.com/p/cannot-login"
           },
           "author": {
             "$ref": "#/components/schemas/TicketAuthor"
@@ -11931,7 +11931,7 @@
                         "null"
                       ],
                       "description": "URL to the Linear issue",
-                      "example": "https://web.archive.org/web/20260613221806/https://linear.app/team/issue/LIN-123"
+                      "example": "https://linear.app/team/issue/LIN-123"
                     }
                   },
                   "required": [
@@ -11956,7 +11956,7 @@
                         "null"
                       ],
                       "description": "URL to the Jira issue",
-                      "example": "https://web.archive.org/web/20260613221806/https://company.atlassian.net/browse/PROJ-456"
+                      "example": "https://company.atlassian.net/browse/PROJ-456"
                     }
                   },
                   "required": [
@@ -11978,7 +11978,7 @@
                     "url": {
                       "type": "string",
                       "description": "URL to the ClickUp task",
-                      "example": "https://web.archive.org/web/20260613221806/https://app.clickup.com/t/86a1b2c3d"
+                      "example": "https://app.clickup.com/t/86a1b2c3d"
                     },
                     "title": {
                       "type": "string",
@@ -12021,7 +12021,7 @@
                     "url": {
                       "type": "string",
                       "description": "URL to the GitHub issue",
-                      "example": "https://web.archive.org/web/20260613221806/https://github.com/acme/frontend/issues/42"
+                      "example": "https://github.com/acme/frontend/issues/42"
                     },
                     "title": {
                       "type": "string",
@@ -12052,7 +12052,7 @@
                     "url": {
                       "type": "string",
                       "description": "URL to the work item",
-                      "example": "https://web.archive.org/web/20260613221806/https://dev.azure.com/org/project/_workitems/edit/789"
+                      "example": "https://dev.azure.com/org/project/_workitems/edit/789"
                     },
                     "projectId": {
                       "type": "string",
@@ -12343,7 +12343,7 @@
           "url": {
             "type": "string",
             "description": "Webhook endpoint URL",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/webhooks"
+            "example": "https://example.com/webhooks"
           },
           "secret": {
             "type": "string",
@@ -12516,7 +12516,7 @@
           "url": {
             "type": "string",
             "description": "Webhook endpoint URL (must be HTTPS)",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/webhooks"
+            "example": "https://example.com/webhooks"
           },
           "description": {
             "type": "string",
@@ -12590,7 +12590,7 @@
           "url": {
             "type": "string",
             "description": "Webhook endpoint URL (must be HTTPS)",
-            "example": "https://web.archive.org/web/20260613221806/https://example.com/webhooks"
+            "example": "https://example.com/webhooks"
           },
           "description": {
             "type": [
@@ -20255,7 +20255,7 @@
               "type": "string",
               "maxLength": 2048,
               "description": "Full absolute URL to look up. The URL is normalized before matching: query parameters and hash fragments are stripped, the hostname is lowercased, and trailing slashes are removed.",
-              "example": "https://web.archive.org/web/20260613221806/https://help.example.com/en/old/getting-started"
+              "example": "https://help.example.com/en/old/getting-started"
             },
             "required": true,
             "name": "url",
