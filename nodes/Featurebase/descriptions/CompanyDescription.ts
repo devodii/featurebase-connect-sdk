@@ -1,0 +1,150 @@
+import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
+
+import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
+import { limitField, returnAllField } from './shared';
+
+export const companyOperations: INodeProperties = {
+	displayName: 'Operation',
+	name: 'operation',
+	type: 'options',
+	noDataExpression: true,
+	displayOptions: { show: { resource: ['company'] } },
+	default: 'getMany',
+	options: [
+		{ name: 'Get Many', value: 'getMany', description: 'List companies', action: 'Get many companies' },
+		{ name: 'Get', value: 'get', description: 'Get a company by ID', action: 'Get a company' },
+		{ name: 'Upsert', value: 'upsert', description: 'Create or update a company by external company ID', action: 'Upsert a company' },
+		{ name: 'Delete', value: 'delete', description: 'Delete a company by ID', action: 'Delete a company' },
+		{ name: 'List Contacts', value: 'listContacts', description: 'List contacts attached to a company', action: 'List company contacts' },
+		{ name: 'Attach Contact', value: 'attachContact', description: 'Attach a contact to a company', action: 'Attach a contact to a company' },
+		{ name: 'Detach Contact', value: 'detachContact', description: 'Remove a contact from a company', action: 'Detach a contact from a company' },
+	],
+};
+
+export const companyFields: INodeProperties[] = [
+	{
+		displayName: 'Company ID',
+		name: 'companyId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: { show: { resource: ['company'], operation: ['get', 'delete', 'listContacts', 'attachContact', 'detachContact'] } },
+		description: 'The Featurebase company ID',
+	},
+	{
+		displayName: 'Contact ID',
+		name: 'contactId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: { show: { resource: ['company'], operation: ['attachContact', 'detachContact'] } },
+	},
+	{
+		displayName: 'External Company ID',
+		name: 'externalCompanyId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: { show: { resource: ['company'], operation: ['upsert'] } },
+		description: 'Used as the unique identifier for upsert matching',
+	},
+	{
+		displayName: 'Name',
+		name: 'name',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: { show: { resource: ['company'], operation: ['upsert'] } },
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: { show: { resource: ['company'], operation: ['upsert'] } },
+		options: [
+			{ displayName: 'Monthly Spend', name: 'monthlySpend', type: 'number', typeOptions: { minValue: 0 }, default: 0 },
+			{ displayName: 'Industry', name: 'industry', type: 'string', default: '' },
+			{ displayName: 'Website', name: 'website', type: 'string', default: '' },
+			{ displayName: 'Plan', name: 'plan', type: 'string', default: '' },
+			{ displayName: 'Company Size', name: 'companySize', type: 'number', typeOptions: { minValue: 0 }, default: 0 },
+			{ displayName: 'Created At', name: 'createdAt', type: 'dateTime', default: '' },
+			{ displayName: 'Custom Fields (JSON)', name: 'customFields', type: 'json', default: '{}' },
+		],
+	},
+	{
+		...returnAllField,
+		displayOptions: { show: { resource: ['company'], operation: ['getMany', 'listContacts'] } },
+	},
+	{
+		...limitField,
+		displayOptions: { show: { resource: ['company'], operation: ['getMany', 'listContacts'], returnAll: [false] } },
+	},
+];
+
+export async function executeCompany(
+	this: IExecuteFunctions,
+	index: number,
+	operation: string,
+): Promise<IDataObject | IDataObject[]> {
+	switch (operation) {
+		case 'getMany': {
+			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
+			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
+			return (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/companies', {}, returnAll, limit);
+		}
+
+		case 'get': {
+			const companyId = this.getNodeParameter('companyId', index) as string;
+			return featurebaseApiRequest.call(this, 'GET', `/v2/companies/${companyId}`);
+		}
+
+		case 'upsert': {
+			const companyId = this.getNodeParameter('externalCompanyId', index) as string;
+			const name = this.getNodeParameter('name', index) as string;
+			const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
+
+			const body: IDataObject = { companyId, name };
+			for (const key of ['monthlySpend', 'industry', 'website', 'plan', 'companySize', 'createdAt']) {
+				if (additionalFields[key] !== undefined && additionalFields[key] !== '') body[key] = additionalFields[key];
+			}
+			if (additionalFields.customFields && additionalFields.customFields !== '{}') {
+				body.customFields =
+					typeof additionalFields.customFields === 'string'
+						? JSON.parse(additionalFields.customFields)
+						: additionalFields.customFields;
+			}
+
+			return featurebaseApiRequest.call(this, 'POST', '/v2/companies', body);
+		}
+
+		case 'delete': {
+			const companyId = this.getNodeParameter('companyId', index) as string;
+			return featurebaseApiRequest.call(this, 'DELETE', `/v2/companies/${companyId}`);
+		}
+
+		case 'listContacts': {
+			const companyId = this.getNodeParameter('companyId', index) as string;
+			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
+			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
+			return (featurebaseApiRequestAllItems<IDataObject>).call(this, `/v2/companies/${companyId}/contacts`, {}, returnAll, limit);
+		}
+
+		case 'attachContact': {
+			const companyId = this.getNodeParameter('companyId', index) as string;
+			const contactId = this.getNodeParameter('contactId', index) as string;
+			return featurebaseApiRequest.call(this, 'POST', `/v2/companies/${companyId}/contacts`, { contactId });
+		}
+
+		case 'detachContact': {
+			const companyId = this.getNodeParameter('companyId', index) as string;
+			const contactId = this.getNodeParameter('contactId', index) as string;
+			return featurebaseApiRequest.call(this, 'DELETE', `/v2/companies/${companyId}/contacts/${contactId}`);
+		}
+
+		default:
+			throw new NodeOperationError(this.getNode(), `Unknown company operation "${operation}"`, { itemIndex: index });
+	}
+}
