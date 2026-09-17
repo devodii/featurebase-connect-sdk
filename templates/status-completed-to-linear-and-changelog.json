@@ -1,0 +1,101 @@
+{
+	"name": "Status completed to Linear and changelog draft",
+	"nodes": [
+		{
+			"parameters": {
+				"topics": ["post.updated"],
+				"derivedEvent": "statusChangedTo",
+				"targetStatusId": "REPLACE_WITH_COMPLETED_STATUS_ID",
+				"output": {}
+			},
+			"name": "Featurebase Trigger",
+			"type": "n8n-nodes-featurebase.featurebaseTrigger",
+			"typeVersion": 1,
+			"position": [260, 300],
+			"webhookId": "status-completed-to-linear-and-changelog",
+			"credentials": {
+				"featurebaseApi": {
+					"id": "1",
+					"name": "Featurebase API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"resource": "workflowHelper",
+				"operation": "setStatusWithChangelogDraft",
+				"postId": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{$json.id}}"
+				},
+				"statusId": {
+					"__rl": true,
+					"mode": "id",
+					"value": "REPLACE_WITH_COMPLETED_STATUS_ID"
+				},
+				"changelogOptions": {}
+			},
+			"name": "Set Status with Changelog Draft",
+			"type": "n8n-nodes-featurebase.featurebase",
+			"typeVersion": 1,
+			"position": [520, 300],
+			"credentials": {
+				"featurebaseApi": {
+					"id": "1",
+					"name": "Featurebase API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+					"conditions": [
+						{
+							"leftValue": "={{$json.post.integrations.linear}}",
+							"rightValue": 0,
+							"operator": { "type": "array", "operation": "lengthGt" }
+						}
+					],
+					"combinator": "and"
+				}
+			},
+			"name": "Has Linear Issue?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [780, 300]
+		},
+		{
+			"parameters": {
+				"resource": "issueComment",
+				"operation": "create",
+				"issueId": "={{$json.post.integrations.linear[0].issueId}}",
+				"body": "=Marked as **Completed** in Featurebase. Changelog draft created: {{$json.changelog.title}}"
+			},
+			"name": "Linear",
+			"type": "n8n-nodes-base.linear",
+			"typeVersion": 1,
+			"position": [1040, 260],
+			"credentials": {
+				"linearApi": {
+					"id": "3",
+					"name": "Linear account"
+				}
+			}
+		}
+	],
+	"connections": {
+		"Featurebase Trigger": {
+			"main": [[{ "node": "Set Status with Changelog Draft", "type": "main", "index": 0 }]]
+		},
+		"Set Status with Changelog Draft": {
+			"main": [[{ "node": "Has Linear Issue?", "type": "main", "index": 0 }]]
+		},
+		"Has Linear Issue?": {
+			"main": [[{ "node": "Linear", "type": "main", "index": 0 }], []]
+		}
+	},
+	"active": false,
+	"settings": { "executionOrder": "v1" }
+}

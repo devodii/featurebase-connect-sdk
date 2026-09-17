@@ -1,0 +1,77 @@
+{
+	"name": "Support ticket to feedback upsert",
+	"nodes": [
+		{
+			"parameters": {
+				"httpMethod": "POST",
+				"path": "support-ticket-tagged",
+				"responseMode": "onReceived"
+			},
+			"name": "Zendesk/Intercom Webhook",
+			"type": "n8n-nodes-base.webhook",
+			"typeVersion": 2,
+			"position": [260, 300],
+			"webhookId": "support-ticket-to-feedback-upsert",
+			"notes": "Configure this URL as a webhook target in Zendesk (Trigger) or Intercom (Webhook subscription) for the 'feature-request' tag being applied."
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+					"conditions": [
+						{
+							"leftValue": "={{$json.tags}}",
+							"rightValue": "feature-request",
+							"operator": { "type": "array", "operation": "contains" }
+						}
+					],
+					"combinator": "and"
+				}
+			},
+			"name": "Tagged feature-request?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [520, 300]
+		},
+		{
+			"parameters": {
+				"resource": "workflowHelper",
+				"operation": "upsertFeedback",
+				"title": "={{$json.subject}}",
+				"content": "={{$json.description}}",
+				"boardId": {
+					"__rl": true,
+					"mode": "id",
+					"value": "REPLACE_WITH_FEATURE_REQUESTS_BOARD_ID"
+				},
+				"author": {
+					"email": "={{$json.requester.email}}",
+					"name": "={{$json.requester.name}}"
+				},
+				"options": {
+					"threshold": 0.7
+				}
+			},
+			"name": "Upsert Feedback",
+			"type": "n8n-nodes-featurebase.featurebase",
+			"typeVersion": 1,
+			"position": [780, 260],
+			"credentials": {
+				"featurebaseApi": {
+					"id": "1",
+					"name": "Featurebase API"
+				}
+			}
+		}
+	],
+	"connections": {
+		"Zendesk/Intercom Webhook": {
+			"main": [[{ "node": "Tagged feature-request?", "type": "main", "index": 0 }]]
+		},
+		"Tagged feature-request?": {
+			"main": [[{ "node": "Upsert Feedback", "type": "main", "index": 0 }], []]
+		}
+	},
+	"active": false,
+	"settings": { "executionOrder": "v1" }
+}

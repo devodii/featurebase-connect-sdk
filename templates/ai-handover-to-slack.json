@@ -1,0 +1,51 @@
+{
+	"name": "AI handover to Slack",
+	"nodes": [
+		{
+			"parameters": {
+				"topics": ["conversation.handover_requested"],
+				"output": {}
+			},
+			"name": "Featurebase Trigger",
+			"type": "n8n-nodes-featurebase.featurebaseTrigger",
+			"typeVersion": 1,
+			"position": [260, 300],
+			"webhookId": "ai-handover-to-slack",
+			"credentials": {
+				"featurebaseApi": {
+					"id": "1",
+					"name": "Featurebase API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"select": "channel",
+				"channelId": {
+					"__rl": true,
+					"mode": "list",
+					"value": "#support-oncall"
+				},
+				"text": "=🤖➡️👤 AI handover requested on conversation \"{{$json.title}}\" (ID {{$json.id}}). <!here>",
+				"otherOptions": {}
+			},
+			"name": "Slack",
+			"type": "n8n-nodes-base.slack",
+			"typeVersion": 2.2,
+			"position": [520, 300],
+			"credentials": {
+				"slackApi": {
+					"id": "2",
+					"name": "Slack account"
+				}
+			}
+		}
+	],
+	"connections": {
+		"Featurebase Trigger": {
+			"main": [[{ "node": "Slack", "type": "main", "index": 0 }]]
+		}
+	},
+	"active": false,
+	"settings": { "executionOrder": "v1" }
+}

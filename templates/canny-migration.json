@@ -1,0 +1,89 @@
+{
+	"name": "Canny migration",
+	"nodes": [
+		{
+			"parameters": {},
+			"name": "Manual Trigger",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [260, 300]
+		},
+		{
+			"parameters": {
+				"operation": "read",
+				"fileSelector": "canny-export.csv"
+			},
+			"name": "Read Canny CSV",
+			"type": "n8n-nodes-base.readWriteFile",
+			"typeVersion": 1,
+			"position": [500, 300]
+		},
+		{
+			"parameters": {
+				"operation": "fromFile",
+				"fileFormat": "csv",
+				"options": {}
+			},
+			"name": "Parse CSV",
+			"type": "n8n-nodes-base.spreadsheetFile",
+			"typeVersion": 2,
+			"position": [740, 300]
+		},
+		{
+			"parameters": {
+				"jsCode": "return items.map((item) => ({\n  json: {\n    title: item.json['Title'],\n    content: item.json['Details'],\n    board: item.json['Board'] || 'Feature Requests',\n    authorEmail: item.json['Author Email'],\n    authorName: item.json['Author Name'],\n    createdAt: item.json['Created At'],\n    upvotes: Number(item.json['Votes'] || 0),\n    status: item.json['Status'],\n    tags: item.json['Tags'],\n  },\n}));"
+			},
+			"name": "Map Canny Columns",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [980, 300]
+		},
+		{
+			"parameters": {
+				"aggregate": "aggregateAllItemData",
+				"destinationFieldName": "items",
+				"options": {}
+			},
+			"name": "Aggregate Rows",
+			"type": "n8n-nodes-base.aggregate",
+			"typeVersion": 1,
+			"position": [1220, 300]
+		},
+		{
+			"parameters": {
+				"resource": "workflowHelper",
+				"operation": "bulkImport",
+				"items": "={{$json.items}}"
+			},
+			"name": "Bulk Import",
+			"type": "n8n-nodes-featurebase.featurebase",
+			"typeVersion": 1,
+			"position": [1460, 300],
+			"credentials": {
+				"featurebaseApi": {
+					"id": "1",
+					"name": "Featurebase API"
+				}
+			}
+		}
+	],
+	"connections": {
+		"Manual Trigger": {
+			"main": [[{ "node": "Read Canny CSV", "type": "main", "index": 0 }]]
+		},
+		"Read Canny CSV": {
+			"main": [[{ "node": "Parse CSV", "type": "main", "index": 0 }]]
+		},
+		"Parse CSV": {
+			"main": [[{ "node": "Map Canny Columns", "type": "main", "index": 0 }]]
+		},
+		"Map Canny Columns": {
+			"main": [[{ "node": "Aggregate Rows", "type": "main", "index": 0 }]]
+		},
+		"Aggregate Rows": {
+			"main": [[{ "node": "Bulk Import", "type": "main", "index": 0 }]]
+		}
+	},
+	"active": false,
+	"settings": { "executionOrder": "v1" }
+}
