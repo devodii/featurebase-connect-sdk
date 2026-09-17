@@ -2,7 +2,24 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 
 import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { limitField, resourceLocatorField, returnAllField, withContentText } from './shared';
+import { markdownToHtml } from '../utils/markdown';
+import { limitField, markdownToggleField, pick, resourceLocatorField, returnAllField, simplifyField, withContentText } from './shared';
+
+const ARTICLE_SIMPLIFY_FIELDS = [
+	'id',
+	'title',
+	'description',
+	'body',
+	'contentText',
+	'slug',
+	'parentId',
+	'state',
+	'isPublished',
+	'featurebaseUrl',
+	'createdAt',
+	'updatedAt',
+];
+const COLLECTION_SIMPLIFY_FIELDS = ['id', 'name', 'description', 'slug', 'parentId', 'articleCount', 'featurebaseUrl'];
 
 export const helpCenterOperations: INodeProperties = {
 	displayName: 'Operation',
@@ -51,11 +68,15 @@ export const helpCenterFields: INodeProperties[] = [
 		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['create'] } },
 	},
 	{
-		displayName: 'Body (HTML)',
+		displayName: 'Body',
 		name: 'body',
 		type: 'string',
 		typeOptions: { rows: 6 },
 		default: '',
+		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['create', 'update'] } },
+	},
+	{
+		...markdownToggleField,
 		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['create', 'update'] } },
 	},
 	{
@@ -148,6 +169,14 @@ export const helpCenterFields: INodeProperties[] = [
 		...limitField,
 		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['getMany', 'getManyCollections'], returnAll: [false] } },
 	},
+	{
+		...simplifyField,
+		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['get', 'getMany', 'create', 'update'] } },
+	},
+	{
+		...simplifyField,
+		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['getCollection', 'getManyCollections', 'createCollection', 'updateCollection'] } },
+	},
 ];
 
 function extractId(value: unknown): string | undefined {
@@ -160,6 +189,15 @@ function extractId(value: unknown): string | undefined {
 }
 
 export async function executeHelpCenter(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const simplify = ['get', 'getMany', 'create', 'update', 'getCollection', 'getManyCollections', 'createCollection', 'updateCollection'].includes(operation)
+		? (this.getNodeParameter('simplify', index, true) as boolean)
+		: false;
+	const finalizeArticle = (article: IDataObject): IDataObject => {
+		const withText = withContentText(article, 'body');
+		return simplify ? pick(withText, ARTICLE_SIMPLIFY_FIELDS) : withText;
+	};
+	const finalizeCollection = (collection: IDataObject): IDataObject => (simplify ? pick(collection, COLLECTION_SIMPLIFY_FIELDS) : collection);
+
 	switch (operation) {
 		case 'getMany': {
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
@@ -171,23 +209,24 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 			if (parentId) qs.parentId = parentId;
 
 			const articles = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/help_center/articles', qs, returnAll, limit);
-			return articles.map((article) => withContentText(article, 'body'));
+			return articles.map(finalizeArticle);
 		}
 
 		case 'get': {
 			const articleId = this.getNodeParameter('articleId', index) as string;
 			const article = (await featurebaseApiRequest.call(this, 'GET', `/v2/help_center/articles/${articleId}`)) as IDataObject;
-			return withContentText(article, 'body');
+			return finalizeArticle(article);
 		}
 
 		case 'create':
 		case 'update': {
+			const useMarkdown = this.getNodeParameter('markdown', index, true) as boolean;
 			const body = this.getNodeParameter('body', index, '') as string;
 			const fields = this.getNodeParameter('articleAdditionalFields', index, {}) as IDataObject;
 
 			const payload: IDataObject = {};
 			if (operation === 'create') payload.title = this.getNodeParameter('title', index) as string;
-			if (body) payload.body = body;
+			if (body) payload.body = useMarkdown ? markdownToHtml(body) : body;
 			if (fields.description) payload.description = fields.description;
 			if (fields.state) payload.state = fields.state;
 			if (fields.formatter) payload.formatter = fields.formatter;
@@ -204,7 +243,7 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 							payload,
 						)) as IDataObject);
 
-			return withContentText(article, 'body');
+			return finalizeArticle(article);
 		}
 
 		case 'delete': {
@@ -215,12 +254,14 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 		case 'getManyCollections': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
 			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			return (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/help_center/collections', {}, returnAll, limit);
+			const collections = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/help_center/collections', {}, returnAll, limit);
+			return collections.map(finalizeCollection);
 		}
 
 		case 'getCollection': {
 			const collectionId = this.getNodeParameter('collectionId', index) as string;
-			return featurebaseApiRequest.call(this, 'GET', `/v2/help_center/collections/${collectionId}`);
+			const collection = (await featurebaseApiRequest.call(this, 'GET', `/v2/help_center/collections/${collectionId}`)) as IDataObject;
+			return finalizeCollection(collection);
 		}
 
 		case 'createCollection':
@@ -232,9 +273,17 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 			const parentId = extractId(fields.parentId);
 			if (parentId) payload.parentId = parentId;
 
-			return operation === 'createCollection'
-				? featurebaseApiRequest.call(this, 'POST', '/v2/help_center/collections', payload)
-				: featurebaseApiRequest.call(this, 'PATCH', `/v2/help_center/collections/${this.getNodeParameter('collectionId', index) as string}`, payload);
+			const collection =
+				operation === 'createCollection'
+					? ((await featurebaseApiRequest.call(this, 'POST', '/v2/help_center/collections', payload)) as IDataObject)
+					: ((await featurebaseApiRequest.call(
+							this,
+							'PATCH',
+							`/v2/help_center/collections/${this.getNodeParameter('collectionId', index) as string}`,
+							payload,
+						)) as IDataObject);
+
+			return finalizeCollection(collection);
 		}
 
 		case 'deleteCollection': {
