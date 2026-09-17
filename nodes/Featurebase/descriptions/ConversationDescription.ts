@@ -2,7 +2,20 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 
 import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { limitField, resourceLocatorField, returnAllField } from './shared';
+import { limitField, pick, resourceLocatorField, returnAllField, simplifyField } from './shared';
+
+const CONVERSATION_SIMPLIFY_FIELDS = [
+	'id',
+	'title',
+	'state',
+	'priority',
+	'adminAssigneeId',
+	'teamAssigneeId',
+	'tags',
+	'snoozedUntil',
+	'createdAt',
+	'updatedAt',
+];
 
 export const conversationOperations: INodeProperties = {
 	displayName: 'Operation',
@@ -215,6 +228,10 @@ export const conversationFields: INodeProperties[] = [
 		...limitField,
 		displayOptions: { show: { resource: ['conversation'], operation: ['getMany'], returnAll: [false] } },
 	},
+	{
+		...simplifyField,
+		displayOptions: { show: { resource: ['conversation'], operation: ['get', 'getMany', 'create', 'update'] } },
+	},
 ];
 
 function extractId(value: unknown): string | undefined {
@@ -227,6 +244,9 @@ function extractId(value: unknown): string | undefined {
 }
 
 export async function executeConversation(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const simplify = ['get', 'getMany', 'create', 'update'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
+	const finalize = (conversation: IDataObject): IDataObject => (simplify ? pick(conversation, CONVERSATION_SIMPLIFY_FIELDS) : conversation);
+
 	switch (operation) {
 		case 'getMany': {
 			const tagIds = this.getNodeParameter('tagIds', index, '') as string;
@@ -234,12 +254,14 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
 			const qs: IDataObject = {};
 			if (tagIds) qs.tagIds = tagIds;
-			return (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/conversations', qs, returnAll, limit);
+			const conversations = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/conversations', qs, returnAll, limit);
+			return conversations.map(finalize);
 		}
 
 		case 'get': {
 			const conversationId = this.getNodeParameter('conversationId', index) as string;
-			return featurebaseApiRequest.call(this, 'GET', `/v2/conversations/${conversationId}`);
+			const conversation = (await featurebaseApiRequest.call(this, 'GET', `/v2/conversations/${conversationId}`)) as IDataObject;
+			return finalize(conversation);
 		}
 
 		case 'create': {
@@ -249,7 +271,8 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 			const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
 
 			const body: IDataObject = { from: { type: fromType, id: fromId }, bodyMarkdown, ...additionalFields };
-			return featurebaseApiRequest.call(this, 'POST', '/v2/conversations', body);
+			const conversation = (await featurebaseApiRequest.call(this, 'POST', '/v2/conversations', body)) as IDataObject;
+			return finalize(conversation);
 		}
 
 		case 'update': {
@@ -267,7 +290,8 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 				body.customAttributes = typeof fields.customAttributes === 'string' ? JSON.parse(fields.customAttributes) : fields.customAttributes;
 			}
 
-			return featurebaseApiRequest.call(this, 'PATCH', `/v2/conversations/${conversationId}`, body);
+			const conversation = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/conversations/${conversationId}`, body)) as IDataObject;
+			return finalize(conversation);
 		}
 
 		case 'delete': {
