@@ -7,6 +7,8 @@ export class FeaturebaseApi implements ICredentialType {
 
 	documentationUrl = 'https://auth.featurebase.app/login?redirect=/settings/api';
 
+	icon = { light: 'file:Featurebase.svg', dark: 'file:Featurebase.dark.svg' } as const;
+
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
