@@ -4,6 +4,7 @@ import type {
 	IHookFunctions,
 	IHttpRequestMethods,
 	ILoadOptionsFunctions,
+	INodeListSearchResult,
 	INodePropertyOptions,
 	IWebhookFunctions,
 	JsonObject,
@@ -222,4 +223,51 @@ export async function getPostTags(this: ILoadOptionsFunctions): Promise<INodePro
 	return Array.from(tagNames)
 		.sort()
 		.map((name) => ({ name, value: name }));
+}
+
+/**
+ * Builds a resourceLocator "From List" search method for a given list
+ * endpoint. Featurebase list endpoints don't support server-side name
+ * search, so filtering happens client-side over the fetched page.
+ */
+function listSearchFactory(endpoint: string, nameKey: string) {
+	return async function listSearch(
+		this: ILoadOptionsFunctions,
+		filter?: string,
+	): Promise<INodeListSearchResult> {
+		const items = await featurebaseApiRequestAllItems.call(this, endpoint, { limit: 100 }, false, 100);
+		const results = (items as IDataObject[])
+			.map((item) => ({ name: String(item[nameKey] ?? item.id), value: String(item.id) }))
+			.filter((item) => !filter || item.name.toLowerCase().includes(filter.toLowerCase()));
+
+		return { results };
+	};
+}
+
+export const searchBoards = listSearchFactory('/v2/boards', 'name');
+export const searchPostStatuses = listSearchFactory('/v2/post_statuses', 'name');
+export const searchAdmins = listSearchFactory('/v2/admins', 'name');
+export const searchTeams = listSearchFactory('/v2/teams', 'name');
+export const searchBrands = listSearchFactory('/v2/brands', 'name');
+export const searchCustomFields = listSearchFactory('/v2/custom_fields', 'name');
+export const searchHelpCenterCollections = listSearchFactory('/v2/help_center/collections', 'name');
+
+export async function searchPosts(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	const posts = await featurebaseApiRequestAllItems.call(
+		this,
+		'/v2/posts',
+		{ limit: 50, q: filter || undefined, sortBy: 'recent' },
+		false,
+		50,
+	);
+
+	return {
+		results: (posts as IDataObject[]).map((post) => ({
+			name: String(post.title ?? post.id),
+			value: String(post.id),
+		})),
+	};
 }
