@@ -188,7 +188,8 @@ export const postFields: INodeProperties[] = [
 		default: '',
 		required: true,
 		displayOptions: { show: { resource: ['post'], operation: ['getBySlug'] } },
-		description: 'The post slug, from its public URL (e.g. add-dark-mode-support)',
+		description:
+			'The post slug, from its public URL (e.g. add-dark-mode-support). There is no direct get-by-slug endpoint, so this searches by slug text and returns the exact match.',
 	},
 	{
 		displayName: 'Query',
