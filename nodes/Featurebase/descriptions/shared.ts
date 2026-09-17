@@ -1,4 +1,4 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type { IDataObject, INodeProperties } from 'n8n-workflow';
 
 /**
  * Builds a resourceLocator field with a dropdown (backed by a loadOptions
@@ -78,3 +78,65 @@ export const markdownToggleField: INodeProperties = {
 	default: true,
 	description: 'Whether the content field is written in markdown and should be converted to HTML before sending to Featurebase',
 };
+
+/**
+ * Author/voter identification shared shape: id (Featurebase user) takes
+ * priority over userId (external SSO id), which takes priority over email
+ * (reference/FINDINGS.md section 9).
+ */
+export function authorCollectionField(name: string, displayName: string): INodeProperties {
+	return {
+		displayName,
+		name,
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Featurebase User ID',
+				name: 'id',
+				type: 'string',
+				default: '',
+				description: 'Existing Featurebase user ID to attribute to. Takes priority over User ID and Email.',
+			},
+			{
+				displayName: 'External User ID',
+				name: 'userId',
+				type: 'string',
+				default: '',
+				description: 'External user ID from your system, matched via SSO. Takes priority over Email.',
+			},
+			{
+				displayName: 'Email',
+				name: 'email',
+				type: 'string',
+				default: '',
+				description: 'Used to find or create the user if no ID matches',
+			},
+			{
+				displayName: 'Name',
+				name: 'name',
+				type: 'string',
+				default: '',
+				description: 'Display name to use if a new user is created',
+			},
+			{
+				displayName: 'Profile Picture URL',
+				name: 'profilePicture',
+				type: 'string',
+				default: '',
+			},
+		],
+	};
+}
+
+export function cleanAuthorInput(value: IDataObject | undefined): IDataObject | undefined {
+	if (!value || Object.keys(value).length === 0) return undefined;
+	const cleaned: IDataObject = {};
+	for (const [key, fieldValue] of Object.entries(value)) {
+		if (fieldValue !== '' && fieldValue !== undefined && fieldValue !== null) {
+			cleaned[key] = fieldValue;
+		}
+	}
+	return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+}
