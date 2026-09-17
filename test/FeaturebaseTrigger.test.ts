@@ -1,6 +1,7 @@
 import type { IDataObject } from 'n8n-workflow';
 
 import { FeaturebaseTrigger } from '../nodes/Featurebase/FeaturebaseTrigger.node';
+import { hmacSha256Hex } from '../nodes/Featurebase/utils/hmac';
 import postCreated from './fixtures/post.created.json';
 import postUpdatedAssigneeChanged from './fixtures/post.updated.assignee-changed.json';
 import postUpdatedEtaSet from './fixtures/post.updated.eta-set.json';
@@ -19,6 +20,8 @@ interface MockOptions {
 function createWebhookContext(options: MockOptions) {
 	const staticData = options.staticData ?? {};
 	const params = options.params ?? {};
+	const jsonMock = jest.fn();
+	const statusMock = jest.fn(() => ({ json: jsonMock }));
 
 	return {
 		getBodyData: () => options.body,
@@ -34,7 +37,10 @@ function createWebhookContext(options: MockOptions) {
 			parameters: {},
 		}),
 		getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://do.featurebase.app', apiKey: 'sk_test', apiVersion: '2026-01-01.nova' }),
+		getResponseObject: () => ({ status: statusMock }),
 		helpers: { httpRequestWithAuthentication: options.httpRequestWithAuthentication ?? jest.fn() },
+		__statusMock: statusMock,
+		__jsonMock: jsonMock,
 	};
 }
 
@@ -95,6 +101,59 @@ describe('FeaturebaseTrigger webhook()', () => {
 		const context2 = createWebhookContext({ body: postCreated as IDataObject, staticData });
 		const second = await trigger.webhook.call(context2 as never);
 		expect(second.workflowData).toEqual([]);
+	});
+
+	describe('signature verification', () => {
+		it('accepts the request and flags signatureVerified when the header matches', async () => {
+			const secret = 'whsec_testsecret';
+			const signature = hmacSha256Hex(JSON.stringify(postCreated), secret);
+			const context = createWebhookContext({
+				body: postCreated as IDataObject,
+				headers: { 'featurebase-signature': signature },
+				staticData: { secret },
+			});
+
+			const result = await trigger.webhook.call(context as never);
+
+			expect(result.workflowData).toHaveLength(1);
+			expect((result.workflowData![0][0].json as IDataObject).signatureVerified).toBe(true);
+		});
+
+		it('rejects with 401 when a signature header is present but does not match', async () => {
+			const context = createWebhookContext({
+				body: postCreated as IDataObject,
+				headers: { 'featurebase-signature': 'not-the-right-signature' },
+				staticData: { secret: 'whsec_testsecret' },
+			});
+
+			const result = await trigger.webhook.call(context as never);
+
+			expect(context.__statusMock).toHaveBeenCalledWith(401);
+			expect(context.__jsonMock).toHaveBeenCalledWith({ error: 'invalid_signature' });
+			expect(result).toEqual({ noWebhookResponse: true });
+		});
+
+		it('does not reject when no signature header is present, but flags signatureVerified false', async () => {
+			const context = createWebhookContext({
+				body: postCreated as IDataObject,
+				staticData: { secret: 'whsec_testsecret' },
+			});
+
+			const result = await trigger.webhook.call(context as never);
+
+			expect(context.__statusMock).not.toHaveBeenCalled();
+			expect(result.workflowData).toHaveLength(1);
+			expect((result.workflowData![0][0].json as IDataObject).signatureVerified).toBe(false);
+		});
+
+		it('does not attempt verification when no secret is stored', async () => {
+			const context = createWebhookContext({ body: postCreated as IDataObject, staticData: {} });
+
+			const result = await trigger.webhook.call(context as never);
+
+			expect(result.workflowData).toHaveLength(1);
+			expect((result.workflowData![0][0].json as IDataObject).signatureVerified).toBe(false);
+		});
 	});
 
 	describe('filters', () => {
