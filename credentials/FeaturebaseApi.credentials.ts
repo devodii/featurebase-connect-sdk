@@ -1,9 +1,4 @@
-import type {
-	IAuthenticateGeneric,
-	ICredentialTestRequest,
-	ICredentialType,
-	INodeProperties,
-} from 'n8n-workflow';
+import type { IAuthenticateGeneric, ICredentialTestRequest, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class FeaturebaseApi implements ICredentialType {
 	name = 'featurebaseApi';
@@ -27,8 +22,7 @@ export class FeaturebaseApi implements ICredentialType {
 			name: 'apiVersion',
 			type: 'string',
 			default: '2026-01-01.nova',
-			description:
-				'Sent as the Featurebase-Version header on every request. Pin this so your workflows keep working across future Featurebase API releases.',
+			description: 'Sent as the Featurebase-Version header on every request. Pin this so your workflows keep working across future Featurebase API releases.',
 		},
 		{
 			displayName: 'Base URL',

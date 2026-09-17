@@ -65,11 +65,7 @@ export function buildSimpleResource(config: SimpleResourceConfig): {
 		},
 	];
 
-	async function execute(
-		this: IExecuteFunctions,
-		index: number,
-		operation: string,
-	): Promise<IDataObject | IDataObject[]> {
+	async function execute(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 		if (operation === 'get') {
 			const id = extractId(this.getNodeParameter(idField, index));
 			return featurebaseApiRequest.call(this, 'GET', `${endpoint}/${id}`);

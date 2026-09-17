@@ -84,11 +84,7 @@ export const companyFields: INodeProperties[] = [
 	},
 ];
 
-export async function executeCompany(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executeCompany(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	switch (operation) {
 		case 'getMany': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
@@ -111,10 +107,7 @@ export async function executeCompany(
 				if (additionalFields[key] !== undefined && additionalFields[key] !== '') body[key] = additionalFields[key];
 			}
 			if (additionalFields.customFields && additionalFields.customFields !== '{}') {
-				body.customFields =
-					typeof additionalFields.customFields === 'string'
-						? JSON.parse(additionalFields.customFields)
-						: additionalFields.customFields;
+				body.customFields = typeof additionalFields.customFields === 'string' ? JSON.parse(additionalFields.customFields) : additionalFields.customFields;
 			}
 
 			return featurebaseApiRequest.call(this, 'POST', '/v2/companies', body);

@@ -45,11 +45,7 @@ export const surveyFields: INodeProperties[] = [
 	},
 ];
 
-export async function executeSurvey(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executeSurvey(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	switch (operation) {
 		case 'getMany': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;

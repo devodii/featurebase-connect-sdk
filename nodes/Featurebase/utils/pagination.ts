@@ -7,10 +7,7 @@ export interface CursorPage<T> {
  * Walks every page of a Featurebase cursor-paginated list endpoint
  * (reference/FINDINGS.md section 3: { data, nextCursor }).
  */
-export async function collectAllPages<T>(
-	fetchPage: (cursor: string | undefined) => Promise<CursorPage<T>>,
-	maxItems?: number,
-): Promise<T[]> {
+export async function collectAllPages<T>(fetchPage: (cursor: string | undefined) => Promise<CursorPage<T>>, maxItems?: number): Promise<T[]> {
 	const items: T[] = [];
 	let cursor: string | undefined;
 

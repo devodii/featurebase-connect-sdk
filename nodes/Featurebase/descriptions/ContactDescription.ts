@@ -114,14 +114,13 @@ export const contactFields: INodeProperties[] = [
 
 function splitCommaList(value: unknown): string[] | undefined {
 	if (typeof value !== 'string' || value.trim() === '') return undefined;
-	return value.split(',').map((entry) => entry.trim()).filter(Boolean);
+	return value
+		.split(',')
+		.map((entry) => entry.trim())
+		.filter(Boolean);
 }
 
-export async function executeContact(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executeContact(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	switch (operation) {
 		case 'getMany': {
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
@@ -150,10 +149,7 @@ export async function executeContact(
 			if (roles) body.roles = roles;
 
 			if (additionalFields.customFields && additionalFields.customFields !== '{}') {
-				body.customFields =
-					typeof additionalFields.customFields === 'string'
-						? JSON.parse(additionalFields.customFields)
-						: additionalFields.customFields;
+				body.customFields = typeof additionalFields.customFields === 'string' ? JSON.parse(additionalFields.customFields) : additionalFields.customFields;
 			}
 
 			return featurebaseApiRequest.call(this, 'POST', '/v2/contacts', body);

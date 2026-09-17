@@ -25,7 +25,12 @@ export const conversationOperations: INodeProperties = {
 		{ name: 'Reply', value: 'reply', description: 'Reply to a conversation as an admin', action: 'Reply to a conversation' },
 		{ name: 'Add Note', value: 'note', description: 'Add an internal note visible only to admins', action: 'Add a note to a conversation' },
 		{ name: 'Add Participant', value: 'addParticipant', description: 'Add a contact to the conversation', action: 'Add a participant to a conversation' },
-		{ name: 'Remove Participant', value: 'removeParticipant', description: 'Remove a contact from the conversation', action: 'Remove a participant from a conversation' },
+		{
+			name: 'Remove Participant',
+			value: 'removeParticipant',
+			description: 'Remove a contact from the conversation',
+			action: 'Remove a participant from a conversation',
+		},
 		{ name: 'Attach Tag', value: 'attachTag', description: 'Attach a tag to the conversation', action: 'Attach a tag to a conversation' },
 		{ name: 'Detach Tag', value: 'detachTag', description: 'Remove a tag from the conversation', action: 'Detach a tag from a conversation' },
 	],
@@ -221,11 +226,7 @@ function extractId(value: unknown): string | undefined {
 	return String(value);
 }
 
-export async function executeConversation(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executeConversation(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	switch (operation) {
 		case 'getMany': {
 			const tagIds = this.getNodeParameter('tagIds', index, '') as string;
@@ -263,8 +264,7 @@ export async function executeConversation(
 			if (fields.teamAssigneeId !== undefined) body.teamAssigneeId = extractId(fields.teamAssigneeId) ?? null;
 			if (fields.title) body.title = fields.title;
 			if (fields.customAttributes && fields.customAttributes !== '{}') {
-				body.customAttributes =
-					typeof fields.customAttributes === 'string' ? JSON.parse(fields.customAttributes) : fields.customAttributes;
+				body.customAttributes = typeof fields.customAttributes === 'string' ? JSON.parse(fields.customAttributes) : fields.customAttributes;
 			}
 
 			return featurebaseApiRequest.call(this, 'PATCH', `/v2/conversations/${conversationId}`, body);

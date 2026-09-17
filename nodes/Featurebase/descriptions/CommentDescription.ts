@@ -194,14 +194,8 @@ function buildCommentBody(fields: IDataObject): IDataObject {
 	return body;
 }
 
-export async function executeComment(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
-	const useMarkdown = ['create', 'update'].includes(operation)
-		? (this.getNodeParameter('markdown', index, true) as boolean)
-		: false;
+export async function executeComment(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const useMarkdown = ['create', 'update'].includes(operation) ? (this.getNodeParameter('markdown', index, true) as boolean) : false;
 
 	switch (operation) {
 		case 'getMany': {
@@ -211,13 +205,7 @@ export async function executeComment(
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
 			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
 
-			const comments = await (featurebaseApiRequestAllItems<IDataObject>).call(
-				this,
-				'/v2/comments',
-				{ sortBy, ...filters },
-				returnAll,
-				limit,
-			);
+			const comments = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/comments', { sortBy, ...filters }, returnAll, limit);
 			return comments.map((comment) => withContentText(comment));
 		}
 

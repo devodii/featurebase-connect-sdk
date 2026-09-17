@@ -21,8 +21,7 @@ const integrationsField: INodeProperties = {
 	type: 'collection',
 	placeholder: 'Add Integration',
 	default: {},
-	description:
-		'Push the created post to third-party integrations configured on your organization (reference/FINDINGS.md section 9)',
+	description: 'Push the created post to third-party integrations configured on your organization (reference/FINDINGS.md section 9)',
 	options: [
 		{ displayName: 'Linear', name: 'linear', type: 'boolean', default: false },
 		{ displayName: 'ClickUp', name: 'clickup', type: 'boolean', default: false },
@@ -41,8 +40,7 @@ function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 			type: 'multiOptions',
 			typeOptions: { loadOptionsMethod: 'getPostTags' },
 			default: [],
-			description:
-				'Tag names to attach (replaces existing on update). Switch to Expression mode to use tag names that do not exist yet.',
+			description: 'Tag names to attach (replaces existing on update). Switch to Expression mode to use tag names that do not exist yet.',
 		},
 		resourceLocatorField('statusId', 'Status', 'searchPostStatuses', {
 			required: false,
@@ -146,7 +144,7 @@ function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 						type: 'boolean' as const,
 						default: false,
 					},
-			  ]),
+				]),
 	];
 }
 
@@ -253,8 +251,22 @@ export const postFields: INodeProperties[] = [
 		default: {},
 		displayOptions: { show: { resource: ['post'], operation: ['getMany'] } },
 		options: [
-			{ displayName: 'Board Names or IDs', name: 'boardId', type: 'multiOptions', typeOptions: { loadOptionsMethod: 'getBoards' }, default: [], description: 'Choose from the list, or specify IDs using an expression' },
-			{ displayName: 'Status Names or IDs', name: 'statusId', type: 'multiOptions', typeOptions: { loadOptionsMethod: 'getPostStatuses' }, default: [], description: 'Choose from the list, or specify IDs using an expression' },
+			{
+				displayName: 'Board Names or IDs',
+				name: 'boardId',
+				type: 'multiOptions',
+				typeOptions: { loadOptionsMethod: 'getBoards' },
+				default: [],
+				description: 'Choose from the list, or specify IDs using an expression',
+			},
+			{
+				displayName: 'Status Names or IDs',
+				name: 'statusId',
+				type: 'multiOptions',
+				typeOptions: { loadOptionsMethod: 'getPostStatuses' },
+				default: [],
+				description: 'Choose from the list, or specify IDs using an expression',
+			},
 			{ displayName: 'Tag Names or IDs', name: 'tags', type: 'multiOptions', typeOptions: { loadOptionsMethod: 'getPostTags' }, default: [] },
 			{ displayName: 'Query', name: 'q', type: 'string', default: '', description: 'Filter posts by title/content text' },
 			{ displayName: 'Include In-Review Posts', name: 'inReview', type: 'boolean', default: false },
@@ -334,16 +346,7 @@ function simplifyPost(post: IDataObject): IDataObject {
 function buildPostBody(fields: IDataObject): IDataObject {
 	const body: IDataObject = {};
 
-	for (const key of [
-		'inReview',
-		'eta',
-		'visibility',
-		'upvotes',
-		'createdAt',
-		'commentsEnabled',
-		'notifyAdmins',
-		'sendStatusUpdateEmail',
-	]) {
+	for (const key of ['inReview', 'eta', 'visibility', 'upvotes', 'createdAt', 'commentsEnabled', 'notifyAdmins', 'sendStatusUpdateEmail']) {
 		if (fields[key] !== undefined && fields[key] !== '') body[key] = fields[key];
 	}
 
@@ -368,17 +371,11 @@ function buildPostBody(fields: IDataObject): IDataObject {
 	return body;
 }
 
-export async function executePost(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executePost(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	const simplify = ['get', 'getMany', 'getBySlug', 'search', 'create', 'update'].includes(operation)
 		? (this.getNodeParameter('simplify', index, true) as boolean)
 		: false;
-	const useMarkdown = ['create', 'update'].includes(operation)
-		? (this.getNodeParameter('markdown', index, true) as boolean)
-		: false;
+	const useMarkdown = ['create', 'update'].includes(operation) ? (this.getNodeParameter('markdown', index, true) as boolean) : false;
 
 	const finalize = (post: IDataObject): IDataObject => {
 		const withText = withContentText(post);
@@ -406,13 +403,7 @@ export async function executePost(
 
 		case 'getBySlug': {
 			const slug = this.getNodeParameter('slug', index) as string;
-			const results = await (featurebaseApiRequestAllItems<IDataObject>).call(
-				this,
-				'/v2/posts',
-				{ q: slug, limit: 20 },
-				false,
-				20,
-			);
+			const results = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/posts', { q: slug, limit: 20 }, false, 20);
 			const match = results.find((post) => post.slug === slug) ?? results[0];
 			if (!match) {
 				throw new NodeOperationError(this.getNode(), `No post found with slug "${slug}"`, { itemIndex: index });
@@ -427,13 +418,7 @@ export async function executePost(
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
 			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
 
-			const posts = await (featurebaseApiRequestAllItems<IDataObject>).call(
-				this,
-				'/v2/posts',
-				{ q, sortBy, sortOrder },
-				returnAll,
-				limit,
-			);
+			const posts = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/posts', { q, sortBy, sortOrder }, returnAll, limit);
 			return posts.map(finalize);
 		}
 

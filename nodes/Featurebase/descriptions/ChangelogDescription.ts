@@ -160,14 +160,13 @@ export const changelogFields: INodeProperties[] = [
 
 function splitCommaList(value: unknown): string[] | undefined {
 	if (typeof value !== 'string' || value.trim() === '') return undefined;
-	return value.split(',').map((entry) => entry.trim()).filter(Boolean);
+	return value
+		.split(',')
+		.map((entry) => entry.trim())
+		.filter(Boolean);
 }
 
-export async function executeChangelog(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executeChangelog(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	switch (operation) {
 		case 'getMany': {
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
@@ -205,12 +204,7 @@ export async function executeChangelog(
 			const changelog =
 				operation === 'create'
 					? ((await featurebaseApiRequest.call(this, 'POST', '/v2/changelogs', body)) as IDataObject)
-					: ((await featurebaseApiRequest.call(
-							this,
-							'PATCH',
-							`/v2/changelogs/${this.getNodeParameter('changelogId', index) as string}`,
-							body,
-					  )) as IDataObject);
+					: ((await featurebaseApiRequest.call(this, 'PATCH', `/v2/changelogs/${this.getNodeParameter('changelogId', index) as string}`, body)) as IDataObject);
 
 			return withContentText(changelog);
 		}

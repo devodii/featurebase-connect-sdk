@@ -18,7 +18,12 @@ export const webhookOperations: INodeProperties = {
 		{ name: 'Create', value: 'create', description: 'Create a webhook endpoint', action: 'Create a webhook' },
 		{ name: 'Update', value: 'update', description: 'Update a webhook endpoint', action: 'Update a webhook' },
 		{ name: 'Delete', value: 'delete', description: 'Delete a webhook endpoint', action: 'Delete a webhook' },
-		{ name: 'Refresh Secret', value: 'refreshSecret', description: 'Generate a new signing secret, invalidating the old one', action: 'Refresh a webhook secret' },
+		{
+			name: 'Refresh Secret',
+			value: 'refreshSecret',
+			description: 'Generate a new signing secret, invalidating the old one',
+			action: 'Refresh a webhook secret',
+		},
 	],
 };
 
@@ -107,11 +112,7 @@ export const webhookFields: INodeProperties[] = [
 	},
 ];
 
-export async function executeWebhook(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executeWebhook(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	switch (operation) {
 		case 'getMany': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;

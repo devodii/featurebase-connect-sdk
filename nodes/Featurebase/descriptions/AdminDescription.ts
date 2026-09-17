@@ -1,6 +1,10 @@
 import { buildSimpleResource } from './simpleResource';
 
-export const { operations: adminOperations, fields: adminFields, execute: executeAdmin } = buildSimpleResource({
+export const {
+	operations: adminOperations,
+	fields: adminFields,
+	execute: executeAdmin,
+} = buildSimpleResource({
 	resource: 'admin',
 	resourceName: 'admin',
 	endpoint: '/v2/admins',

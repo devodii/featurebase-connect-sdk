@@ -159,11 +159,7 @@ function extractId(value: unknown): string | undefined {
 	return String(value);
 }
 
-export async function executeHelpCenter(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<IDataObject | IDataObject[]> {
+export async function executeHelpCenter(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	switch (operation) {
 		case 'getMany': {
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
@@ -206,7 +202,7 @@ export async function executeHelpCenter(
 							'PATCH',
 							`/v2/help_center/articles/${this.getNodeParameter('articleId', index) as string}`,
 							payload,
-					  )) as IDataObject);
+						)) as IDataObject);
 
 			return withContentText(article, 'body');
 		}
@@ -238,12 +234,7 @@ export async function executeHelpCenter(
 
 			return operation === 'createCollection'
 				? featurebaseApiRequest.call(this, 'POST', '/v2/help_center/collections', payload)
-				: featurebaseApiRequest.call(
-						this,
-						'PATCH',
-						`/v2/help_center/collections/${this.getNodeParameter('collectionId', index) as string}`,
-						payload,
-				  );
+				: featurebaseApiRequest.call(this, 'PATCH', `/v2/help_center/collections/${this.getNodeParameter('collectionId', index) as string}`, payload);
 		}
 
 		case 'deleteCollection': {

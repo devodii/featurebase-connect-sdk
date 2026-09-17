@@ -14,11 +14,7 @@ import { NodeApiError } from 'n8n-workflow';
 import type { CursorPage } from './utils/pagination';
 import { collectAllPages } from './utils/pagination';
 
-type FeaturebaseContext =
-	| IExecuteFunctions
-	| ILoadOptionsFunctions
-	| IHookFunctions
-	| IWebhookFunctions;
+type FeaturebaseContext = IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions | IWebhookFunctions;
 
 interface FeaturebaseErrorBody {
 	error?: {
@@ -83,20 +79,13 @@ function buildReadableMessage(error: unknown): string {
 	return error instanceof Error ? error.message : 'Unknown Featurebase API error';
 }
 
-async function requestWithRetry(
-	context: FeaturebaseContext,
-	options: IDataObject,
-): Promise<IDataObject> {
+async function requestWithRetry(context: FeaturebaseContext, options: IDataObject): Promise<IDataObject> {
 	let attempt = 0;
 
 	// eslint-disable-next-line no-constant-condition
 	while (true) {
 		try {
-			return (await context.helpers.httpRequestWithAuthentication.call(
-				context,
-				'featurebaseApi',
-				options as never,
-			)) as IDataObject;
+			return (await context.helpers.httpRequestWithAuthentication.call(context, 'featurebaseApi', options as never)) as IDataObject;
 		} catch (error) {
 			if (isRateLimitError(error) && attempt < MAX_RATE_LIMIT_RETRIES) {
 				attempt += 1;
@@ -196,9 +185,7 @@ export async function getCustomFields(this: ILoadOptionsFunctions): Promise<INod
 	return toOptions(fields as IDataObject[], 'name');
 }
 
-export async function getHelpCenterCollections(
-	this: ILoadOptionsFunctions,
-): Promise<INodePropertyOptions[]> {
+export async function getHelpCenterCollections(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const collections = await featurebaseApiRequestAllItems.call(this, '/v2/help_center/collections');
 	return toOptions(collections as IDataObject[], 'name');
 }
@@ -231,10 +218,7 @@ export async function getPostTags(this: ILoadOptionsFunctions): Promise<INodePro
  * search, so filtering happens client-side over the fetched page.
  */
 function listSearchFactory(endpoint: string, nameKey: string) {
-	return async function listSearch(
-		this: ILoadOptionsFunctions,
-		filter?: string,
-	): Promise<INodeListSearchResult> {
+	return async function listSearch(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 		const items = await featurebaseApiRequestAllItems.call(this, endpoint, { limit: 100 }, false, 100);
 		const results = (items as IDataObject[])
 			.map((item) => ({ name: String(item[nameKey] ?? item.id), value: String(item.id) }))
@@ -252,17 +236,8 @@ export const searchBrands = listSearchFactory('/v2/brands', 'name');
 export const searchCustomFields = listSearchFactory('/v2/custom_fields', 'name');
 export const searchHelpCenterCollections = listSearchFactory('/v2/help_center/collections', 'name');
 
-export async function searchPosts(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	const posts = await featurebaseApiRequestAllItems.call(
-		this,
-		'/v2/posts',
-		{ limit: 50, q: filter || undefined, sortBy: 'recent' },
-		false,
-		50,
-	);
+export async function searchPosts(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
+	const posts = await featurebaseApiRequestAllItems.call(this, '/v2/posts', { limit: 50, q: filter || undefined, sortBy: 'recent' }, false, 50);
 
 	return {
 		results: (posts as IDataObject[]).map((post) => ({
@@ -272,10 +247,7 @@ export async function searchPosts(
 	};
 }
 
-export async function searchComments(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
+export async function searchComments(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 	const comments = await featurebaseApiRequestAllItems.call(this, '/v2/comments', { limit: 50 }, false, 50);
 
 	const results = (comments as IDataObject[])

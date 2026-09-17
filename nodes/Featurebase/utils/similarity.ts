@@ -1,23 +1,4 @@
-const STOPWORDS = new Set([
-	'a',
-	'an',
-	'the',
-	'and',
-	'or',
-	'but',
-	'to',
-	'of',
-	'in',
-	'on',
-	'for',
-	'with',
-	'is',
-	'are',
-	'be',
-	'it',
-	'this',
-	'that',
-]);
+const STOPWORDS = new Set(['a', 'an', 'the', 'and', 'or', 'but', 'to', 'of', 'in', 'on', 'for', 'with', 'is', 'are', 'be', 'it', 'this', 'that']);
 
 function tokenize(text: string): Set<string> {
 	const words = text
