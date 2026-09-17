@@ -2,7 +2,9 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 
 import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { limitField, returnAllField } from './shared';
+import { limitField, pick, returnAllField, simplifyField } from './shared';
+
+const SURVEY_SIMPLIFY_FIELDS = ['id', 'title', 'description', 'isActive', 'responseCount', 'createdAt', 'updatedAt'];
 
 export const surveyOperations: INodeProperties = {
 	displayName: 'Operation',
@@ -43,19 +45,28 @@ export const surveyFields: INodeProperties[] = [
 		...limitField,
 		displayOptions: { show: { resource: ['survey'], operation: ['getMany', 'getResponses'], returnAll: [false] } },
 	},
+	{
+		...simplifyField,
+		displayOptions: { show: { resource: ['survey'], operation: ['get', 'getMany'] } },
+	},
 ];
 
 export async function executeSurvey(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const simplify = ['get', 'getMany'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
+	const finalize = (survey: IDataObject): IDataObject => (simplify ? pick(survey, SURVEY_SIMPLIFY_FIELDS) : survey);
+
 	switch (operation) {
 		case 'getMany': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
 			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			return (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/surveys', {}, returnAll, limit);
+			const surveys = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/surveys', {}, returnAll, limit);
+			return surveys.map(finalize);
 		}
 
 		case 'get': {
 			const surveyId = this.getNodeParameter('surveyId', index) as string;
-			return featurebaseApiRequest.call(this, 'GET', `/v2/surveys/${surveyId}`);
+			const survey = (await featurebaseApiRequest.call(this, 'GET', `/v2/surveys/${surveyId}`)) as IDataObject;
+			return finalize(survey);
 		}
 
 		case 'getResponses': {
