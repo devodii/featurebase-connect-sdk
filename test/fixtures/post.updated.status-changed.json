@@ -1,0 +1,29 @@
+{
+	"topic": "post.updated",
+	"id": "evt_post_updated_1",
+	"createdAt": "2026-01-16T09:00:00.000Z",
+	"organizationId": "507f1f77bcf86cd799439099",
+	"data": {
+		"item": {
+			"object": "post",
+			"id": "507f1f77bcf86cd799439011",
+			"slug": "add-dark-mode-support",
+			"postUrl": "https://feedback.example.com/p/add-dark-mode-support",
+			"title": "Add dark mode support",
+			"content": "<p>It would be great to have a dark mode option.</p>",
+			"boardId": "507f1f77bcf86cd799439001",
+			"author": { "id": "507f1f77bcf86cd799439021", "name": "Jane Doe", "email": "jane@example.com", "type": "customer" },
+			"status": { "id": "507f1f77bcf86cd799439032", "name": "Completed", "type": "completed" },
+			"assigneeId": "507f1f77bcf86cd799439041",
+			"eta": null,
+			"tags": [{ "id": "507f1f77bcf86cd799439051", "name": "ui", "color": "#4f46e5" }],
+			"upvotes": 12,
+			"commentCount": 3,
+			"createdAt": "2026-01-15T10:30:00.000Z",
+			"updatedAt": "2026-01-16T09:00:00.000Z"
+		},
+		"changes": [
+			{ "field": "status", "oldValue": { "id": "507f1f77bcf86cd799439031", "name": "Under Review" }, "newValue": { "id": "507f1f77bcf86cd799439032", "name": "Completed" } }
+		]
+	}
+}

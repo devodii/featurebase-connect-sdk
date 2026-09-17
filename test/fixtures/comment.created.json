@@ -1,0 +1,18 @@
+{
+	"topic": "comment.created",
+	"id": "evt_comment_created_1",
+	"createdAt": "2026-01-21T09:00:00.000Z",
+	"organizationId": "507f1f77bcf86cd799439099",
+	"data": {
+		"item": {
+			"object": "comment",
+			"id": "507f1f77bcf86cd799439061",
+			"postId": "507f1f77bcf86cd799439011",
+			"content": "<p>Any update on this?</p>",
+			"author": { "id": "507f1f77bcf86cd799439021", "name": "Jane Doe", "type": "customer" },
+			"upvotes": 0,
+			"isPrivate": false,
+			"createdAt": "2026-01-21T09:00:00.000Z"
+		}
+	}
+}
