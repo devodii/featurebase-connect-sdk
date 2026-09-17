@@ -177,7 +177,7 @@ export async function getBrands(this: ILoadOptionsFunctions): Promise<INodePrope
 
 export async function getCustomFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const fields = await featurebaseApiRequestAllItems.call(this, '/v2/custom_fields');
-	return toOptions(fields as IDataObject[], 'name');
+	return toOptions(fields as IDataObject[], 'label');
 }
 
 export async function getHelpCenterCollections(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
@@ -228,7 +228,7 @@ export const searchPostStatuses = listSearchFactory('/v2/post_statuses', 'name')
 export const searchAdmins = listSearchFactory('/v2/admins', 'name');
 export const searchTeams = listSearchFactory('/v2/teams', 'name');
 export const searchBrands = listSearchFactory('/v2/brands', 'name');
-export const searchCustomFields = listSearchFactory('/v2/custom_fields', 'name');
+export const searchCustomFields = listSearchFactory('/v2/custom_fields', 'label');
 export const searchHelpCenterCollections = listSearchFactory('/v2/help_center/collections', 'name');
 
 export async function searchPosts(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
