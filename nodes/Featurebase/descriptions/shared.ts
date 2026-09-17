@@ -1,5 +1,7 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 
+import { htmlToText } from '../utils/html';
+
 /**
  * Builds a resourceLocator field with a dropdown (backed by a loadOptions
  * method) and a manual "By ID" fallback, per the id-shaped-parameter
@@ -139,4 +141,15 @@ export function cleanAuthorInput(value: IDataObject | undefined): IDataObject | 
 		}
 	}
 	return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+}
+
+/**
+ * "contentText added to every post/comment/changelog output" - a plain-text
+ * version of the HTML content field, useful for AI nodes downstream.
+ */
+export function withContentText<T extends IDataObject>(item: T, field = 'content'): T {
+	if (typeof item[field] === 'string') {
+		return { ...item, contentText: htmlToText(item[field] as string) };
+	}
+	return item;
 }
