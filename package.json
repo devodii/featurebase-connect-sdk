@@ -23,6 +23,7 @@
 		"lint": "n8n-node lint",
 		"lintfix": "n8n-node lint --fix",
 		"format": "prettier --write .",
+		"format:push": "bash scripts/format-lint-push.sh",
 		"test": "jest",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease"
