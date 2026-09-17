@@ -25,7 +25,14 @@ function createWebhookContext(options: MockOptions) {
 		getHeaderData: () => options.headers ?? {},
 		getWorkflowStaticData: () => staticData,
 		getNodeParameter: (name: string, fallback?: unknown) => params[name] ?? fallback,
-		getNode: () => ({ id: '1', name: 'Featurebase Trigger', type: 'n8n-nodes-featurebase.featurebaseTrigger', typeVersion: 1, position: [0, 0] as [number, number], parameters: {} }),
+		getNode: () => ({
+			id: '1',
+			name: 'Featurebase Trigger',
+			type: 'n8n-nodes-featurebase.featurebaseTrigger',
+			typeVersion: 1,
+			position: [0, 0] as [number, number],
+			parameters: {},
+		}),
 		getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://do.featurebase.app', apiKey: 'sk_test', apiVersion: '2026-01-01.nova' }),
 		helpers: { httpRequestWithAuthentication: options.httpRequestWithAuthentication ?? jest.fn() },
 	};
