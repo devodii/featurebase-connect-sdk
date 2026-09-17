@@ -2,7 +2,7 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 
 import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { limitField, markdownToggleField, returnAllField, withContentText } from './shared';
+import { limitField, markdownToggleField, pick, returnAllField, simplifyField, withContentText } from './shared';
 
 export const changelogOperations: INodeProperties = {
 	displayName: 'Operation',
@@ -156,7 +156,13 @@ export const changelogFields: INodeProperties[] = [
 		...limitField,
 		displayOptions: { show: { resource: ['changelog'], operation: ['getMany'], returnAll: [false] } },
 	},
+	{
+		...simplifyField,
+		displayOptions: { show: { resource: ['changelog'], operation: ['get', 'getMany', 'create', 'update', 'publish'] } },
+	},
 ];
+
+const CHANGELOG_SIMPLIFY_FIELDS = ['id', 'slug', 'url', 'title', 'content', 'contentText', 'state', 'date'];
 
 function splitCommaList(value: unknown): string[] | undefined {
 	if (typeof value !== 'string' || value.trim() === '') return undefined;
@@ -167,6 +173,12 @@ function splitCommaList(value: unknown): string[] | undefined {
 }
 
 export async function executeChangelog(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const simplify = ['get', 'getMany', 'create', 'update', 'publish'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
+	const finalize = (changelog: IDataObject): IDataObject => {
+		const withText = withContentText(changelog);
+		return simplify ? pick(withText, CHANGELOG_SIMPLIFY_FIELDS) : withText;
+	};
+
 	switch (operation) {
 		case 'getMany': {
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
@@ -178,13 +190,13 @@ export async function executeChangelog(this: IExecuteFunctions, index: number, o
 			if (categories) qs.categories = categories;
 
 			const changelogs = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/changelogs', qs, returnAll, limit);
-			return changelogs.map((changelog) => withContentText(changelog));
+			return changelogs.map(finalize);
 		}
 
 		case 'get': {
 			const changelogId = this.getNodeParameter('changelogId', index) as string;
 			const changelog = (await featurebaseApiRequest.call(this, 'GET', `/v2/changelogs/${changelogId}`)) as IDataObject;
-			return withContentText(changelog);
+			return finalize(changelog);
 		}
 
 		case 'create':
@@ -206,7 +218,7 @@ export async function executeChangelog(this: IExecuteFunctions, index: number, o
 					? ((await featurebaseApiRequest.call(this, 'POST', '/v2/changelogs', body)) as IDataObject)
 					: ((await featurebaseApiRequest.call(this, 'PATCH', `/v2/changelogs/${this.getNodeParameter('changelogId', index) as string}`, body)) as IDataObject);
 
-			return withContentText(changelog);
+			return finalize(changelog);
 		}
 
 		case 'publish': {
@@ -219,7 +231,7 @@ export async function executeChangelog(this: IExecuteFunctions, index: number, o
 			if (options.scheduledDate) body.scheduledDate = options.scheduledDate;
 
 			const changelog = (await featurebaseApiRequest.call(this, 'POST', `/v2/changelogs/${changelogId}/publish`, body)) as IDataObject;
-			return withContentText(changelog);
+			return finalize(changelog);
 		}
 
 		case 'unpublish': {
