@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"description": "n8n community node for Featurebase: feedback boards, changelogs, help center, and support conversations.",
 	"license": "MIT",
-	"homepage": "https://github.com/emmanuelodii/n8n-nodes-featurebase",
+	"homepage": "https://github.com/devodii/n8n-nodes-featurebase",
 	"keywords": [
 		"n8n-community-node-package",
 		"featurebase"
@@ -14,7 +14,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/emmanuelodii/n8n-nodes-featurebase.git"
+		"url": "https://github.com/devodii/n8n-nodes-featurebase.git"
 	},
 	"main": "index.js",
 	"scripts": {
