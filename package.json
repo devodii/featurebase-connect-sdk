@@ -19,6 +19,7 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "n8n-node build",
+		"clean": "rm -rf dist .tsbuildinfo",
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lintfix": "n8n-node lint --fix",
