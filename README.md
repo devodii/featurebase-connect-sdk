@@ -99,21 +99,48 @@ Composite operations under the **Workflow Helper** resource that combine multipl
 
 ## Templates
 
-Real n8n workflow exports in `templates/`, built with this package's nodes:
+Real n8n workflow exports in `templates/`, built with this package's nodes. Import any of them from n8n's **Workflows > Import from File** menu.
 
-| File                                            | What it does                                                                                                                    |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `high-vote-post-to-slack.json`                  | Upvote Threshold Crossed (25) trigger to a Slack message with title, board, upvotes, and link                                   |
-| `status-completed-to-linear-and-changelog.json` | Status Changed to Completed trigger, sets status and drafts a changelog, then comments on the linked Linear issue if one exists |
-| `weekly-trending-digest.json`                   | Scheduled Monday 09:00, pulls the top 10 trending posts, scores them by revenue, and posts a digest to Slack                    |
-| `support-ticket-to-feedback-upsert.json`        | Zendesk/Intercom webhook on a "feature-request" tag to Upsert Feedback, attributed to the requester's email                     |
-| `ai-handover-to-slack.json`                     | AI Handover Requested trigger to a Slack mention                                                                                |
-| `canny-migration.json`                          | Reads a Canny CSV export, maps its columns, and runs Bulk Import                                                                |
+### `high-vote-post-to-slack.json`
+
+`![screenshot placeholder]`
+
+Upvote Threshold Crossed (25) trigger to a Slack message with title, board, upvotes, and link.
+
+### `status-completed-to-linear-and-changelog.json`
+
+`![screenshot placeholder]`
+
+Status Changed to Completed trigger, sets status and drafts a changelog, then comments on the linked Linear issue if one exists.
+
+### `weekly-trending-digest.json`
+
+`![screenshot placeholder]`
+
+Scheduled Monday 09:00, pulls the top 10 trending posts, scores them by revenue, and posts a digest to Slack.
+
+### `support-ticket-to-feedback-upsert.json`
+
+`![screenshot placeholder]`
+
+Zendesk/Intercom webhook on a "feature-request" tag to Upsert Feedback, attributed to the requester's email.
+
+### `ai-handover-to-slack.json`
+
+`![screenshot placeholder]`
+
+AI Handover Requested trigger to a Slack mention.
+
+### `canny-migration.json`
+
+`![screenshot placeholder]`
+
+Reads a Canny CSV export, maps its columns, and runs Bulk Import.
 
 ## Webhooks, limits, and rate limits
 
 - Featurebase allows a maximum of **10 webhook endpoints per organization**. If activating the trigger fails because you're at the limit, delete an old endpoint first (Featurebase dashboard, or this package's Webhook resource) - the trigger surfaces this as a clear error rather than a raw API failure.
-- Featurebase signs outbound webhooks with a secret prefixed `whsec_...`, generated when a webhook is created. The exact signature header name and algorithm are not confirmed by Featurebase's currently published docs (see `reference/FINDINGS.md` section 7); the trigger verifies HMAC-SHA256 against a `Featurebase-Signature` header when present and marks each item with `signatureVerified`, but does not reject unsigned requests outright while that gap remains.
+- Featurebase signs outbound webhooks with a secret prefixed `whsec_...`, generated when a webhook is created. The exact signature header name and algorithm are not confirmed by Featurebase's currently published docs (see `reference/FINDINGS.md` section 7); the trigger verifies HMAC-SHA256 against a `Featurebase-Signature` header when present. If that header is present but does not match, the request is rejected with a 401. If the header is absent entirely (the live behavior is unconfirmed), the request is still processed and marked `signatureVerified: false`, since rejecting every request outright would break the trigger for everyone until Featurebase confirms the real header name.
 - Numeric rate limit thresholds are not published. The node retries on `rate_limit_error` (HTTP 429) with exponential backoff and jitter, honouring `Retry-After` when present, up to 5 attempts before failing.
 
 ## Development
