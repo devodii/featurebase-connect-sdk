@@ -1,0 +1,56 @@
+{
+	"name": "n8n-nodes-featurebase",
+	"version": "0.1.0",
+	"description": "n8n community node for Featurebase: feedback boards, changelogs, help center, and support conversations.",
+	"license": "MIT",
+	"homepage": "https://github.com/emmanuelodii/n8n-nodes-featurebase",
+	"keywords": [
+		"n8n-community-node-package",
+		"featurebase"
+	],
+	"author": {
+		"name": "Emmanuel Odii",
+		"email": "emmanuelodii80@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/emmanuelodii/n8n-nodes-featurebase.git"
+	},
+	"main": "index.js",
+	"scripts": {
+		"build": "n8n-node build",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lintfix": "n8n-node lint --fix",
+		"format": "prettier --write .",
+		"test": "jest",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/FeaturebaseApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/Featurebase/Featurebase.node.js",
+			"dist/nodes/Featurebase/FeaturebaseTrigger.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "^0.48.4",
+		"@types/jest": "^29.5.14",
+		"eslint": "^9.39.4",
+		"jest": "^29.7.0",
+		"prettier": "^3.8.3",
+		"ts-jest": "^29.2.5",
+		"typescript": "^5.9.3"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
+}
