@@ -1,0 +1,108 @@
+Webhooks
+Skip to content
+Search
+Ctrl+K
+Version:
+2026-01-01.nova
+2026-01-01.nova
+2025-12-12.clover
+This is version picker select, using it you can select a version of the API.
+Guides
+Introduction
+Webhooks
+Overview
+Consuming webhooks
+Topic types
+Handler examples
+Security
+Delivery behaviors
+REST API
+Changelog
+Featurebase API
+Getting Started
+API Versioning
+Authentication
+Error Handling
+Feedback
+Boards
+Posts
+Post Statuses
+Comments
+Custom Fields
+Changelog
+Changelogs
+Organization
+Admins
+Teams
+Users
+Contacts
+Companies
+Products
+Surveys
+Help Centers
+Conversations
+Integrations
+Webhooks
+Guides
+/
+Webhooks
+Overview
+Consuming webhooks
+Topic types
+Handler examples
+Security
+Delivery behaviors
+/
+Overview
+Last updated
+1 month ago
+Webhooks
+Copy
+Copy for LLM
+Copy page as Markdown for LLMs
+View as Markdown
+Open this page as Markdown
+Open in ChatGPT
+Get insights from ChatGPT
+Open in Claude
+Get insights from Claude
+Connect to Cursor
+Install MCP server on Cursor
+Connect to VS Code
+Install MCP server on VS Code
+When using Featurebase, you might want your applications to react instantly as users interact with your portal. With webhooks, your backend systems can receive and act on real-time updates such as new feedback posts.
+Featurebase sends event data to your application's webhook endpoint as a JSON payload, using secure HTTPS. This data contains all the essential event details so you can act on it instantly.
+Registering webhooks
+To register a new webhook, you need to have a URL in your app that Featurebase can call. You can configure a new webhook from the Featurebase Dashboard → Settings →
+Webhooks
+, or programmatically via the Webhooks API.
+Your webhook endpoint must be a publicly accessible HTTPS URL in this format:
+https://{your-website}/{your-webhook-endpoint}
+For example, if your domain is
+https://yourawesomesite.com
+and your webhook endpoint route is
+/featurebase_webhooks
+, you would register:
+https://yourawesomesite.com/featurebase_webhooks
+You can register up to 10 webhook endpoints per organization. All endpoints must use HTTPS for security.
+Now, whenever something of interest happens, a webhook is fired off by Featurebase. In the next section, we'll look at how to consume webhooks.
+Next steps
+Consuming webhooks
+- Learn how to handle incoming webhook payloads
+Topic types
+- View all available webhook event types
+Handler examples
+- Code examples in multiple languages
+Security
+- Verify webhook signatures
+Delivery behaviors
+- Understand retry logic and event ordering
+Was this helpful?
+Previous page
+Introduction
+Next page
+Consuming webhooks
+On this page
+Registering webhooks
+Next steps
+Ask AI
