@@ -9,8 +9,10 @@ import {
 	extractId,
 	limitField,
 	markdownToggleField,
+	pick,
 	resourceLocatorField,
 	returnAllField,
+	simplifyField,
 	withContentText,
 } from './shared';
 
@@ -177,6 +179,25 @@ export const commentFields: INodeProperties[] = [
 		...limitField,
 		displayOptions: { show: { resource: ['comment'], operation: ['getMany'], returnAll: [false] } },
 	},
+	{
+		...simplifyField,
+		displayOptions: { show: { resource: ['comment'], operation: ['get', 'getMany', 'create', 'update'] } },
+	},
+];
+
+const COMMENT_SIMPLIFY_FIELDS = [
+	'id',
+	'postId',
+	'changelogId',
+	'parentCommentId',
+	'content',
+	'contentText',
+	'author',
+	'upvotes',
+	'downvotes',
+	'score',
+	'isPrivate',
+	'createdAt',
 ];
 
 function buildCommentBody(fields: IDataObject): IDataObject {
@@ -196,6 +217,11 @@ function buildCommentBody(fields: IDataObject): IDataObject {
 
 export async function executeComment(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
 	const useMarkdown = ['create', 'update'].includes(operation) ? (this.getNodeParameter('markdown', index, true) as boolean) : false;
+	const simplify = ['get', 'getMany', 'create', 'update'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
+	const finalize = (comment: IDataObject): IDataObject => {
+		const withText = withContentText(comment);
+		return simplify ? pick(withText, COMMENT_SIMPLIFY_FIELDS) : withText;
+	};
 
 	switch (operation) {
 		case 'getMany': {
@@ -206,13 +232,13 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
 
 			const comments = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/comments', { sortBy, ...filters }, returnAll, limit);
-			return comments.map((comment) => withContentText(comment));
+			return comments.map(finalize);
 		}
 
 		case 'get': {
 			const commentId = extractId(this.getNodeParameter('commentId', index));
 			const comment = (await featurebaseApiRequest.call(this, 'GET', `/v2/comments/${commentId}`)) as IDataObject;
-			return withContentText(comment);
+			return finalize(comment);
 		}
 
 		case 'create': {
@@ -225,7 +251,7 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 			};
 
 			const comment = (await featurebaseApiRequest.call(this, 'POST', '/v2/comments', body)) as IDataObject;
-			return withContentText(comment);
+			return finalize(comment);
 		}
 
 		case 'update': {
@@ -239,7 +265,7 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 			};
 
 			const comment = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/comments/${commentId}`, body)) as IDataObject;
-			return withContentText(comment);
+			return finalize(comment);
 		}
 
 		case 'delete': {
