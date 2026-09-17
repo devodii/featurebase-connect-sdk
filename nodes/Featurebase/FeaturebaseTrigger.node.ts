@@ -331,6 +331,23 @@ export class FeaturebaseTrigger implements INodeType {
 		const headers = this.getHeaderData();
 		const staticData = getStaticData(this);
 
+		let signatureVerified = false;
+		if (staticData.secret) {
+			const signatureHeader = SIGNATURE_HEADER_CANDIDATES.map((name) => headers[name]).find((value) => typeof value === 'string') as string | undefined;
+			if (signatureHeader) {
+				try {
+					signatureVerified = verifyHmacSha256(JSON.stringify(body), staticData.secret, signatureHeader);
+				} catch {
+					signatureVerified = false;
+				}
+
+				if (!signatureVerified) {
+					this.getResponseObject().status(401).json({ error: 'invalid_signature' });
+					return { noWebhookResponse: true };
+				}
+			}
+		}
+
 		const topic = (body.topic ?? body.type ?? body.event) as string | undefined;
 		const eventId = (body.id ?? body.eventId) as string | undefined;
 		const item = ((body.data as IDataObject)?.item ?? (body.data as IDataObject)?.object ?? body.data ?? {}) as IDataObject;
@@ -342,18 +359,6 @@ export class FeaturebaseTrigger implements INodeType {
 				return { workflowData: [] };
 			}
 			staticData.seenEventIds = [...seen, eventId].slice(-MAX_SEEN_EVENT_IDS);
-		}
-
-		let signatureVerified = false;
-		if (staticData.secret) {
-			const signatureHeader = SIGNATURE_HEADER_CANDIDATES.map((name) => headers[name]).find((value) => typeof value === 'string') as string | undefined;
-			if (signatureHeader) {
-				try {
-					signatureVerified = verifyHmacSha256(JSON.stringify(body), staticData.secret, signatureHeader);
-				} catch {
-					signatureVerified = false;
-				}
-			}
 		}
 
 		const filters = this.getNodeParameter('filters', {}) as IDataObject;
