@@ -247,8 +247,10 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 			if (fields.description) payload.description = fields.description;
 			if (fields.state) payload.state = fields.state;
 			if (fields.formatter) payload.formatter = fields.formatter;
-			const parentId = extractId(fields.parentId);
-			if (parentId) payload.parentId = parentId;
+			if (fields.parentId !== undefined) {
+				const parentId = extractId(fields.parentId);
+				payload.parentId = operation === 'create' ? parentId : (parentId ?? null);
+			}
 
 			const article =
 				operation === 'create'
@@ -288,8 +290,10 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 			const name = this.getNodeParameter('name', index, '') as string;
 			if (name) payload.name = name;
 			if (fields.description) payload.description = fields.description;
-			const parentId = extractId(fields.parentId);
-			if (parentId) payload.parentId = parentId;
+			if (fields.parentId !== undefined) {
+				const parentId = extractId(fields.parentId);
+				payload.parentId = operation === 'createCollection' ? parentId : (parentId ?? null);
+			}
 
 			const collection =
 				operation === 'createCollection'
