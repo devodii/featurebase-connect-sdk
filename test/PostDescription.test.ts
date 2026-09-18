@@ -86,6 +86,40 @@ describe('post update', () => {
 		expect(body.boardId).toBe('board-2');
 	});
 
+	it('sends eta: null to clear it when the field is present but empty', async () => {
+		mockedRequest.mockResolvedValueOnce({ id: 'post-1' });
+
+		const context = createExecuteContext({
+			postId: { mode: 'id', value: 'post-1' },
+			content: '',
+			updateFields: { eta: '' },
+			markdown: true,
+			simplify: false,
+		});
+
+		await executePost.call(context as never, 0, 'update');
+
+		const body = mockedRequest.mock.calls[0][2];
+		expect(body.eta).toBeNull();
+	});
+
+	it('sends the real eta value when one is chosen', async () => {
+		mockedRequest.mockResolvedValueOnce({ id: 'post-1' });
+
+		const context = createExecuteContext({
+			postId: { mode: 'id', value: 'post-1' },
+			content: '',
+			updateFields: { eta: '2026-03-01T00:00:00.000Z' },
+			markdown: true,
+			simplify: false,
+		});
+
+		await executePost.call(context as never, 0, 'update');
+
+		const body = mockedRequest.mock.calls[0][2];
+		expect(body.eta).toBe('2026-03-01T00:00:00.000Z');
+	});
+
 	it('sends assigneeId: null to unassign when the field is present but empty', async () => {
 		mockedRequest.mockResolvedValueOnce({ id: 'post-1' });
 
