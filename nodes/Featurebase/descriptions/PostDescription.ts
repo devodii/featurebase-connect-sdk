@@ -99,7 +99,7 @@ function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 			name: 'eta',
 			type: 'dateTime',
 			default: '',
-			description: 'Estimated completion date',
+			description: 'Estimated completion date. On update, add this field and leave it empty to clear the ETA.',
 		},
 		resourceLocatorField('assigneeId', 'Assignee', 'searchAdmins', {
 			required: false,
@@ -369,8 +369,13 @@ function simplifyPost(post: IDataObject): IDataObject {
 function buildPostBody(fields: IDataObject, forCreate: boolean): IDataObject {
 	const body: IDataObject = {};
 
-	for (const key of ['inReview', 'eta', 'visibility', 'upvotes', 'createdAt', 'commentsEnabled', 'notifyAdmins', 'sendStatusUpdateEmail']) {
+	for (const key of ['inReview', 'visibility', 'upvotes', 'createdAt', 'commentsEnabled', 'notifyAdmins', 'sendStatusUpdateEmail']) {
 		if (fields[key] !== undefined && fields[key] !== '') body[key] = fields[key];
+	}
+
+	if (fields.eta !== undefined) {
+		// eta only accepts null (to clear) on update; on create an empty value just means "not set".
+		body.eta = forCreate ? fields.eta || undefined : fields.eta || null;
 	}
 
 	if (Array.isArray(fields.tags) && fields.tags.length > 0) body.tags = fields.tags;
