@@ -103,7 +103,7 @@ function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 		},
 		resourceLocatorField('assigneeId', 'Assignee', 'searchAdmins', {
 			required: false,
-			description: 'Admin to assign this post to',
+			description: 'Admin to assign this post to. On update, add this field and leave it empty to unassign.',
 		}),
 		{
 			displayName: 'Visibility',
@@ -366,7 +366,7 @@ function simplifyPost(post: IDataObject): IDataObject {
 	};
 }
 
-function buildPostBody(fields: IDataObject): IDataObject {
+function buildPostBody(fields: IDataObject, forCreate: boolean): IDataObject {
 	const body: IDataObject = {};
 
 	for (const key of ['inReview', 'eta', 'visibility', 'upvotes', 'createdAt', 'commentsEnabled', 'notifyAdmins', 'sendStatusUpdateEmail']) {
@@ -375,8 +375,17 @@ function buildPostBody(fields: IDataObject): IDataObject {
 
 	if (Array.isArray(fields.tags) && fields.tags.length > 0) body.tags = fields.tags;
 	if (fields.statusId) body.statusId = extractId(fields.statusId);
-	if (fields.assigneeId) body.assigneeId = extractId(fields.assigneeId);
 	if (fields.boardId) body.boardId = extractId(fields.boardId);
+
+	if (fields.assigneeId !== undefined) {
+		const assigneeId = extractId(fields.assigneeId);
+		// assigneeId only accepts null (to unassign) on update; on create it must be a real ID or omitted.
+		if (forCreate) {
+			if (assigneeId !== '') body.assigneeId = assigneeId;
+		} else {
+			body.assigneeId = assigneeId === '' ? null : assigneeId;
+		}
+	}
 
 	const author = cleanAuthorInput(fields.author as IDataObject);
 	if (author) body.author = author;
@@ -456,7 +465,7 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 				title,
 				boardId,
 				content: useMarkdown ? markdownToHtml(content) : content,
-				...buildPostBody(additionalFields),
+				...buildPostBody(additionalFields, true),
 			};
 
 			const post = (await featurebaseApiRequest.call(this, 'POST', '/v2/posts', body)) as IDataObject;
@@ -468,7 +477,7 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const content = this.getNodeParameter('content', index, '') as string;
 			const updateFields = this.getNodeParameter('updateFields', index, {}) as IDataObject;
 
-			const body: IDataObject = buildPostBody(updateFields);
+			const body: IDataObject = buildPostBody(updateFields, false);
 			if (content) body.content = useMarkdown ? markdownToHtml(content) : content;
 
 			const post = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/posts/${postId}`, body)) as IDataObject;
