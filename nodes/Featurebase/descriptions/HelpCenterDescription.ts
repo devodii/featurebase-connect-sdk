@@ -123,6 +123,14 @@ export const helpCenterFields: INodeProperties[] = [
 		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['createCollection'] } },
 	},
 	{
+		displayName: 'Name',
+		name: 'name',
+		type: 'string',
+		default: '',
+		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['updateCollection'] } },
+		description: 'Leave empty to keep the current name',
+	},
+	{
 		displayName: 'Collection Additional Fields',
 		name: 'collectionAdditionalFields',
 		type: 'collection',
@@ -268,7 +276,8 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 		case 'updateCollection': {
 			const fields = this.getNodeParameter('collectionAdditionalFields', index, {}) as IDataObject;
 			const payload: IDataObject = {};
-			if (operation === 'createCollection') payload.name = this.getNodeParameter('name', index) as string;
+			const name = this.getNodeParameter('name', index, '') as string;
+			if (name) payload.name = name;
 			if (fields.description) payload.description = fields.description;
 			const parentId = extractId(fields.parentId);
 			if (parentId) payload.parentId = parentId;
