@@ -1,7 +1,7 @@
 /**
- * The full webhook topic enum shared by CreateWebhookBody/UpdateWebhookBody
- * (reference/FINDINGS.md section 5). Ticket topics exist in the spec but
- * tickets are out of scope for this package (see FINDINGS section 1).
+ * Derived from the `topics` enum on CreateWebhookBody/UpdateWebhookBody in
+ * openapi.json. Ticket topics (ticket.created/updated/deleted) exist in that
+ * enum too, but tickets are a separate resource this package doesn't cover.
  */
 export const WEBHOOK_TOPICS: Array<{ name: string; value: string; group: string }> = [
 	{ name: 'Post Created', value: 'post.created', group: 'Feedback' },

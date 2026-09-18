@@ -86,7 +86,7 @@ export class FeaturebaseTrigger implements INodeType {
 				type: 'multiOptions',
 				required: true,
 				default: [],
-				description: 'Featurebase events to subscribe to. Ticket topics exist in the API but are out of scope for this package (see reference/FINDINGS.md).',
+				description: 'Featurebase events to subscribe to. Ticket topics exist in the API but tickets are a separate resource this package does not cover.',
 				options: WEBHOOK_TOPICS.map(({ name, value, group }) => ({ name: `${group}: ${name}`, value })),
 			},
 			{

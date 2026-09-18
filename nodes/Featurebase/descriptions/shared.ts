@@ -82,9 +82,9 @@ export const markdownToggleField: INodeProperties = {
 };
 
 /**
- * Author/voter identification shared shape: id (Featurebase user) takes
- * priority over userId (external SSO id), which takes priority over email
- * (reference/FINDINGS.md section 9).
+ * Matches the AuthorInput schema in openapi.json: id (Featurebase user)
+ * takes priority over userId (external SSO id), which takes priority over
+ * email.
  */
 export function authorCollectionField(name: string, displayName: string): INodeProperties {
 	return {

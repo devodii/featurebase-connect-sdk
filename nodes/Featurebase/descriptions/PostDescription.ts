@@ -21,7 +21,7 @@ const integrationsField: INodeProperties = {
 	type: 'collection',
 	placeholder: 'Add Integration',
 	default: {},
-	description: 'Push the created post to third-party integrations configured on your organization (reference/FINDINGS.md section 9)',
+	description: 'Push the created post to third-party integrations configured on your organization',
 	options: [
 		{ displayName: 'ClickUp', name: 'clickup', type: 'boolean', default: false },
 		{ displayName: 'Discord', name: 'discord', type: 'boolean', default: false },

@@ -10,9 +10,9 @@ export function hmacSha256Hex(payload: string, secret: string): string {
 
 /**
  * Constant-time comparison of a computed signature against a header value.
- * The header's exact name and encoding are not confirmed by Featurebase's
- * docs (reference/FINDINGS.md section 7), so this accepts a raw hex digest
- * and lets the caller try the header names it knows about.
+ * Featurebase's docs don't publish the exact signature header name, so this
+ * accepts a raw hex digest and lets the caller try the header names it
+ * knows about.
  */
 export function verifyHmacSha256(payload: string, secret: string, signature: string): boolean {
 	const expected = hmacSha256Hex(payload, secret);

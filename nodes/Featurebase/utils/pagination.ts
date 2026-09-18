@@ -4,8 +4,8 @@ export interface CursorPage<T> {
 }
 
 /**
- * Walks every page of a Featurebase cursor-paginated list endpoint
- * (reference/FINDINGS.md section 3: { data, nextCursor }).
+ * Walks every page of a Featurebase cursor-paginated list endpoint, whose
+ * list responses all share the shape { data, nextCursor } in openapi.json.
  */
 export async function collectAllPages<T>(fetchPage: (cursor: string | undefined) => Promise<CursorPage<T>>, maxItems?: number): Promise<T[]> {
 	const items: T[] = [];

@@ -97,8 +97,8 @@ function parseBlocks(markdown: string): Block[] {
 /**
  * Converts a practical subset of markdown to HTML: headings, bold, italic,
  * links, inline code, fenced code blocks, lists, and paragraphs. Featurebase's
- * API stores post/comment content as HTML, not markdown, so this runs client-side
- * before content is sent (see reference/FINDINGS.md section 9).
+ * API stores post/comment content as HTML, not markdown, so this runs
+ * client-side before content is sent.
  */
 export function markdownToHtml(markdown: string): string {
 	if (!markdown) return '';

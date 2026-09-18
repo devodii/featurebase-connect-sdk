@@ -186,10 +186,9 @@ export async function getHelpCenterCollections(this: ILoadOptionsFunctions): Pro
 }
 
 /**
- * There is no dedicated "list post tags" endpoint (reference/FINDINGS.md
- * section 10 - /v2/tags is the Conversation Tags registry, a different
- * object). Tags are instead collected from the tag names attached to a
- * sample of existing posts.
+ * openapi.json has no "list post tags" endpoint - /v2/tags is the
+ * Conversation Tags registry, a different object. Tags are instead
+ * collected from the tag names attached to a sample of existing posts.
  */
 export async function getPostTags(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const posts = await featurebaseApiRequestAllItems.call(this, '/v2/posts', { limit: 100 }, false, 100);

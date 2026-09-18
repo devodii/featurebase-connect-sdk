@@ -15,8 +15,8 @@ export interface SimpleResourceConfig {
 /**
  * Boards, Post Statuses, Admins, Teams, Brands, and Custom Fields are all
  * read-only "Get / Get Many" resources with an identical shape in the
- * Featurebase API (reference/FINDINGS.md section 1), so they share one
- * implementation instead of six near-duplicates.
+ * Featurebase API, so they share one implementation instead of six
+ * near-duplicates.
  */
 export function buildSimpleResource(config: SimpleResourceConfig): {
 	operations: INodeProperties;
