@@ -68,6 +68,14 @@ export const helpCenterFields: INodeProperties[] = [
 		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['create'] } },
 	},
 	{
+		displayName: 'Title',
+		name: 'title',
+		type: 'string',
+		default: '',
+		displayOptions: { show: { resource: ['helpCenterArticle'], operation: ['update'] } },
+		description: 'Leave empty to keep the current title',
+	},
+	{
 		displayName: 'Body',
 		name: 'body',
 		type: 'string',
@@ -233,7 +241,8 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 			const fields = this.getNodeParameter('articleAdditionalFields', index, {}) as IDataObject;
 
 			const payload: IDataObject = {};
-			if (operation === 'create') payload.title = this.getNodeParameter('title', index) as string;
+			const title = this.getNodeParameter('title', index, '') as string;
+			if (title) payload.title = title;
 			if (body) payload.body = useMarkdown ? markdownToHtml(body) : body;
 			if (fields.description) payload.description = fields.description;
 			if (fields.state) payload.state = fields.state;
