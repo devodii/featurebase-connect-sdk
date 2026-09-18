@@ -43,6 +43,14 @@ export const changelogFields: INodeProperties[] = [
 		displayOptions: { show: { resource: ['changelog'], operation: ['create'] } },
 	},
 	{
+		displayName: 'Title',
+		name: 'title',
+		type: 'string',
+		default: '',
+		displayOptions: { show: { resource: ['changelog'], operation: ['update'] } },
+		description: 'Leave empty to keep the current title',
+	},
+	{
 		displayName: 'Content',
 		name: 'content',
 		type: 'string',
@@ -206,7 +214,8 @@ export async function executeChangelog(this: IExecuteFunctions, index: number, o
 			const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
 
 			const body: IDataObject = {};
-			if (operation === 'create') body.title = this.getNodeParameter('title', index) as string;
+			const title = this.getNodeParameter('title', index, '') as string;
+			if (title) body.title = title;
 			if (content) body[useMarkdown ? 'markdownContent' : 'htmlContent'] = content;
 
 			const categories = splitCommaList(additionalFields.categories);
