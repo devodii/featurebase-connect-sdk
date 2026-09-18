@@ -34,6 +34,14 @@ const integrationsField: INodeProperties = {
 
 function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 	return [
+		...(forCreate
+			? []
+			: [
+					resourceLocatorField('boardId', 'Board', 'searchBoards', {
+						required: false,
+						description: 'Move the post to a different board',
+					}),
+				]),
 		{
 			displayName: 'Tag Names or IDs',
 			name: 'tags',
@@ -130,14 +138,18 @@ function postFieldsCollection(forCreate: boolean): INodeProperties[] {
 			type: 'boolean',
 			default: true,
 		},
-		{
-			displayName: 'Notify Admins',
-			name: 'notifyAdmins',
-			type: 'boolean',
-			default: false,
-			description: 'Whether to email admins as if the post was created from the dashboard',
-		},
-		...(forCreate ? [integrationsField] : []),
+		...(forCreate
+			? [
+					{
+						displayName: 'Notify Admins',
+						name: 'notifyAdmins',
+						type: 'boolean' as const,
+						default: false,
+						description: 'Whether to email admins as if the post was created from the dashboard',
+					},
+					integrationsField,
+				]
+			: []),
 		...(forCreate
 			? []
 			: [
@@ -364,6 +376,7 @@ function buildPostBody(fields: IDataObject): IDataObject {
 	if (Array.isArray(fields.tags) && fields.tags.length > 0) body.tags = fields.tags;
 	if (fields.statusId) body.statusId = extractId(fields.statusId);
 	if (fields.assigneeId) body.assigneeId = extractId(fields.assigneeId);
+	if (fields.boardId) body.boardId = extractId(fields.boardId);
 
 	const author = cleanAuthorInput(fields.author as IDataObject);
 	if (author) body.author = author;
