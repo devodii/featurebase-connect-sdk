@@ -11,7 +11,6 @@ const STRING_FORMAT_METHODS: Record<string, string> = {
 	'date-time': '.datetime({ offset: true })',
 };
 
-/** The name a generated schema constant is bound to, e.g. `Post` -> `PostSchema`. */
 export function schemaBindingName(schemaName: string): string {
 	return `${schemaName}Schema`;
 }
@@ -142,12 +141,9 @@ function build(document: OpenApiDocument, schema: JsonSchema, visiting: Readonly
 	return expr;
 }
 
-/**
- * Converts a resolved OpenAPI/JSON Schema into a Zod schema expression, as source text.
- * Pass `schemaName` when generating the definition for a named component schema, so a
- * reference back to that same name (direct or mutual recursion) breaks with `z.lazy()`
- * instead of recursing forever.
- */
+// Pass schemaName when generating a named schema's own definition, so a reference
+// back to that name (direct or mutual recursion) breaks with z.lazy() instead of
+// recursing forever.
 export function generateZodSchema(document: OpenApiDocument, schema: JsonSchema, schemaName?: string): string {
 	return build(document, schema, schemaName ? new Set([schemaName]) : new Set());
 }
