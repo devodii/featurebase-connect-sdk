@@ -1,9 +1,5 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals */
-import { resolve } from 'path';
+import { SPEC_PATH } from '../test-support';
 import { getOperation, getSchema, loadOpenApi } from './loader';
-
-const SPEC_PATH = resolve(__dirname, '../../../../reference/openapi.json');
 
 describe('loadOpenApi', () => {
 	const document = loadOpenApi(SPEC_PATH);

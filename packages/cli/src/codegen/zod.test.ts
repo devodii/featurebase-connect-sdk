@@ -1,17 +1,11 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals */
-import { resolve } from 'path';
 import { z } from 'zod';
 import { getSchema, loadOpenApi, type OpenApiDocument } from '../openapi/loader';
 import type { JsonSchema } from '../openapi/schema';
+import { evalModule, SPEC_PATH } from '../test-support';
 import { generateZodSchema } from './zod';
 
-const SPEC_PATH = resolve(__dirname, '../../../../reference/openapi.json');
-
-/** Evaluates a generated expression string into a real zod schema, the way the compiler's emitted file would run it. */
 function evaluate(expr: string): z.ZodTypeAny {
-	// eslint-disable-next-line @n8n/community-nodes/no-dangerous-functions
-	return new Function('z', `return ${expr};`)(z) as z.ZodTypeAny;
+	return evalModule(`return ${expr};`, { z });
 }
 
 describe('generateZodSchema against the real Featurebase spec', () => {

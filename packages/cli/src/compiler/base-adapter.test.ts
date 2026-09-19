@@ -1,11 +1,7 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals */
 import { getOperation, loadOpenApi, getSchema, type OpenApiDocument } from '../openapi/loader';
+import { SPEC_PATH } from '../test-support';
 import { BaseAdapter, createProject } from './base-adapter';
 import type { CompilerContext } from './types';
-import { resolve } from 'path';
-
-const SPEC_PATH = resolve(__dirname, '../../../../reference/openapi.json');
 
 class TestAdapter extends BaseAdapter {
 	generate(ctx: CompilerContext): void {

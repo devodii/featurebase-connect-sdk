@@ -1,10 +1,6 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports */
-import { mkdtempSync, readFileSync, rmSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
 import { generateManifestJsonSchema, writeManifestJsonSchema } from './json-schema';
 import { ManifestSchema } from './schema';
+import { createTempDir, readFixture, removeTempDir, resolvePath } from '../test-support';
 
 describe('generateManifestJsonSchema', () => {
 	const jsonSchema = generateManifestJsonSchema();
@@ -40,27 +36,27 @@ describe('generateManifestJsonSchema', () => {
 
 describe('writeManifestJsonSchema', () => {
 	it('writes a valid, parseable JSON schema file to disk', () => {
-		const dir = mkdtempSync(join(tmpdir(), 'featurebase-connect-schema-'));
+		const dir = createTempDir('featurebase-connect-schema-');
 		try {
-			const outPath = join(dir, 'manifest.schema.json');
+			const outPath = resolvePath(dir, 'manifest.schema.json');
 			writeManifestJsonSchema(outPath);
 
-			const written = JSON.parse(readFileSync(outPath, 'utf8'));
+			const written = JSON.parse(readFixture(outPath));
 			expect(written.$schema).toBe('http://json-schema.org/draft-07/schema#');
 			expect(written.definitions.FeaturebaseConnectManifest.type).toBe('object');
 		} finally {
-			rmSync(dir, { recursive: true, force: true });
+			removeTempDir(dir);
 		}
 	});
 
 	it('creates the parent directory when it does not exist yet', () => {
-		const dir = mkdtempSync(join(tmpdir(), 'featurebase-connect-schema-'));
+		const dir = createTempDir('featurebase-connect-schema-');
 		try {
-			const outPath = join(dir, 'nested', 'deeper', 'manifest.schema.json');
+			const outPath = resolvePath(dir, 'nested', 'deeper', 'manifest.schema.json');
 			writeManifestJsonSchema(outPath);
-			expect(JSON.parse(readFileSync(outPath, 'utf8')).$schema).toBeDefined();
+			expect(JSON.parse(readFixture(outPath)).$schema).toBeDefined();
 		} finally {
-			rmSync(dir, { recursive: true, force: true });
+			removeTempDir(dir);
 		}
 	});
 });

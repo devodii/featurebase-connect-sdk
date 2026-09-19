@@ -1,12 +1,6 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals */
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
-import { tmpdir } from 'os';
-import { join, resolve } from 'path';
 import { loadOpenApi, type OpenApiDocument } from '../openapi/loader';
+import { createTempDir, removeTempDir, SPEC_PATH, writeFixture } from '../test-support';
 import { loadManifest, resolveAdapterPath } from './load';
-
-const SPEC_PATH = resolve(__dirname, '../../../../reference/openapi.json');
 
 describe('loadManifest', () => {
 	let dir: string;
@@ -17,17 +11,15 @@ describe('loadManifest', () => {
 	});
 
 	beforeEach(() => {
-		dir = mkdtempSync(join(tmpdir(), 'featurebase-connect-manifest-'));
+		dir = createTempDir('featurebase-connect-manifest-');
 	});
 
 	afterEach(() => {
-		rmSync(dir, { recursive: true, force: true });
+		removeTempDir(dir);
 	});
 
 	function writeManifest(contents: string): string {
-		const manifestPath = join(dir, 'manifest.yaml');
-		writeFileSync(manifestPath, contents);
-		return manifestPath;
+		return writeFixture(dir, 'manifest.yaml', contents);
 	}
 
 	it('loads a valid manifest referencing real operationIds', () => {

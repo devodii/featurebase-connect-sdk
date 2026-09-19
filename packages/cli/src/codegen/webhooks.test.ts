@@ -1,25 +1,17 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals */
-import { resolve } from 'path';
 import { z } from 'zod';
 import { loadOpenApi } from '../openapi/loader';
+import { evalModule, SPEC_PATH } from '../test-support';
 import { generateWebhookTopics } from './webhooks';
-
-const SPEC_PATH = resolve(__dirname, '../../../../reference/openapi.json');
 
 function evaluate(expr: string): { WEBHOOK_TOPICS: readonly string[]; WebhookTopicSchema: z.ZodTypeAny } {
 	// The real generated file is TypeScript (export statements, a `type` alias), but
-	// `Function` only runs plain JS, so strip everything that isn't runtime code.
+	// evalModule only runs plain JS, so strip everything that isn't runtime code.
 	const script = expr
 		.split('\n')
 		.filter((line) => !line.startsWith('export type'))
 		.map((line) => line.replace(/^export /, '').replace(/ as const;$/, ';'))
 		.join('\n');
-	// eslint-disable-next-line @n8n/community-nodes/no-dangerous-functions
-	return new Function('z', `${script}\nreturn { WEBHOOK_TOPICS, WebhookTopicSchema };`)(z) as {
-		WEBHOOK_TOPICS: readonly string[];
-		WebhookTopicSchema: z.ZodTypeAny;
-	};
+	return evalModule(`${script}\nreturn { WEBHOOK_TOPICS, WebhookTopicSchema };`, { z });
 }
 
 describe('generateWebhookTopics', () => {
