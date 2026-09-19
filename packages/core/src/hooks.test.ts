@@ -38,6 +38,7 @@ describe('defineHooks', () => {
 		const registry = defineHooks({
 			createPost: [
 				(ctx) => {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					type _PayloadIsCreatePostBody = Expect<Equal<typeof ctx.payload, ExtractBody<'createPost'>>>;
 					return { ...ctx.payload, title: ctx.payload.title.trim() };
 				},
