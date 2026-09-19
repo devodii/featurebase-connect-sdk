@@ -11,7 +11,7 @@ describe('build', () => {
 	let dir: string;
 
 	beforeEach(() => {
-		dir = mkdtempSync(join(tmpdir(), 'forge-build-'));
+		dir = mkdtempSync(join(tmpdir(), 'featurebase-connect-build-'));
 	});
 
 	afterEach(() => {

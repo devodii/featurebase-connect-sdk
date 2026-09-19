@@ -7,7 +7,7 @@ import { build } from '../compiler/build';
 async function main(): Promise<void> {
 	const [manifestArg, specArg] = process.argv.slice(2);
 	if (!manifestArg) {
-		console.error('Usage: forge <manifest.yaml> [openapi.json]');
+		console.error('Usage: featurebase-connect <manifest.yaml> [openapi.json]');
 		process.exitCode = 1;
 		return;
 	}

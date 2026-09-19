@@ -6,7 +6,7 @@
 	"main": "src/index.ts",
 	"types": "src/index.ts",
 	"bin": {
-		"forge": "src/bin/forge.ts"
+		"featurebase-connect": "src/bin/featurebase-connect.ts"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",

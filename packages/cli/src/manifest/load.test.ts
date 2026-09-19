@@ -17,7 +17,7 @@ describe('loadManifest', () => {
 	});
 
 	beforeEach(() => {
-		dir = mkdtempSync(join(tmpdir(), 'forge-manifest-'));
+		dir = mkdtempSync(join(tmpdir(), 'featurebase-connect-manifest-'));
 	});
 
 	afterEach(() => {
