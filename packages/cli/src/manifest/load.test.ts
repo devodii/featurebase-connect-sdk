@@ -50,6 +50,19 @@ operations:
 		});
 	});
 
+	it('ignores a leading yaml-language-server pragma comment, used for editor autocomplete', () => {
+		const manifestPath = writeManifest(`# yaml-language-server: $schema=../../packages/cli/schema/manifest.schema.json
+name: n8n
+adapter: ./mapper.ts
+outDir: ./generated
+operations:
+  - listBoards
+`);
+
+		const manifest = loadManifest(manifestPath, document);
+		expect(manifest.name).toBe('n8n');
+	});
+
 	it('rejects a manifest missing a required field', () => {
 		const manifestPath = writeManifest(`
 adapter: ./mapper.ts

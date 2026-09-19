@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../packages/cli/schema/manifest.schema.json
 name: n8n
 adapter: ./mapper.ts
 outDir: ./generated
