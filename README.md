@@ -155,6 +155,8 @@ This repository is also home to the Featurebase Connect SDK, a headless, OpenAPI
 
 The generator covers the whole spec, not just a hand-picked subset: every one of the ~190 named schemas, every operation (a manifest can request an explicit list or `operations: '*'` for all of them), and the real webhook event topics (extracted from the spec's `topics` enum, since Featurebase's `webhooks` section itself is empty) as a typed union plus a zod enum. Every generated schema is paired with its inferred TypeScript type from one source of truth (`z.infer<>`), so this is useful for any integration, not just n8n.
 
+`manifest.yaml` itself is typed too: `packages/cli/schema/manifest.schema.json` is generated from the same zod schema that validates it at build time, and a `# yaml-language-server: $schema=...` comment at the top of each manifest wires it up, so an editor with the YAML extension gives autocomplete, inline validation, and hover docs while writing one.
+
 `integrations/n8n` is the first real adapter built on this SDK: a `manifest.yaml` listing Post operations, a small `mapper.ts` generating typed Zod schemas, an operation registry, and the webhook topics from the real spec, and a `client.ts` wiring them into a ready-to-use `FeaturebaseClient`. Adding a new integration is meant to be this small.
 
 This n8n community node package (the root of this repository) does not yet consume the SDK; that migration is a planned next step. Uncertain runtime behavior (rate limit thresholds, retry-after semantics) is tagged `@unchecked-*` in the source rather than assumed.
