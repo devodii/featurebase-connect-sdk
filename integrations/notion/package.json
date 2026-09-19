@@ -1,0 +1,22 @@
+{
+	"name": "@featurebase-connect-sdk/integration-notion",
+	"version": "0.1.0",
+	"private": true,
+	"license": "MIT",
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"test": "jest"
+	},
+	"dependencies": {
+		"@featurebase-connect-sdk/core": "workspace:*",
+		"zod": "^3.24.1"
+	},
+	"devDependencies": {
+		"@featurebase-connect-sdk/types": "workspace:*",
+		"@types/jest": "^29.5.14",
+		"@types/node": "^22.10.5",
+		"jest": "^29.7.0",
+		"ts-jest": "^29.2.5",
+		"typescript": "^5.9.3"
+	}
+}

@@ -62,7 +62,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Typecheck
-        run: pnpm -r --filter "./packages/**" --filter "./integrations/n8n" run typecheck
+        run: pnpm -r --filter "./packages/**" --filter "./integrations/*" run typecheck
 
       - name: Run tests
-        run: pnpm -r --filter "./packages/**" --filter "./integrations/n8n" run test
+        run: pnpm -r --filter "./packages/**" --filter "./integrations/*" run test
