@@ -1,6 +1,4 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports */
-import { dirname, resolve } from 'path';
+import { dirname, resolve } from '../platform';
 import { loadManifest, resolveAdapterPath } from '../manifest/load';
 import { getOperation, loadOpenApi } from '../openapi/loader';
 import type { BaseAdapter } from './base-adapter';
@@ -18,7 +16,7 @@ let tsNodeRegistered = false;
 // ctx.operations, etc.), so require() must be able to load a .ts file directly.
 function ensureTypeScriptSupport(adapterPath: string): void {
 	if (tsNodeRegistered || !adapterPath.endsWith('.ts')) return;
-	// eslint-disable-next-line @typescript-eslint/no-require-imports
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @n8n/community-nodes/no-restricted-imports
 	require('ts-node').register({ transpileOnly: true });
 	tsNodeRegistered = true;
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// This is a build-time cli tool, not n8n node code, so node builtins/console are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals, no-console */
-import { resolve } from 'path';
+// This is the cli entrypoint: printing to the terminal and reading argv/exit code
+// are the whole point, not n8n node behavior.
+/* eslint-disable no-console, @n8n/community-nodes/no-restricted-globals */
+import { resolve } from '../platform';
 import { build } from '../compiler/build';
 
 async function main(): Promise<void> {

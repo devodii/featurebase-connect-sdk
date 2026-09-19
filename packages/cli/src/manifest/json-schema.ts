@@ -1,8 +1,4 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports */
-import { mkdirSync, writeFileSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { dirname, mkdirSync, resolve, writeFileSync, zodToJsonSchema } from '../platform';
 import { ManifestSchema } from './schema';
 
 /** A JSON Schema for manifest.yaml, so editors (via the yaml-language-server pragma) can validate and autocomplete it. */

@@ -1,13 +1,9 @@
-// This is a build-time cli tool, not n8n node code, so node builtins are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports */
-import { readFileSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { parse } from 'yaml';
+import { dirname, parseYaml, readFileSync, resolve } from '../platform';
 import type { OpenApiDocument } from '../openapi/loader';
 import { ManifestSchema, type Manifest } from './schema';
 
 export function loadManifest(manifestPath: string, document: OpenApiDocument): Manifest {
-	const raw: unknown = parse(readFileSync(resolve(manifestPath), 'utf8'));
+	const raw: unknown = parseYaml(readFileSync(resolve(manifestPath), 'utf8'));
 	const result = ManifestSchema.safeParse(raw);
 	if (!result.success) {
 		const issues = result.error.issues.map((issue) => `${issue.path.join('.')} ${issue.message}`).join('; ');
