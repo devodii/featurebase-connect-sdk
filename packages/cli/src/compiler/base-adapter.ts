@@ -1,6 +1,4 @@
-// This is a build-time cli tool, not n8n node code, so third-party deps are fine.
-/* eslint-disable @n8n/community-nodes/no-restricted-imports */
-import { Project, QuoteKind, type ProjectOptions, VariableDeclarationKind, type SourceFile } from 'ts-morph';
+import { Project, QuoteKind, type ProjectOptions, VariableDeclarationKind, type SourceFile } from '../platform';
 import { generateOperationRegistry } from '../codegen/operations';
 import { generateWebhookTopics } from '../codegen/webhooks';
 import { generateZodSchema, schemaBindingName, schemaTypeName } from '../codegen/zod';
@@ -59,8 +57,15 @@ export abstract class BaseAdapter implements IntegrationAdapter {
 		return sourceFile;
 	}
 
+	/**
+	 * Writes a runtime operation registry. This file imports `@featurebase-connect-sdk/core`,
+	 * a real cross-package dependency, so any integration living in this monorepo needs this
+	 * disable comment for the root n8n package's lint job, which scans the whole repository
+	 * tree rather than just the published node code.
+	 */
 	protected writeOperationRegistry(ctx: CompilerContext, filePath: string, constName: string): SourceFile {
 		const sourceFile = this.createSourceFile(filePath);
+		sourceFile.insertText(0, '/* eslint-disable @n8n/community-nodes/no-restricted-imports, import-x/no-unresolved */\n');
 		sourceFile.addImportDeclaration({
 			moduleSpecifier: '@featurebase-connect-sdk/core',
 			namedImports: [{ name: 'OperationDescriptor', isTypeOnly: true }],

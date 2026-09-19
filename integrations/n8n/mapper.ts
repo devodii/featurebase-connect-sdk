@@ -6,11 +6,8 @@ import { BaseAdapter, schemaBindingName, type CompilerContext } from '@featureba
 
 class N8nAdapter extends BaseAdapter {
 	generate(ctx: CompilerContext): void {
-		const registry = this.writeOperationRegistry(ctx, `${ctx.outDir}/operations.ts`, 'n8nOperations');
+		this.writeOperationRegistry(ctx, `${ctx.outDir}/operations.ts`, 'n8nOperations');
 		this.writeWebhookTopics(ctx, `${ctx.outDir}/webhookTopics.ts`, 'N8N_WEBHOOK_TOPICS', 'N8nWebhookTopic');
-		// This lives in the same repo as the n8n community node, whose root lint config scans
-		// the whole tree; it flags this workspace-package import even though it's not node code.
-		registry.insertText(0, '/* eslint-disable @n8n/community-nodes/no-restricted-imports, import-x/no-unresolved */\n');
 
 		const schemaOperations = ctx.operations.filter((operation) => operation.requestBodySchema);
 		for (const operation of schemaOperations) {
