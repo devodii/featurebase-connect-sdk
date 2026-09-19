@@ -1,3 +1,7 @@
+// This is a platform-agnostic package, not n8n node code, so a plain setTimeout
+// and rethrowing the caller's own error (for it to wrap however it wants) are fine.
+/* eslint-disable @n8n/community-nodes/no-restricted-globals, @n8n/community-nodes/require-node-api-error */
+
 export interface RetryOptions {
 	maxRetries?: number;
 	baseDelayMs?: number;
