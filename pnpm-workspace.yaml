@@ -1,0 +1,9 @@
+# None of these native build scripts are needed for this package's own
+# build/lint/test/pack pipeline (verified: all pass without approving any of
+# them), so none are allowed to run, following least-privilege for installs.
+allowBuilds:
+  cpu-features: false
+  eslint-plugin-n8n-nodes-base: false
+  isolated-vm: false
+  ssh2: false
+  unrs-resolver: false
