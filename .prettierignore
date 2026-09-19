@@ -4,3 +4,4 @@ reference
 pnpm-lock.yaml
 packages/types/src/generated
 integrations/*/generated
+packages/cli/schema
