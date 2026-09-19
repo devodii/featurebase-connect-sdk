@@ -1,3 +1,7 @@
+// This is the sdk's own build-time adapter, not the published n8n node, so a real
+// dependency is fine; the root lint job runs npm ci (no pnpm workspace linking),
+// so it cannot resolve this workspace package either.
+/* eslint-disable @n8n/community-nodes/no-restricted-imports, import-x/no-unresolved */
 import { BaseAdapter, schemaBindingName, type CompilerContext } from '@featurebase-connect-sdk/cli';
 
 class N8nAdapter extends BaseAdapter {
@@ -5,7 +9,7 @@ class N8nAdapter extends BaseAdapter {
 		const registry = this.writeOperationRegistry(ctx, `${ctx.outDir}/operations.ts`, 'n8nOperations');
 		// This lives in the same repo as the n8n community node, whose root lint config scans
 		// the whole tree; it flags this workspace-package import even though it's not node code.
-		registry.insertText(0, '/* eslint-disable @n8n/community-nodes/no-restricted-imports */\n');
+		registry.insertText(0, '/* eslint-disable @n8n/community-nodes/no-restricted-imports, import-x/no-unresolved */\n');
 
 		const schemaOperations = ctx.operations.filter((operation) => operation.requestBodySchema);
 		for (const operation of schemaOperations) {
