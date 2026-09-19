@@ -143,6 +143,18 @@ Reads a Canny CSV export, maps its columns, and runs Bulk Import.
 - Featurebase signs outbound webhooks with a secret prefixed `whsec_...`, generated when a webhook is created. The exact signature header name and algorithm are not confirmed by Featurebase's currently published docs (see `reference/FINDINGS.md` section 7); the trigger verifies HMAC-SHA256 against a `Featurebase-Signature` header when present. If that header is present but does not match, the request is rejected with a 401. If the header is absent entirely (the live behavior is unconfirmed), the request is still processed and marked `signatureVerified: false`, since rejecting every request outright would break the trigger for everyone until Featurebase confirms the real header name.
 - Numeric rate limit thresholds are not published. The node retries on `rate_limit_error` (HTTP 429) with exponential backoff and jitter, honouring `Retry-After` when present, up to 5 attempts before failing.
 
+## Monorepo
+
+This repository is also home to the Featurebase Connect SDK, a headless, OpenAPI-driven toolkit for building typed Featurebase integrations beyond n8n:
+
+| Package          | What it is                                                                                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/types` | TypeScript types generated from `reference/openapi.json`, plus generics like `ExtractBody<TOp>` and `ExtractResponse<TOp>` keyed by operationId.                                                                    |
+| `packages/core`  | A platform-agnostic API client: a generic `FeaturebaseClient.execute<TOp>`, cursor pagination, retry with backoff, and a typed hook engine. Takes an injected fetcher, so it works in n8n, a CLI, or anywhere else. |
+| `packages/cli`   | Codegen tooling: parses the OpenAPI spec and turns JSON Schema into Zod schema source, for generating typed integrations from a manifest.                                                                           |
+
+This n8n package (the root of this repository) does not yet consume the SDK; that migration is a planned next step. Uncertain runtime behavior (rate limit thresholds, retry-after semantics) is tagged `@unchecked-*` in the source rather than assumed.
+
 ## Development
 
 ```bash
@@ -154,6 +166,14 @@ npm run lintfix
 npm run format      # prettier --write .
 npm test            # jest
 npm run format:push # format, lint --fix, typecheck, commit, and push
+```
+
+The SDK packages use pnpm:
+
+```bash
+pnpm install
+pnpm --filter "./packages/**" run typecheck
+pnpm --filter "./packages/**" run test
 ```
 
 `reference/` holds everything this package was built from: the OpenAPI spec (`openapi.json`), recovered docs pages, and `FINDINGS.md`, which records every place the spec and this README's claims come from, plus every documented gap. Anything not backed by that spec was deliberately left out rather than guessed.
