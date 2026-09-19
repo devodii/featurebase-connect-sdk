@@ -12,5 +12,5 @@
 		"outDir": "./dist",
 		"noEmit": true
 	},
-	"include": ["client.ts", "schemas.ts", "operations.ts", "*.test.ts"]
+	"include": ["client.ts", "schemas.ts", "operations.ts", "notion-client.ts", "sync.ts", "*.test.ts"]
 }
