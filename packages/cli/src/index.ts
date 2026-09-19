@@ -2,6 +2,7 @@ export { BaseAdapter, createProject } from './compiler/base-adapter';
 export type { CompilerContext, IntegrationAdapter } from './compiler/types';
 export { build } from './compiler/build';
 export type { BuildOptions } from './compiler/build';
+export { generateOperationRegistry } from './codegen/operations';
 export { generateZodSchema, schemaBindingName } from './codegen/zod';
 export { loadManifest, resolveAdapterPath } from './manifest/load';
 export { ManifestSchema } from './manifest/schema';
