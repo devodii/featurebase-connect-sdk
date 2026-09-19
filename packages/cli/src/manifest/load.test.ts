@@ -72,6 +72,22 @@ operations: []
 		expect(() => loadManifest(manifestPath, document)).toThrow('operations');
 	});
 
+	it('expands operations: "*" to every operationId in the real spec', () => {
+		const manifestPath = writeManifest(`
+name: everything
+adapter: ./mapper.ts
+outDir: ./generated
+operations: '*'
+`);
+
+		const manifest = loadManifest(manifestPath, document);
+
+		expect(manifest.operations).toEqual(Object.keys(document.operations));
+		expect(manifest.operations.length).toBeGreaterThan(50);
+		expect(manifest.operations).toContain('createPost');
+		expect(manifest.operations).toContain('listBoards');
+	});
+
 	it('rejects a manifest referencing an operationId that does not exist in the spec', () => {
 		const manifestPath = writeManifest(`
 name: n8n

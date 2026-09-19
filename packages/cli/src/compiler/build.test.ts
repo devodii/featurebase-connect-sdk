@@ -123,6 +123,24 @@ export default new TestMapper();
 		expect(contents).toContain('export const marker = true;');
 	});
 
+	it('builds every operation in the real spec when the manifest asks for "*"', async () => {
+		writeFileSync(
+			join(dir, 'manifest.yaml'),
+			`
+name: everything
+adapter: ./mapper.js
+outDir: ./generated
+operations: '*'
+`,
+		);
+		writeFileSync(join(dir, 'mapper.js'), `module.exports.default = { generate() {}, save() {} };`);
+
+		const ctx = await build({ manifestPath: join(dir, 'manifest.yaml'), specPath: SPEC_PATH });
+
+		expect(ctx.operations.length).toBeGreaterThan(50);
+		expect(ctx.operations.map((operation) => operation.operationId)).toContain('createPost');
+	});
+
 	it('rejects a manifest that references an unknown operationId before touching the adapter', async () => {
 		writeFileSync(
 			join(dir, 'manifest.yaml'),

@@ -14,13 +14,15 @@ export function loadManifest(manifestPath: string, document: OpenApiDocument): M
 		throw new Error(`Invalid manifest at "${manifestPath}": ${issues}`);
 	}
 
-	const manifest = result.data;
-	const unknownOperations = manifest.operations.filter((operationId) => !(operationId in document.operations));
+	const parsed = result.data;
+	const operations = parsed.operations === '*' ? Object.keys(document.operations) : parsed.operations;
+
+	const unknownOperations = operations.filter((operationId) => !(operationId in document.operations));
 	if (unknownOperations.length > 0) {
 		throw new Error(`Manifest at "${manifestPath}" references unknown operationId(s): ${unknownOperations.join(', ')}`);
 	}
 
-	return manifest;
+	return { name: parsed.name, adapter: parsed.adapter, outDir: parsed.outDir, operations };
 }
 
 export function resolveAdapterPath(manifestPath: string, manifest: Manifest): string {
