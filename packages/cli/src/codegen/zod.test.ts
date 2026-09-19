@@ -91,6 +91,7 @@ describe('generateZodSchema cycle handling', () => {
 			raw: { components: { schemas } },
 			schemas,
 			operations: {},
+			webhookTopics: [],
 		};
 
 		const expr = generateZodSchema(document, schemas.A, 'A');

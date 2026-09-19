@@ -40,4 +40,10 @@ describe('loadOpenApi', () => {
 	it('throws a clear error for an unknown schema name', () => {
 		expect(() => getSchema(document, 'DoesNotExist')).toThrow('DoesNotExist');
 	});
+
+	it('extracts the real webhook event topics, since the spec has no top-level webhooks section', () => {
+		expect(document.webhookTopics).toContain('post.created');
+		expect(document.webhookTopics).toContain('conversation_part.redacted');
+		expect(document.webhookTopics.length).toBeGreaterThan(20);
+	});
 });
