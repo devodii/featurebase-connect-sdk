@@ -145,19 +145,16 @@ Reads a Canny CSV export, maps its columns, and runs Bulk Import.
 
 ## Monorepo
 
-This repository is also home to the Featurebase Connect SDK, a headless, OpenAPI-driven toolkit for building typed Featurebase integrations beyond n8n:
+This repository is also home to the Featurebase Connect SDK, a small, hand-written toolkit for building typed Featurebase integrations beyond n8n:
 
 | Package          | What it is                                                                                                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/types` | TypeScript types generated from `reference/openapi.json`, plus generics like `ExtractBody<TOp>` and `ExtractResponse<TOp>` keyed by operationId.                                                                    |
 | `packages/core`  | A platform-agnostic API client: a generic `FeaturebaseClient.execute<TOp>`, cursor pagination, retry with backoff, and a typed hook engine. Takes an injected fetcher, so it works in n8n, a CLI, or anywhere else. |
-| `packages/cli`   | Codegen tooling (the `featurebase-connect` CLI): parses the OpenAPI spec and turns JSON Schema into Zod schema source, for generating typed integrations from a manifest.                                           |
 
-The generator covers the whole spec, not just a hand-picked subset: every one of the ~190 named schemas, every operation (a manifest can request an explicit list or `operations: '*'` for all of them), and the real webhook event topics (extracted from the spec's `topics` enum, since Featurebase's `webhooks` section itself is empty) as a typed union plus a zod enum. Every generated schema is paired with its inferred TypeScript type from one source of truth (`z.infer<>`), so this is useful for any integration, not just n8n.
+`integrations/n8n` shows the pattern: `operations.ts` (a plain object mapping operationId to method and path), `schemas.ts` (hand-written Zod schemas for the operations that take a body), and `client.ts` (wires both into a ready-to-use `FeaturebaseClient`, plus a `defineHooks` example that trims post titles before they're validated and sent). Each Zod schema carries a compile-time check (`Expect<Equal<...>>`) against the type generated from the real spec, so if Featurebase changes an endpoint and `packages/types` gets regenerated, a stale hand-written schema fails to compile instead of silently drifting.
 
-`manifest.yaml` itself is typed too: `packages/cli/schema/manifest.schema.json` is generated from the same zod schema that validates it at build time, and a `# yaml-language-server: $schema=...` comment at the top of each manifest wires it up, so an editor with the YAML extension gives autocomplete, inline validation, and hover docs while writing one.
-
-`integrations/n8n` is the first real adapter built on this SDK: a `manifest.yaml` listing Post operations, a small `mapper.ts` generating typed Zod schemas, an operation registry, and the webhook topics from the real spec, and a `client.ts` wiring them into a ready-to-use `FeaturebaseClient`. Adding a new integration is meant to be this small.
+Adding a new integration (say, Slack) means creating `integrations/slack/` with the same three small files, reusing `packages/core` and `packages/types` directly. There is no code generator, no manifest file, and no build step involved - just plain TypeScript.
 
 This n8n community node package (the root of this repository) does not yet consume the SDK; that migration is a planned next step. Uncertain runtime behavior (rate limit thresholds, retry-after semantics) is tagged `@unchecked-*` in the source rather than assumed.
 
@@ -178,8 +175,8 @@ The SDK packages use pnpm:
 
 ```bash
 pnpm install
-pnpm --filter "./packages/**" run typecheck
-pnpm --filter "./packages/**" run test
+pnpm --filter "./packages/**" --filter "./integrations/**" run typecheck
+pnpm --filter "./packages/**" --filter "./integrations/**" run test
 ```
 
 `reference/` holds everything this package was built from: the OpenAPI spec (`openapi.json`), recovered docs pages, and `FINDINGS.md`, which records every place the spec and this README's claims come from, plus every documented gap. Anything not backed by that spec was deliberately left out rather than guessed.
