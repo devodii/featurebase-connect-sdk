@@ -2,7 +2,6 @@ import type { Equal, Expect } from '@featurebase-connect-sdk/types';
 import { z } from 'zod';
 import { FeaturebaseClient, FeaturebaseValidationError, type ExecuteArgs, type OperationRegistry } from './client';
 import type { FetchRequest, FetchResponse, Fetcher } from './fetcher';
-import { defineHooks } from './hooks';
 
 const OPERATIONS: OperationRegistry = {
 	listBoards: { method: 'GET', path: '/v2/boards' },
@@ -68,19 +67,7 @@ describe('FeaturebaseClient.execute', () => {
 		expect(requests[0].url).toBe('https://do.featurebase.app/v2/posts?boardId=b1&sortBy=recent');
 	});
 
-	it('runs before-request hooks and sends the mutated payload', async () => {
-		const { fetcher, requests } = fakeFetcher(() => ({ status: 201, headers: {}, body: { id: 'p1' } }));
-		const hooks = defineHooks({
-			createPost: [(ctx) => ({ ...ctx.payload, title: ctx.payload.title.trim() })],
-		});
-		const client = new FeaturebaseClient({ baseUrl: 'https://do.featurebase.app', fetcher, operations: OPERATIONS, hooks });
-
-		await client.execute('createPost', { title: '  hi  ', boardId: 'b1' });
-
-		expect(requests[0].body).toMatchObject({ title: 'hi' });
-	});
-
-	it('validates the hooked payload against a zod schema before sending, and never calls the fetcher on failure', async () => {
+	it('validates the payload against a zod schema before sending, and never calls the fetcher on failure', async () => {
 		const { fetcher, requests } = fakeFetcher(() => ({ status: 201, headers: {}, body: {} }));
 		const schema = z.object({ title: z.string().min(2), boardId: z.string() });
 		const client = new FeaturebaseClient({
@@ -92,25 +79,6 @@ describe('FeaturebaseClient.execute', () => {
 
 		await expect(client.execute('createPost', { title: 't', boardId: 'b1' })).rejects.toBeInstanceOf(FeaturebaseValidationError);
 		expect(requests).toHaveLength(0);
-	});
-
-	it('lets a hook fix up a payload that would otherwise fail validation', async () => {
-		const { fetcher, requests } = fakeFetcher(() => ({ status: 201, headers: {}, body: {} }));
-		const schema = z.object({ title: z.string().min(2), boardId: z.string() });
-		const hooks = defineHooks({
-			createPost: [(ctx) => ({ ...ctx.payload, title: ctx.payload.title.padEnd(2, '!') })],
-		});
-		const client = new FeaturebaseClient({
-			baseUrl: 'https://do.featurebase.app',
-			fetcher,
-			operations: OPERATIONS,
-			schemas: { createPost: schema },
-			hooks,
-		});
-
-		await client.execute('createPost', { title: 't', boardId: 'b1' });
-
-		expect(requests[0].body).toMatchObject({ title: 't!' });
 	});
 
 	it('retries a failed request using the configured retry policy', async () => {

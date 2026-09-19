@@ -147,12 +147,12 @@ Reads a Canny CSV export, maps its columns, and runs Bulk Import.
 
 This repository is also home to the Featurebase Connect SDK, a small, hand-written toolkit for building typed Featurebase integrations beyond n8n:
 
-| Package          | What it is                                                                                                                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/types` | TypeScript types generated from `reference/openapi.json`, plus generics like `ExtractBody<TOp>` and `ExtractResponse<TOp>` keyed by operationId.                                                                    |
-| `packages/core`  | A platform-agnostic API client: a generic `FeaturebaseClient.execute<TOp>`, cursor pagination, retry with backoff, and a typed hook engine. Takes an injected fetcher, so it works in n8n, a CLI, or anywhere else. |
+| Package          | What it is                                                                                                                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/types` | TypeScript types generated from `reference/openapi.json`, plus generics like `ExtractBody<TOp>` and `ExtractResponse<TOp>` keyed by operationId.                                               |
+| `packages/core`  | A platform-agnostic API client: a generic `FeaturebaseClient.execute<TOp>`, cursor pagination, and retry with backoff. Takes an injected fetcher, so it works in n8n, a CLI, or anywhere else. |
 
-`integrations/n8n` shows the pattern: `operations.ts` (a plain object mapping operationId to method and path), `schemas.ts` (hand-written Zod schemas for the operations that take a body), and `client.ts` (wires both into a ready-to-use `FeaturebaseClient`, plus a `defineHooks` example that trims post titles before they're validated and sent). Each Zod schema carries a compile-time check (`Expect<Equal<...>>`) against the type generated from the real spec, so if Featurebase changes an endpoint and `packages/types` gets regenerated, a stale hand-written schema fails to compile instead of silently drifting.
+`integrations/n8n` shows the pattern: `operations.ts` (a plain object mapping operationId to method and path), `schemas.ts` (hand-written Zod schemas for the operations that take a body), and `client.ts` (wires both into a ready-to-use `FeaturebaseClient`). Each Zod schema carries a compile-time check (`Expect<Equal<...>>`) against the type generated from the real spec, so if Featurebase changes an endpoint and `packages/types` gets regenerated, a stale hand-written schema fails to compile instead of silently drifting.
 
 Adding a new integration (say, Slack) means creating `integrations/slack/` with the same three small files, reusing `packages/core` and `packages/types` directly. There is no code generator, no manifest file, and no build step involved - just plain TypeScript.
 

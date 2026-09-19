@@ -1,7 +1,6 @@
 import type { ExtractBody, ExtractResponse, OperationId, OperationPath, OperationQuery } from '@featurebase-connect-sdk/types';
 import type { ZodTypeAny } from 'zod';
 import type { Fetcher } from './fetcher';
-import { runBeforeRequestHooks, type HookRegistry } from './hooks';
 import { withRetry, type RetryOptions } from './retry';
 import { buildUrl, type PathParams, type QueryParams } from './url';
 
@@ -32,7 +31,6 @@ export interface FeaturebaseClientOptions {
 	fetcher: Fetcher;
 	operations: OperationRegistry;
 	schemas?: Partial<Record<OperationId, ZodTypeAny>>;
-	hooks?: HookRegistry;
 	retry?: RetryOptions;
 	headers?: Record<string, string>;
 }
@@ -58,7 +56,7 @@ export class FeaturebaseClient {
 		const descriptor = this.options.operations[operation];
 		if (!descriptor) throw new Error(`No operation descriptor registered for "${operation}"`);
 
-		const payload = rawPayload === undefined ? rawPayload : await this.prepare(operation, rawPayload);
+		const payload = rawPayload === undefined ? rawPayload : this.validate(operation, rawPayload);
 
 		const pathParams = requestOptions && 'pathParams' in requestOptions ? (requestOptions.pathParams as PathParams) : undefined;
 		const url = buildUrl(this.options.baseUrl, descriptor.path, pathParams, requestOptions?.query as QueryParams | undefined);
@@ -71,13 +69,11 @@ export class FeaturebaseClient {
 		return response.body as ExtractResponse<TOp>;
 	}
 
-	private async prepare<TOp extends OperationId>(operation: TOp, payload: ExtractBody<TOp>): Promise<ExtractBody<TOp>> {
-		const hooked = await runBeforeRequestHooks(operation, payload, this.options.hooks?.[operation]);
-
+	private validate<TOp extends OperationId>(operation: TOp, payload: ExtractBody<TOp>): ExtractBody<TOp> {
 		const schema = this.options.schemas?.[operation];
-		if (!schema) return hooked;
+		if (!schema) return payload;
 
-		const result = schema.safeParse(hooked);
+		const result = schema.safeParse(payload);
 		if (!result.success) {
 			throw new FeaturebaseValidationError(
 				operation,

@@ -2,8 +2,6 @@ export { FeaturebaseClient, FeaturebaseValidationError } from './client';
 export type { ExecuteArgs, OperationDescriptor, OperationRegistry, ValidationIssue, FeaturebaseClientOptions } from './client';
 export type { FetchRequest, FetchResponse, Fetcher } from './fetcher';
 export { featurebaseRetryOptions } from './featurebase-retry';
-export { defineHooks, runBeforeRequestHooks } from './hooks';
-export type { BeforeRequestHook, HookContext, HookRegistry } from './hooks';
 export { collectAll, paginate } from './pagination';
 export type { CursorPage } from './pagination';
 export { withRetry } from './retry';

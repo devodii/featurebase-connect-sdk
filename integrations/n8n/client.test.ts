@@ -54,24 +54,6 @@ describe('createFeaturebaseClient', () => {
 		expect(requests).toHaveLength(0);
 	});
 
-	it('trims a padded title via the before-request hook before it is validated and sent', async () => {
-		const { fetcher, requests } = fakeFetcher(() => ({ status: 201, headers: {}, body: { id: 'p1', title: 'hi', slug: 'hi' } }));
-		const client = createFeaturebaseClient({ apiKey: 'sk_test', fetcher });
-
-		await client.execute('createPost', { title: '  A real post  ', boardId: 'b1' });
-
-		expect(requests[0]).toMatchObject({ body: { title: 'A real post' } });
-	});
-
-	it('leaves an update payload with no title untouched by the hook', async () => {
-		const { fetcher, requests } = fakeFetcher(() => ({ status: 200, headers: {}, body: { id: 'p1' } }));
-		const client = createFeaturebaseClient({ apiKey: 'sk_test', fetcher });
-
-		await client.execute('updatePost', { boardId: 'b2' }, { pathParams: { id: 'p1' } });
-
-		expect(requests[0]).toMatchObject({ body: { boardId: 'b2' } });
-	});
-
 	it('resolves a required path param for getPost', async () => {
 		const { fetcher, requests } = fakeFetcher(() => ({ status: 200, headers: {}, body: { id: 'p1', title: 'hi' } }));
 		const client = createFeaturebaseClient({ apiKey: 'sk_test', fetcher });
