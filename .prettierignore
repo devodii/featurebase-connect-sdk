@@ -2,3 +2,4 @@ dist
 node_modules
 reference
 pnpm-lock.yaml
+packages/types/src/generated
