@@ -3,15 +3,15 @@ import type { ExtractBody, ExtractResponse } from './extract';
 import type { Equal, Expect } from './test-utils';
 
 // createPost has a request body and a 201 response.
-type _CreatePostBody = Expect<Equal<ExtractBody<'createPost'>, components['schemas']['CreatePostBody']>>;
-type _CreatePostResponse = Expect<Equal<ExtractResponse<'createPost'>, components['schemas']['Post']>>;
+export type _CreatePostBody = Expect<Equal<ExtractBody<'createPost'>, components['schemas']['CreatePostBody']>>;
+export type _CreatePostResponse = Expect<Equal<ExtractResponse<'createPost'>, components['schemas']['Post']>>;
 
 // listBoards is a GET with no body.
-type _ListBoardsBody = Expect<Equal<ExtractBody<'listBoards'>, never>>;
+export type _ListBoardsBody = Expect<Equal<ExtractBody<'listBoards'>, never>>;
 
 // deleteWebhook returns a 204 with no useful body content in this spec's
 // modeling, so this only needs to compile, not equal anything specific.
-type _DeleteWebhookCompiles = ExtractResponse<'deleteWebhook'>;
+export type _DeleteWebhookCompiles = ExtractResponse<'deleteWebhook'>;
 
 describe('ExtractBody / ExtractResponse', () => {
 	it('compiles the type-level assertions above', () => {
