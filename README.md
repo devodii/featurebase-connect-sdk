@@ -6,11 +6,12 @@ Everything for building [Featurebase](https://featurebase.app) integrations, in 
 | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `integrations/n8n/node` | The published n8n community node (`n8n-nodes-featurebase`). See [its README](integrations/n8n/node/README.md). |
 | `integrations/n8n`      | A small, hand-written example of using the SDK below to talk to Featurebase from n8n.                          |
+| `integrations/notion`   | Same pattern, wired for a Featurebase-to-Notion sync instead (different operations, same three files).         |
 | `packages/types`        | TypeScript types generated from `reference/openapi.json`, plus generics like `ExtractBody<TOp>`.               |
 | `packages/core`         | A platform-agnostic API client: `FeaturebaseClient.execute<TOp>`, cursor pagination, retry with backoff.       |
 | `reference/`            | The OpenAPI spec and recovered docs everything else in this repo is built from.                                |
 
-Adding a new integration (say, Slack) means creating `integrations/slack/` with the same pattern `integrations/n8n` shows: a plain object mapping operationId to method and path, a couple of hand-written Zod schemas, and a client wiring them into `packages/core`. No code generator, no manifest file, no build step.
+Adding a new integration means creating `integrations/<name>/` with the pattern `integrations/n8n` and `integrations/notion` both show: `operations.ts` (a plain object mapping operationId to method and path), `schemas.ts` (hand-written Zod schemas for the operations that take a body), and `client.ts` (wires both into `packages/core`'s `FeaturebaseClient`). No code generator, no manifest file, no build step.
 
 ## Development
 
@@ -18,8 +19,8 @@ This is a pnpm workspace. The n8n node itself (`integrations/n8n/node`) is delib
 
 ```bash
 pnpm install
-pnpm -r --filter "./packages/**" --filter "./integrations/n8n" run typecheck
-pnpm -r --filter "./packages/**" --filter "./integrations/n8n" run test
+pnpm -r --filter "./packages/**" --filter "./integrations/*" run typecheck
+pnpm -r --filter "./packages/**" --filter "./integrations/*" run test
 ```
 
 ## License
