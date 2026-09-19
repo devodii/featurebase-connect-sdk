@@ -10,7 +10,7 @@ This documents the exact current process for publishing `n8n-nodes-featurebase` 
 - [x] Zero runtime dependencies (`n8n-workflow` is a `peerDependency`, everything else is a `devDependency`).
 - [x] Written in TypeScript with `strict: true`.
 - [x] License is MIT (`LICENSE`, and `"license": "MIT"` in `package.json`).
-- [x] `repository.url` and `homepage` point at the actual public GitHub repo (`github.com/devodii/n8n-nodes-featurebase`), matching the npm author.
+- [x] `repository.url` and `homepage` point at the actual public GitHub repo (`github.com/devodii/featurebase-connect-sdk`), matching the npm author.
 - [x] The code never reads `process.env` or touches the filesystem; all input comes through node parameters and credentials.
 - [x] Both nodes are programmatic style (`execute()` / `webhook()` classes implementing `INodeType`), not declarative-routing style, as required for a package that also ships a trigger.
 - [x] Single third-party service (Featurebase only) - no unrelated APIs bundled in.
@@ -29,7 +29,7 @@ Pick one:
 2. On npmjs.com, open the package's settings > **Publish access** > **Trusted Publishers** > **Add a publisher**.
 3. Fill in:
    - Repository owner: `devodii`
-   - Repository name: `n8n-nodes-featurebase`
+   - Repository name: `featurebase-connect-sdk`
    - Workflow name: `publish.yml`
    - Environment: leave blank
 4. Leave `NPM_TOKEN` unset in the repo's GitHub secrets - the workflow uses OIDC instead.

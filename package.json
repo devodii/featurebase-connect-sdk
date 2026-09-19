@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"description": "n8n community node for Featurebase: feedback boards, changelogs, help center, and support conversations.",
 	"license": "MIT",
-	"homepage": "https://github.com/devodii/n8n-nodes-featurebase",
+	"homepage": "https://github.com/devodii/featurebase-connect-sdk",
 	"keywords": [
 		"n8n-community-node-package",
 		"featurebase"
@@ -14,7 +14,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/devodii/n8n-nodes-featurebase.git"
+		"url": "https://github.com/devodii/featurebase-connect-sdk.git"
 	},
 	"scripts": {
 		"build": "n8n-node build",
@@ -53,5 +53,6 @@
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
-	}
+	},
+	"packageManager": "pnpm@11.18.0+sha512.33d83c77da82f49fba836925c6f1b841181ec3132b670639bd012f7075f5c7cf634c5f870147c19aae7478fac01df09d8892e880454896edd23ee9b33757563c"
 }
