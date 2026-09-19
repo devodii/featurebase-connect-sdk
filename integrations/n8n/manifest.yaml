@@ -1,0 +1,9 @@
+name: n8n
+adapter: ./mapper.ts
+outDir: ./generated
+operations:
+  - listPosts
+  - getPost
+  - createPost
+  - updatePost
+  - deletePost
