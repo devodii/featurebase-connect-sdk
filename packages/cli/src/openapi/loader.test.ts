@@ -1,3 +1,5 @@
+// This is a build-time cli tool, not n8n node code, so node builtins are fine.
+/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals */
 import { resolve } from 'path';
 import { getOperation, getSchema, loadOpenApi } from './loader';
 

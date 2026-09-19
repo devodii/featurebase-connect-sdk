@@ -1,3 +1,5 @@
+// This is a build-time cli tool, not n8n node code, so node builtins are fine.
+/* eslint-disable @n8n/community-nodes/no-restricted-imports */
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { JsonSchema } from './schema';
