@@ -1,3 +1,7 @@
+packages:
+  - packages/*
+  - integrations/*
+
 # None of these native build scripts are needed for this package's own
 # build/lint/test/pack pipeline (verified: all pass without approving any of
 # them), so none are allowed to run, following least-privilege for installs.
