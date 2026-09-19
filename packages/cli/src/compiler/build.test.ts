@@ -89,6 +89,40 @@ module.exports = new TestMapper();
 		expect(contents).toContain('export const marker = true;');
 	});
 
+	it('loads a TypeScript adapter directly, so authors get real types and autocomplete', async () => {
+		writeFileSync(
+			join(dir, 'manifest.yaml'),
+			`
+name: test-integration
+adapter: ./mapper.ts
+outDir: ./generated
+operations:
+  - createPost
+`,
+		);
+
+		writeFileSync(
+			join(dir, 'mapper.ts'),
+			`
+import { BaseAdapter } from '${resolve(__dirname, 'base-adapter')}';
+import type { CompilerContext } from '${resolve(__dirname, 'types')}';
+
+class TestMapper extends BaseAdapter {
+	generate(ctx: CompilerContext): void {
+		this.createSourceFile(ctx.outDir + '/marker.ts').addStatements('export const marker = true;');
+	}
+}
+
+export default new TestMapper();
+`,
+		);
+
+		await build({ manifestPath: join(dir, 'manifest.yaml'), specPath: SPEC_PATH });
+
+		const contents = readFileSync(join(dir, 'generated', 'marker.ts'), 'utf8');
+		expect(contents).toContain('export const marker = true;');
+	});
+
 	it('rejects a manifest that references an unknown operationId before touching the adapter', async () => {
 		writeFileSync(
 			join(dir, 'manifest.yaml'),
