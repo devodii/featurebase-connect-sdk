@@ -10,13 +10,15 @@
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"test": "jest"
+		"test": "jest",
+		"generate:schema": "node -e \"require('ts-node').register({transpileOnly: true}); require('./src/manifest/json-schema').writeManifestJsonSchema('./schema/manifest.schema.json')\""
 	},
 	"dependencies": {
 		"ts-morph": "^24.0.0",
 		"ts-node": "^10.9.2",
 		"yaml": "^2.6.1",
-		"zod": "^3.24.1"
+		"zod": "^3.24.1",
+		"zod-to-json-schema": "^3.24.1"
 	},
 	"devDependencies": {
 		"@featurebase-connect-sdk/types": "workspace:*",
