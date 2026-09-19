@@ -6,6 +6,7 @@ export { generateOperationRegistry } from './codegen/operations';
 export { generateWebhookTopics } from './codegen/webhooks';
 export { generateZodSchema, schemaBindingName, schemaTypeName } from './codegen/zod';
 export { loadManifest, resolveAdapterPath } from './manifest/load';
+export { generateManifestJsonSchema, writeManifestJsonSchema } from './manifest/json-schema';
 export { ManifestSchema } from './manifest/schema';
 export type { Manifest, RawManifest } from './manifest/schema';
 export { dereference, getOperation, getSchema, loadOpenApi } from './openapi/loader';
