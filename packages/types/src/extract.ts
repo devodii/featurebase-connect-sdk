@@ -18,14 +18,6 @@ export type ExtractResponse<TOp extends OperationId> = JsonContent<
 	SuccessResponses<operations[TOp]['responses']>[keyof SuccessResponses<operations[TOp]['responses']>]
 >;
 
-export type OperationQuery<TOp extends OperationId> = operations[TOp] extends {
-	parameters: { query?: infer TQuery };
-}
-	? TQuery
-	: never;
+export type OperationQuery<TOp extends OperationId> = NonNullable<operations[TOp]['parameters']['query']>;
 
-export type OperationPath<TOp extends OperationId> = operations[TOp] extends {
-	parameters: { path?: infer TPath };
-}
-	? TPath
-	: never;
+export type OperationPath<TOp extends OperationId> = NonNullable<operations[TOp]['parameters']['path']>;
