@@ -14,11 +14,7 @@ function pagedFetcher(pages: readonly (readonly number[])[]) {
 
 describe('paginate', () => {
 	it('yields every item across every page in order', async () => {
-		const { fetchPage } = pagedFetcher([
-			[1, 2],
-			[3, 4],
-			[5],
-		]);
+		const { fetchPage } = pagedFetcher([[1, 2], [3, 4], [5]]);
 
 		const items: number[] = [];
 		for await (const item of paginate(fetchPage)) {
