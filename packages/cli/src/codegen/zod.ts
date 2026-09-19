@@ -15,6 +15,11 @@ export function schemaBindingName(schemaName: string): string {
 	return `${schemaName}Schema`;
 }
 
+/** TypeScript type names are conventionally PascalCase, even when the source schema name (an operationId, say) is not. */
+export function schemaTypeName(schemaName: string): string {
+	return schemaName.charAt(0).toUpperCase() + schemaName.slice(1);
+}
+
 function refName(ref: string): string {
 	const parts = ref.split('/');
 	return parts[parts.length - 1];
