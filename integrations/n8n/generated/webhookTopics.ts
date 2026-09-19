@@ -1,4 +1,0 @@
-import { z } from 'zod';
-export const N8N_WEBHOOK_TOPICS = ["post.created", "post.updated", "post.deleted", "post.voted", "ticket.created", "ticket.updated", "ticket.deleted", "changelog.published", "comment.created", "comment.updated", "comment.deleted", "conversation.user.created", "conversation.user.replied", "conversation.admin.replied", "conversation.admin.closed", "conversation.handover_requested", "conversation.admin.assigned", "conversation.admin.noted", "conversation.admin.snoozed", "conversation.admin.unsnoozed", "conversation.admin.opened", "conversation.priority.updated", "conversation.deleted", "conversation.contact.attached", "conversation.contact.detached", "conversation.read", "conversation_part.redacted"] as const;
-export type N8nWebhookTopic = (typeof N8N_WEBHOOK_TOPICS)[number];
-export const N8nWebhookTopicSchema = z.enum(N8N_WEBHOOK_TOPICS);
