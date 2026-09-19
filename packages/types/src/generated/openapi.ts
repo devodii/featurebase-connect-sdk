@@ -6151,7 +6151,7 @@ export interface components {
              * @default
              * @example <p>It would be great to have dark mode.</p>
              */
-            content: string;
+            content?: string;
             /**
              * @description Board ID to create post in
              * @example 507f1f77bcf86cd799439011
@@ -6170,7 +6170,7 @@ export interface components {
              * @default true
              * @example true
              */
-            commentsEnabled: boolean | null;
+            commentsEnabled?: boolean | null;
             /**
              * @description Status ID to set
              * @example 507f1f77bcf86cd799439012
@@ -6182,7 +6182,7 @@ export interface components {
              * @default false
              * @example false
              */
-            inReview: boolean | null;
+            inReview?: boolean | null;
             /**
              * @description Custom field values. Keys must be valid ObjectIds. Values can be: string, boolean, number, ISO date string, array of strings, ObjectId string, or null.
              * @example {
@@ -6223,48 +6223,48 @@ export interface components {
              * @default false
              * @example true
              */
-            notifyAdmins: boolean;
+            notifyAdmins?: boolean;
             /**
              * @description Push the created post to third-party integrations configured on your organization. Each integration must be explicitly set to true to trigger; omitted integrations will not be pushed to.
              * @default {}
              */
-            integrations: {
+            integrations?: {
                 /**
                  * @description Push to Linear
                  * @default false
                  * @example true
                  */
-                linear: boolean;
+                linear?: boolean;
                 /**
                  * @description Push to ClickUp
                  * @default false
                  * @example false
                  */
-                clickup: boolean;
+                clickup?: boolean;
                 /**
                  * @description Push to GitHub
                  * @default false
                  * @example false
                  */
-                github: boolean;
+                github?: boolean;
                 /**
                  * @description Push to Jira
                  * @default false
                  * @example false
                  */
-                jira: boolean;
+                jira?: boolean;
                 /**
                  * @description Push to Discord
                  * @default false
                  * @example false
                  */
-                discord: boolean;
+                discord?: boolean;
                 /**
                  * @description Push to Slack
                  * @default false
                  * @example false
                  */
-                slack: boolean;
+                slack?: boolean;
             };
         };
         UpdatePostBody: {
@@ -6850,13 +6850,13 @@ export interface components {
              * @default false
              * @example false
              */
-            isPrivate: boolean | null;
+            isPrivate?: boolean | null;
             /**
              * @description Whether to notify voters of the submission about the comment
              * @default true
              * @example true
              */
-            sendNotification: boolean | null;
+            sendNotification?: boolean | null;
             author?: components["schemas"]["AuthorInput"] & unknown;
             /**
              * @description Set the date when the comment was created. Useful for importing comments from other platforms.
@@ -7197,7 +7197,7 @@ export interface components {
              * @example draft
              * @enum {string}
              */
-            state: "draft" | "live";
+            state?: "draft" | "live";
         };
         UpdateChangelogBody: {
             /**
@@ -7281,7 +7281,7 @@ export interface components {
              * @default false
              * @example true
              */
-            sendEmail: boolean | null;
+            sendEmail?: boolean | null;
             /**
              * @description An array of locales to publish the changelog to. An empty array publishes to all locales.
              * @default []
@@ -7290,7 +7290,7 @@ export interface components {
              *       "de"
              *     ]
              */
-            locales: ("bn" | "bs" | "pt-BR" | "bg" | "ca" | "hr" | "cs" | "da" | "nl" | "en" | "et" | "fi" | "fr" | "de" | "el" | "hi" | "hu" | "id" | "it" | "ja" | "ko" | "lv" | "lt" | "ms" | "mn" | "nb" | "pl" | "pt" | "ro" | "ru" | "sr" | "zh-CN" | "sk" | "sl" | "es" | "sw" | "sv" | "th" | "zh-TW" | "tr" | "uk" | "vi")[];
+            locales?: ("bn" | "bs" | "pt-BR" | "bg" | "ca" | "hr" | "cs" | "da" | "nl" | "en" | "et" | "fi" | "fr" | "de" | "el" | "hi" | "hu" | "id" | "it" | "ja" | "ko" | "lv" | "lt" | "ms" | "mn" | "nb" | "pl" | "pt" | "ro" | "ru" | "sr" | "zh-CN" | "sk" | "sl" | "es" | "sw" | "sv" | "th" | "zh-TW" | "tr" | "uk" | "vi")[];
             /**
              * @description The date when the changelog should be published. Must be a future date. Pass null or omit to publish immediately.
              * @example 2023-12-01T00:00:00Z
@@ -7305,7 +7305,7 @@ export interface components {
              *       "en"
              *     ]
              */
-            locales: ("bn" | "bs" | "pt-BR" | "bg" | "ca" | "hr" | "cs" | "da" | "nl" | "en" | "et" | "fi" | "fr" | "de" | "el" | "hi" | "hu" | "id" | "it" | "ja" | "ko" | "lv" | "lt" | "ms" | "mn" | "nb" | "pl" | "pt" | "ro" | "ru" | "sr" | "zh-CN" | "sk" | "sl" | "es" | "sw" | "sv" | "th" | "zh-TW" | "tr" | "uk" | "vi")[];
+            locales?: ("bn" | "bs" | "pt-BR" | "bg" | "ca" | "hr" | "cs" | "da" | "nl" | "en" | "et" | "fi" | "fr" | "de" | "el" | "hi" | "hu" | "id" | "it" | "ja" | "ko" | "lv" | "lt" | "ms" | "mn" | "nb" | "pl" | "pt" | "ro" | "ru" | "sr" | "zh-CN" | "sk" | "sl" | "es" | "sw" | "sv" | "th" | "zh-TW" | "tr" | "uk" | "vi")[];
         };
         ChangelogSubscribersImport: {
             /**
@@ -9202,7 +9202,7 @@ export interface components {
              * @example default
              * @enum {string}
              */
-            formatter: "default" | "ai";
+            formatter?: "default" | "ai";
             /**
              * @description The ID of the parent collection
              * @example 6474684
@@ -9215,7 +9215,7 @@ export interface components {
              * @example draft
              * @enum {string}
              */
-            state: "live" | "draft";
+            state?: "live" | "draft";
             /** @description Dictionary of translations keyed by locale code */
             translations?: {
                 bn?: components["schemas"]["ArticleTranslationInput_Nova"];
@@ -9284,7 +9284,7 @@ export interface components {
              * @example default
              * @enum {string}
              */
-            formatter: "default" | "ai";
+            formatter?: "default" | "ai";
             icon?: components["schemas"]["ArticleIconInput_Nova"] & unknown;
             /**
              * @description New parent collection ID
@@ -11589,7 +11589,7 @@ export interface components {
              * @example desktop
              * @enum {string}
              */
-            channel: "desktop" | "email";
+            channel?: "desktop" | "email";
             recipients?: components["schemas"]["OutreachRecipients"];
             /**
              * @description Subject line for the email. Required when channel is "email" and from.type is "admin".
@@ -11714,7 +11714,7 @@ export interface components {
              * @default false
              * @example false
              */
-            skipNotifications: boolean;
+            skipNotifications?: boolean;
         };
         /**
          * Admin Reply
@@ -11750,7 +11750,7 @@ export interface components {
              * @default false
              * @example false
              */
-            skipNotifications: boolean;
+            skipNotifications?: boolean;
         };
         ReplyToConversationBody: components["schemas"]["ContactReplyBody"] | components["schemas"]["AdminReplyBody"];
         /** @description Mark the conversation as read for specific admins and/or contacts. */

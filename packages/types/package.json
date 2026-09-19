@@ -6,7 +6,7 @@
 	"main": "src/index.ts",
 	"types": "src/index.ts",
 	"scripts": {
-		"generate": "openapi-typescript ../../reference/openapi.json -o src/generated/openapi.ts",
+		"generate": "openapi-typescript ../../reference/openapi.json -o src/generated/openapi.ts --default-non-nullable false",
 		"typecheck": "tsc --noEmit",
 		"test": "jest"
 	},
