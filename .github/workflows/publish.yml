@@ -44,6 +44,9 @@ jobs:
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations/n8n/node
 
     permissions:
       id-token: write
@@ -57,6 +60,7 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm'
+          cache-dependency-path: integrations/n8n/node/package-lock.json
 
       - name: Install dependencies
         run: npm ci

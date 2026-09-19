@@ -11,22 +11,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  node:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations/n8n/node
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
+          cache: 'npm'
+          cache-dependency-path: integrations/n8n/node/package-lock.json
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: npm ci
 
       - name: Check formatting
         run: npx prettier --check .
@@ -58,7 +60,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Typecheck
-        run: pnpm -r --filter "./packages/**" --filter "./integrations/**" run typecheck
+        run: pnpm -r --filter "./packages/**" --filter "./integrations/n8n" run typecheck
 
       - name: Run tests
-        run: pnpm -r --filter "./packages/**" --filter "./integrations/**" run test
+        run: pnpm -r --filter "./packages/**" --filter "./integrations/n8n" run test
