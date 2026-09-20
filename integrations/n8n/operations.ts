@@ -1,7 +1,7 @@
-import type { OperationDescriptor } from '@featurebase-connect-sdk/core';
+import type * as _$featurebaseconnect0 from '@featurebase-connect-sdk/core';
 
 // Method and path for each Post operation this integration uses, straight from reference/openapi.json.
-export const n8nOperations: Record<string, OperationDescriptor> = {
+export const n8nOperations: Record<string, _$featurebaseconnect0.OperationDescriptor> = {
 	listPosts: { method: 'GET', path: '/v2/posts' },
 	getPost: { method: 'GET', path: '/v2/posts/{id}' },
 	createPost: { method: 'POST', path: '/v2/posts' },

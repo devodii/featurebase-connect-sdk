@@ -12,7 +12,6 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
-		"@featurebase-connect-sdk/types": "workspace:*",
 		"@types/jest": "^29.5.14",
 		"@types/node": "^22.10.5",
 		"jest": "^29.7.0",

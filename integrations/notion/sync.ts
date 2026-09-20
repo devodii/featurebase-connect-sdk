@@ -1,8 +1,7 @@
-import { collectAll, type FeaturebaseClient } from '@featurebase-connect-sdk/core';
-import type { components } from '@featurebase-connect-sdk/types';
+import * as _$featurebaseconnect0 from '@featurebase-connect-sdk/core';
 import { notionProperty, type NotionClient, type NotionProperties } from './notion-client';
 
-type Post = components['schemas']['Post'];
+type Post = _$featurebaseconnect0.Types.components['schemas']['Post'];
 
 /** Maps this integration's logical fields to the actual property names in your Notion database. */
 export interface NotionPropertyNames {
@@ -15,7 +14,7 @@ export interface NotionPropertyNames {
 }
 
 export interface SyncOptions {
-	featurebase: FeaturebaseClient;
+	featurebase: _$featurebaseconnect0.FeaturebaseClient;
 	notion: NotionClient;
 	databaseId: string;
 	propertyNames: NotionPropertyNames;
@@ -26,14 +25,14 @@ export interface SyncResult {
 	updated: number;
 }
 
-async function fetchAllPosts(featurebase: FeaturebaseClient): Promise<Post[]> {
-	return collectAll<Post>(async (cursor) => {
+async function fetchAllPosts(featurebase: _$featurebaseconnect0.FeaturebaseClient): Promise<Post[]> {
+	return _$featurebaseconnect0.collectAll<Post>(async (cursor) => {
 		const page = await featurebase.execute('listPosts', undefined, { query: { cursor } });
 		return { items: page.data, nextCursor: page.nextCursor };
 	});
 }
 
-async function fetchBoardNames(featurebase: FeaturebaseClient): Promise<Map<string, string>> {
+async function fetchBoardNames(featurebase: _$featurebaseconnect0.FeaturebaseClient): Promise<Map<string, string>> {
 	// listBoards returns a plain array, not a paginated { data, nextCursor } shape.
 	const boards = await featurebase.execute('listBoards');
 	return new Map(boards.map((board) => [board.id, board.name]));

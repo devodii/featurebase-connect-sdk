@@ -1,4 +1,4 @@
-import { withRetry, type Fetcher, type FetchRequest } from '@featurebase-connect-sdk/core';
+import * as _$featurebaseconnect0 from '@featurebase-connect-sdk/core';
 
 // Pinned so every request parses the same way; bump this if you need a newer Notion
 // API version. https://developers.notion.com/reference/versioning
@@ -16,7 +16,7 @@ export interface NotionPage {
 
 export interface NotionClientOptions {
 	apiKey: string;
-	fetcher?: Fetcher;
+	fetcher?: _$featurebaseconnect0.Fetcher;
 }
 
 export class NotionApiError extends Error {
@@ -29,7 +29,7 @@ export class NotionApiError extends Error {
 	}
 }
 
-export const defaultNotionFetcher: Fetcher = async (request) => {
+export const defaultNotionFetcher: _$featurebaseconnect0.Fetcher = async (request) => {
 	const response = await fetch(request.url, {
 		method: request.method,
 		headers: request.headers,
@@ -49,10 +49,10 @@ function isRateLimited(error: unknown): boolean {
 export class NotionClient {
 	constructor(private readonly options: NotionClientOptions) {}
 
-	private async request<T>(req: Pick<FetchRequest, 'method' | 'url' | 'body'>): Promise<T> {
+	private async request<T>(req: Pick<_$featurebaseconnect0.FetchRequest, 'method' | 'url' | 'body'>): Promise<T> {
 		const fetcher = this.options.fetcher ?? defaultNotionFetcher;
 
-		const response = await withRetry(
+		const response = await _$featurebaseconnect0.withRetry(
 			async () => {
 				const res = await fetcher({
 					...req,
