@@ -2,11 +2,12 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
+import { getFeaturebaseClient } from '../featurebase-client';
 import {
 	authorCollectionField,
 	cleanAuthorInput,
 	extractId,
+	extractItems,
 	limitField,
 	markdownToggleField,
 	resourceLocatorField,
@@ -410,6 +411,7 @@ function buildPostBody(fields: IDataObject, forCreate: boolean): IDataObject {
 }
 
 export async function executePost(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const simplify = ['get', 'getMany', 'getBySlug', 'search', 'create', 'update'].includes(operation)
 		? (this.getNodeParameter('simplify', index, true) as boolean)
 		: false;
@@ -426,22 +428,22 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const sortBy = this.getNodeParameter('sortBy', index) as string;
 			const sortOrder = this.getNodeParameter('sortOrder', index) as string;
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
 
-			const qs: IDataObject = { sortBy, sortOrder, ...filters };
-			const posts = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/posts', qs, returnAll, limit);
+			const qs: IDataObject = { sortBy, sortOrder, ...filters, limit };
+			const posts = extractItems(await client.execute('listPosts', { query: qs as never }));
 			return posts.map(finalize);
 		}
 
 		case 'get': {
 			const postId = extractId(this.getNodeParameter('postId', index));
-			const post = (await featurebaseApiRequest.call(this, 'GET', `/v2/posts/${postId}`)) as IDataObject;
+			const post = (await client.execute('getPost', { params: { id: postId } })) as IDataObject;
 			return finalize(post);
 		}
 
 		case 'getBySlug': {
 			const slug = this.getNodeParameter('slug', index) as string;
-			const results = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/posts', { q: slug, limit: 20 }, false, 20);
+			const results = extractItems(await client.execute('listPosts', { query: { q: slug, limit: 20 } }));
 			const match = results.find((post) => post.slug === slug) ?? results[0];
 			if (!match) {
 				throw new NodeOperationError(this.getNode(), `No post found with slug "${slug}"`, { itemIndex: index });
@@ -454,9 +456,9 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const sortBy = this.getNodeParameter('sortBy', index) as string;
 			const sortOrder = this.getNodeParameter('sortOrder', index) as string;
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
 
-			const posts = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/posts', { q, sortBy, sortOrder }, returnAll, limit);
+			const posts = extractItems(await client.execute('listPosts', { query: { q, sortBy, sortOrder, limit } as never }));
 			return posts.map(finalize);
 		}
 
@@ -473,7 +475,7 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 				...buildPostBody(additionalFields, true),
 			};
 
-			const post = (await featurebaseApiRequest.call(this, 'POST', '/v2/posts', body)) as IDataObject;
+			const post = (await client.execute('createPost', { body: body as never })) as IDataObject;
 			return finalize(post);
 		}
 
@@ -485,19 +487,19 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const body: IDataObject = buildPostBody(updateFields, false);
 			if (content) body.content = useMarkdown ? ContentTransformer.markdownToHtml(content) : content;
 
-			const post = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/posts/${postId}`, body)) as IDataObject;
+			const post = (await client.execute('updatePost', { params: { id: postId }, body: body as never })) as IDataObject;
 			return finalize(post);
 		}
 
 		case 'delete': {
 			const postId = extractId(this.getNodeParameter('postId', index));
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/posts/${postId}`);
+			return (await client.execute('deletePost', { params: { id: postId } })) as IDataObject;
 		}
 
 		case 'addUpvoter': {
 			const postId = extractId(this.getNodeParameter('postId', index));
 			const voter = cleanAuthorInput(this.getNodeParameter('voter', index, {}) as IDataObject) ?? {};
-			return featurebaseApiRequest.call(this, 'POST', `/v2/posts/${postId}/voters`, voter);
+			return (await client.execute('addVoter', { params: { id: postId }, body: voter as never })) as IDataObject;
 		}
 
 		case 'removeUpvoter': {
@@ -506,14 +508,14 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const { name, profilePicture, ...removable } = voter;
 			void name;
 			void profilePicture;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/posts/${postId}/voters`, removable);
+			return (await client.execute('removeVoter', { params: { id: postId }, body: removable as never })) as IDataObject;
 		}
 
 		case 'getUpvoters': {
 			const postId = extractId(this.getNodeParameter('postId', index));
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			return (featurebaseApiRequestAllItems<IDataObject>).call(this, `/v2/posts/${postId}/voters`, {}, returnAll, limit);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+			return extractItems(await client.execute('listVoters', { params: { id: postId }, query: { limit } }));
 		}
 
 		default:
