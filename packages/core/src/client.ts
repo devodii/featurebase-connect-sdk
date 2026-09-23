@@ -1,6 +1,5 @@
-import type { EndpointSpec, OperationId } from './types';
-import type { Fetcher } from './fetcher';
-import type { SchemaRegistry } from './registry';
+import type { EndpointSpec, ExecuteArgs, OperationId } from './types';
+import type { Fetcher, FetchRequest } from './fetcher';
 import { withRetry, type RetryOptions } from './retry';
 import { buildUrl } from './url';
 
@@ -26,60 +25,92 @@ export class FeaturebaseValidationError extends Error {
 	}
 }
 
-export interface FeaturebaseClientOptions {
-	baseUrl: string;
-	fetcher: Fetcher;
-	operations: OperationRegistry;
-	schemas?: SchemaRegistry;
-	retry?: RetryOptions;
-	headers?: Record<string, string>;
+// Define what a Plugin looks like
+export interface FeaturebasePlugin {
+	id: string;
+	hooks?: {
+		beforeExecute?: <TOp extends OperationId>(operation: TOp, args: unknown[]) => Promise<unknown[]> | unknown[];
+		beforeRequest?: (request: FetchRequest) => Promise<FetchRequest> | FetchRequest;
+		afterResponse?: (response: unknown, ctx: { operation: OperationId }) => Promise<unknown> | unknown;
+	};
 }
 
-type RequestOptions<TOp extends OperationId> = [EndpointSpec<TOp>['path']] extends [never]
-	? { query?: EndpointSpec<TOp>['query'] }
-	: { pathParams: EndpointSpec<TOp>['path']; query?: EndpointSpec<TOp>['query'] };
+export interface FeaturebaseConnectOptions {
+	apiKey: string;
+	baseUrl?: string;
+	apiVersion?: string;
+	fetcher?: Fetcher;
+	operations: OperationRegistry;
+	retry?: RetryOptions;
+	plugins?: FeaturebasePlugin[];
+}
 
-export type ExecuteArgs<TOp extends OperationId> = [EndpointSpec<TOp>['path']] extends [never]
-	? [EndpointSpec<TOp>['body']] extends [never]
-		? [payload?: undefined, options?: RequestOptions<TOp>]
-		: [payload: EndpointSpec<TOp>['body'], options?: RequestOptions<TOp>]
-	: [EndpointSpec<TOp>['body']] extends [never]
-		? [payload: undefined, options: RequestOptions<TOp>]
-		: [payload: EndpointSpec<TOp>['body'], options: RequestOptions<TOp>];
+export function createFeaturebase(options: FeaturebaseConnectOptions) {
+	const baseUrl = options.baseUrl ?? 'https://do.featurebase.app';
+	const fetcher = options.fetcher ?? defaultFetcher;
+	const plugins = options.plugins ?? [];
 
-export class FeaturebaseClient {
-	constructor(private readonly options: FeaturebaseClientOptions) {}
+	// The core execute function, highly typed.
+	async function execute<TOp extends OperationId>(operation: TOp, ...args: ExecuteArgs<TOp>): Promise<EndpointSpec<TOp>['response']> {
+		let modifiedArgs: unknown[] = args;
 
-	async execute<TOp extends OperationId>(operation: TOp, ...args: ExecuteArgs<TOp>): Promise<EndpointSpec<TOp>['response']> {
-		const [rawPayload, requestOptions] = args as [EndpointSpec<TOp>['body'] | undefined, RequestOptions<TOp> | undefined];
+		// Run beforeExecute hooks (validation happens here)
+		for (const plugin of plugins) {
+			if (plugin.hooks?.beforeExecute) {
+				modifiedArgs = await plugin.hooks.beforeExecute(operation, modifiedArgs);
+			}
+		}
 
-		const descriptor = this.options.operations[operation];
+		const requestOptions = (modifiedArgs[0] ?? {}) as { body?: unknown; query?: unknown; params?: unknown };
+
+		const descriptor = options.operations[operation];
 		if (!descriptor) throw new Error(`No operation descriptor registered for "${operation}"`);
 
-		const payload = rawPayload === undefined ? rawPayload : this.validate(operation, rawPayload);
+		let request: FetchRequest = {
+			method: descriptor.method,
+			url: buildUrl(baseUrl, descriptor.path, requestOptions.params as never, requestOptions.query as never),
+			body: requestOptions.body,
+			headers: {
+				Authorization: `Bearer ${options.apiKey}`,
+				'Content-Type': 'application/json',
+				...(options.apiVersion ? { 'Featurebase-Version': options.apiVersion } : {}),
+			},
+		};
 
-		const pathParams = requestOptions && 'pathParams' in requestOptions ? requestOptions.pathParams : undefined;
-		const url = buildUrl(this.options.baseUrl, descriptor.path, pathParams, requestOptions?.query);
-
-		const response = await withRetry(
-			() => this.options.fetcher({ method: descriptor.method, url, body: payload, headers: this.options.headers }),
-			this.options.retry,
-		);
-
-		return response.body as EndpointSpec<TOp>['response'];
-	}
-
-	private validate<TOp extends OperationId>(operation: TOp, payload: EndpointSpec<TOp>['body']): EndpointSpec<TOp>['body'] {
-		const schema = this.options.schemas?.[operation];
-		if (!schema) return payload;
-
-		const result = schema.safeParse(payload);
-		if (!result.success) {
-			throw new FeaturebaseValidationError(
-				operation,
-				result.error.issues.map((issue) => ({ path: issue.path, message: issue.message })),
-			);
+		// Run beforeRequest hooks (plugins modifying the outgoing request)
+		for (const plugin of plugins) {
+			if (plugin.hooks?.beforeRequest) {
+				request = await plugin.hooks.beforeRequest(request);
+			}
 		}
-		return result.data as EndpointSpec<TOp>['body'];
+
+		const response = await withRetry(() => fetcher(request), options.retry);
+
+		// Run afterResponse hooks
+		let data: unknown = response.body;
+		for (const plugin of plugins) {
+			if (plugin.hooks?.afterResponse) {
+				data = await plugin.hooks.afterResponse(data, { operation });
+			}
+		}
+
+		return data as EndpointSpec<TOp>['response'];
 	}
+
+	return {
+		execute,
+		// Expose plugin utilities if integrations need to bind to the client
+		$plugins: plugins.reduce<Record<string, FeaturebasePlugin>>((acc, plugin) => ({ ...acc, [plugin.id]: plugin }), {}),
+	};
 }
+
+const defaultFetcher: Fetcher = async (request) => {
+	const response = await fetch(request.url, {
+		method: request.method,
+		headers: request.headers,
+		body: request.body === undefined ? undefined : JSON.stringify(request.body),
+	});
+
+	const body = await response.json().catch(() => undefined);
+	return { status: response.status, headers: Object.fromEntries(response.headers), body };
+};
