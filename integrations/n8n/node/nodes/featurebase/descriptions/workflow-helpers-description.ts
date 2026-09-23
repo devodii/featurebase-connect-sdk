@@ -315,10 +315,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 			const raw = this.getNodeParameter('items', index) as string | IDataObject[];
 			const rows: IDataObject[] = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
-			const [boards, statuses] = await Promise.all([
-				extractItems(await client.execute('listBoards')),
-				extractItems(await client.execute('listPostStatuses')),
-			]);
+			const [boards, statuses] = await Promise.all([extractItems(await client.execute('listBoards')), extractItems(await client.execute('listPostStatuses'))]);
 
 			const resolveId = (list: IDataObject[], nameOrId: string | undefined): string | undefined => {
 				if (!nameOrId) return undefined;

@@ -35,16 +35,18 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/FeaturebaseApi.credentials.js"
+			"dist/Credentials/FeaturebaseApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/Featurebase/Featurebase.node.js",
-			"dist/nodes/Featurebase/FeaturebaseTrigger.node.js"
+			"dist/Nodes/Featurebase/Featurebase.node.js",
+			"dist/Nodes/Featurebase/FeaturebaseTrigger.node.js"
 		]
 	},
 	"devDependencies": {
+		"@featurebase-connect-sdk/core": "workspace:*",
 		"@n8n/node-cli": "^0.48.4",
 		"@types/jest": "^29.5.14",
+		"esbuild": "^0.28.2",
 		"eslint": "^9.39.4",
 		"fast-glob": "^3.3.3",
 		"jest": "^29.7.0",
@@ -54,8 +56,5 @@
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
-	},
-	"dependencies": {
-		"@featurebase-connect-sdk/core": "workspace:*"
 	}
 }

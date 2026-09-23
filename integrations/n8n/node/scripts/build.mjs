@@ -2,11 +2,31 @@ import { readdir, readFile, writeFile, rename, stat, mkdir, cp } from 'node:fs/p
 import { join, basename, extname, dirname } from 'node:path';
 import { execSync } from 'node:child_process';
 import fastGlob from 'fast-glob';
+import * as esbuild from 'esbuild';
 
-console.log('🔨 [1/5] Compiling TypeScript...');
-execSync('npx tsc -p tsconfig.json', { stdio: 'inherit' });
+console.log('🔎 [1/6] Type-checking...');
+execSync('npx tsc -p tsconfig.json --noEmit', { stdio: 'inherit' });
 
-console.log('🖼️  [2/5] Copying static files...');
+// n8n community node packages cannot declare runtime dependencies (they get bundled
+// into the n8n instance itself and can conflict with it or other nodes). So this
+// bundles @featurebase-connect-sdk/core and its own deps (zod, marked, html-to-text,
+// @zodios/core) directly into each entry file. Only n8n-workflow stays external,
+// since n8n's runtime provides it.
+console.log('📦 [2/6] Bundling entry points...');
+const entryPoints = await fastGlob('{nodes,credentials}/**/*.{node,credentials}.ts');
+
+await esbuild.build({
+	entryPoints,
+	outdir: 'dist',
+	outbase: '.',
+	bundle: true,
+	platform: 'node',
+	format: 'cjs',
+	target: 'es2019',
+	external: ['n8n-workflow'],
+});
+
+console.log('🖼️  [3/6] Copying static files...');
 async function copyStaticFiles() {
 	const staticFiles = fastGlob.sync(['**/*.{png,svg}', '**/__schema__/**/*.json'], {
 		ignore: ['dist', 'node_modules'],
@@ -45,19 +65,10 @@ async function walkAndProcess(dir) {
 			} else {
 				await walkAndProcess(fullPath);
 			}
-		} else if (file.endsWith('.js') || file.endsWith('.d.ts')) {
-			let content = await readFile(fullPath, 'utf8');
-
-			// Rewrite local imports/requires to point at the renamed PascalCase files
-			content = content.replace(/((?:require\(|from\s+)['"]\.\.?\/)([^'"]+)(['"]\)?)/g, (match, prefix, importPath, suffix) => {
-				const pathParts = importPath.split('/');
-				const newPath = pathParts.map((part) => toPascalCase(part)).join('/');
-				return `${prefix}${newPath}${suffix}`;
-			});
-
-			await writeFile(fullPath, content, 'utf8');
-
-			// Rename file (e.g. 'featurebase-trigger.node.js' -> 'FeaturebaseTrigger.node.js')
+		} else if (file.endsWith('.js')) {
+			// Each entry file is a self-contained esbuild bundle (no local require()
+			// calls survive bundling), so only the filename itself needs renaming.
+			// e.g. 'featurebase-trigger.node.js' -> 'FeaturebaseTrigger.node.js'
 			const [baseName, ...suffixes] = basename(file, extname(file)).split('.');
 			const newBaseName = toPascalCase(baseName);
 			const newFileName = [newBaseName, ...suffixes].join('.') + extname(file);
@@ -70,10 +81,10 @@ async function walkAndProcess(dir) {
 	}
 }
 
-console.log('🔄 [3/5] Normalizing n8n PascalCase conventions...');
+console.log('🔄 [4/6] Normalizing n8n PascalCase conventions...');
 await walkAndProcess(join(process.cwd(), 'dist'));
 
-console.log('🔍 [4/5] Auto-discovering nodes and credentials...');
+console.log('🔍 [5/6] Auto-discovering nodes and credentials...');
 async function discoverN8nFiles(dir, suffix, list = []) {
 	const files = await readdir(dir);
 	for (const file of files) {
@@ -91,7 +102,7 @@ const distPath = join(process.cwd(), 'dist');
 const nodes = await discoverN8nFiles(distPath, '.node.js');
 const credentials = await discoverN8nFiles(distPath, '.credentials.js');
 
-console.log('📝 [5/5] Injecting manifest into package.json...');
+console.log('📝 [6/6] Injecting manifest into package.json...');
 const pkgPath = join(process.cwd(), 'package.json');
 const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
 

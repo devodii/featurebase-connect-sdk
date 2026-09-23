@@ -1,9 +1,12 @@
 import type { IDataObject, IHookFunctions, IWebhookFunctions, IWebhookResponseData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
+import { ContentTransformer } from '@featurebase-connect-sdk/core';
+
 import { WEBHOOK_TOPICS } from './descriptions/webhook-topics';
-import { featurebaseApiRequest, featurebaseApiRequestAllItems, getAdmins, getBoards, getPostStatuses, getPostTags } from './generic-functions';
-import { htmlToText } from './utils/html';
+import { extractItems } from './descriptions/shared';
+import { getFeaturebaseClient } from './featurebase-client';
+import { getAdmins, getBoards, getPostStatuses, getPostTags } from './methods/load-options';
 import { verifyHmacSha256 } from './utils/hmac';
 
 const MAX_SEEN_EVENT_IDS = 500;
@@ -62,7 +65,7 @@ export class FeaturebaseTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Featurebase Trigger',
 		name: 'featurebaseTrigger',
-		icon: { light: 'file:Featurebase.svg', dark: 'file:Featurebase.dark.svg' },
+		icon: { light: 'file:featurebase.svg', dark: 'file:featurebase.dark.svg' },
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["derivedEvent"] || ($parameter["topics"] || []).join(", ")}}',
@@ -256,7 +259,8 @@ export class FeaturebaseTrigger implements INodeType {
 				if (!staticData.webhookId) return false;
 
 				try {
-					await featurebaseApiRequest.call(this, 'GET', `/v2/webhooks/${staticData.webhookId}`);
+					const client = await getFeaturebaseClient(this);
+					await client.execute('getWebhookById', { params: { id: staticData.webhookId } });
 					return true;
 				} catch {
 					delete staticData.webhookId;
@@ -269,23 +273,26 @@ export class FeaturebaseTrigger implements INodeType {
 				const webhookUrl = this.getNodeWebhookUrl('default');
 				const topics = this.getNodeParameter('topics', []) as string[];
 				const staticData = getStaticData(this);
+				const client = await getFeaturebaseClient(this);
 
 				if (!topics.length) {
 					throw new NodeOperationError(this.getNode(), 'Select at least one topic to subscribe to');
 				}
 
-				const existing = await featurebaseApiRequestAllItems.call(this, '/v2/webhooks');
-				const alreadyRegistered = (existing as IDataObject[]).find((webhook) => webhook.url === webhookUrl);
+				const existing = extractItems(await client.execute('listWebhooks', { query: {} }));
+				const alreadyRegistered = existing.find((webhook) => webhook.url === webhookUrl);
 				if (alreadyRegistered) {
 					staticData.webhookId = alreadyRegistered.id as string;
 					return true;
 				}
 
 				try {
-					const webhook = (await featurebaseApiRequest.call(this, 'POST', '/v2/webhooks', {
-						name: `n8n: ${this.getWorkflow().name ?? this.getNode().name}`,
-						url: webhookUrl,
-						topics,
+					const webhook = (await client.execute('createWebhook', {
+						body: {
+							name: `n8n: ${this.getWorkflow().name ?? this.getNode().name}`,
+							url: webhookUrl,
+							topics,
+						} as never,
 					})) as IDataObject;
 
 					staticData.webhookId = webhook.id as string;
@@ -311,7 +318,8 @@ export class FeaturebaseTrigger implements INodeType {
 				if (!staticData.webhookId) return true;
 
 				try {
-					await featurebaseApiRequest.call(this, 'DELETE', `/v2/webhooks/${staticData.webhookId}`);
+					const client = await getFeaturebaseClient(this);
+					await client.execute('deleteWebhook', { params: { id: staticData.webhookId } });
 				} catch (error) {
 					this.logger.warn(
 						`Featurebase Trigger: failed to delete webhook ${staticData.webhookId} on deactivation, it may already be gone: ${
@@ -399,7 +407,7 @@ export class FeaturebaseTrigger implements INodeType {
 			signatureVerified,
 		};
 
-		if (contentField) outputItem.contentText = htmlToText(contentField);
+		if (contentField) outputItem.contentText = ContentTransformer.htmlToText(contentField);
 		if (item.postUrl) outputItem.postUrl = item.postUrl;
 		if (includeRaw) outputItem.raw = body;
 
@@ -479,7 +487,8 @@ async function evaluateDerivedEvent(
 			const postId = item.postId as string | undefined;
 			if (!postId) return false;
 
-			const post = (await featurebaseApiRequest.call(context, 'GET', `/v2/posts/${postId}`)) as IDataObject;
+			const client = await getFeaturebaseClient(context);
+			const post = (await client.execute('getPost', { params: { id: postId } })) as IDataObject;
 			const filterAdminId = context.getNodeParameter('assignedToAdminId', '') as string;
 			if (!post.assigneeId) return false;
 			if (filterAdminId) return post.assigneeId === filterAdminId;

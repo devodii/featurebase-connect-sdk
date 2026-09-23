@@ -43,7 +43,7 @@ import {
 	searchPostStatuses,
 	searchPosts,
 	searchTeams,
-} from './generic-functions';
+} from './methods/load-options';
 
 type ResourceExecutor = (this: IExecuteFunctions, index: number, operation: string) => Promise<IDataObject | IDataObject[]>;
 
@@ -70,7 +70,7 @@ export class Featurebase implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Featurebase',
 		name: 'featurebase',
-		icon: { light: 'file:Featurebase.svg', dark: 'file:Featurebase.dark.svg' },
+		icon: { light: 'file:featurebase.svg', dark: 'file:featurebase.dark.svg' },
 		group: ['input'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',

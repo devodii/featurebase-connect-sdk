@@ -82,7 +82,10 @@ export async function getPostTags(this: ILoadOptionsFunctions): Promise<INodePro
  * operation. Featurebase list endpoints don't support server-side name
  * search, so filtering happens client-side over the fetched page.
  */
-function listSearchFactory(operation: 'listBoards' | 'listPostStatuses' | 'listAdmins' | 'listTeams' | 'listBrands' | 'listCustomFields' | 'listCollections', nameKey: string) {
+function listSearchFactory(
+	operation: 'listBoards' | 'listPostStatuses' | 'listAdmins' | 'listTeams' | 'listBrands' | 'listCustomFields' | 'listCollections',
+	nameKey: string,
+) {
 	return async function listSearch(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 		const client = await getFeaturebaseClient(this);
 		const items = extractItems(await client.execute(operation, { query: { limit: 100 } } as never));

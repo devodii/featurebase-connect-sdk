@@ -1,10 +1,4 @@
-import {
-	createFeaturebase,
-	createFormattingPlugin,
-	createValidationPlugin,
-	operationRegistry,
-	generatedSchemas,
-} from '@featurebase-connect-sdk/core';
+import { createFeaturebase, createFormattingPlugin, createValidationPlugin, operationRegistry, generatedSchemas } from '@featurebase-connect-sdk/core';
 
 import { createN8nFetcher, type N8nContext } from './n8n-fetcher';
 
