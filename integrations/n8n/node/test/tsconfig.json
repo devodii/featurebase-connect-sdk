@@ -1,4 +1,0 @@
-{
-	"extends": "../tsconfig.jest.json",
-	"include": ["**/*", "../nodes/**/*", "../credentials/**/*"]
-}
