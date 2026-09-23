@@ -8,4 +8,5 @@ export { withRetry } from './retry';
 export type { RetryOptions } from './retry';
 export { buildUrl } from './url';
 export type { PathParams, QueryParams } from './url';
+export { htmlToText, markdownToHtml } from './transformers';
 export type * as Types from './types';
