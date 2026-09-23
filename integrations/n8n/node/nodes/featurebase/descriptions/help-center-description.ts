@@ -2,8 +2,8 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
-import { limitField, markdownToggleField, pick, resourceLocatorField, returnAllField, simplifyField, withContentText } from './shared';
+import { getFeaturebaseClient } from '../featurebase-client';
+import { extractItems, limitField, markdownToggleField, pick, resourceLocatorField, returnAllField, simplifyField, withContentText } from './shared';
 
 const ARTICLE_SIMPLIFY_FIELDS = [
 	'id',
@@ -205,6 +205,7 @@ function extractId(value: unknown): string | undefined {
 }
 
 export async function executeHelpCenter(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const simplify = ['get', 'getMany', 'create', 'update', 'getCollection', 'getManyCollections', 'createCollection', 'updateCollection'].includes(operation)
 		? (this.getNodeParameter('simplify', index, true) as boolean)
 		: false;
@@ -219,18 +220,18 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
 			const parentId = extractId(filters.parentId);
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
 
-			const qs: IDataObject = { ...filters };
+			const qs: IDataObject = { ...filters, limit };
 			if (parentId) qs.parentId = parentId;
 
-			const articles = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/help_center/articles', qs, returnAll, limit);
+			const articles = extractItems(await client.execute('listArticles', { query: qs as never }));
 			return articles.map(finalizeArticle);
 		}
 
 		case 'get': {
 			const articleId = this.getNodeParameter('articleId', index) as string;
-			const article = (await featurebaseApiRequest.call(this, 'GET', `/v2/help_center/articles/${articleId}`)) as IDataObject;
+			const article = (await client.execute('getArticle', { params: { id: articleId }, query: {} })) as IDataObject;
 			return finalizeArticle(article);
 		}
 
@@ -254,32 +255,30 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 
 			const article =
 				operation === 'create'
-					? ((await featurebaseApiRequest.call(this, 'POST', '/v2/help_center/articles', payload)) as IDataObject)
-					: ((await featurebaseApiRequest.call(
-							this,
-							'PATCH',
-							`/v2/help_center/articles/${this.getNodeParameter('articleId', index) as string}`,
-							payload,
-						)) as IDataObject);
+					? ((await client.execute('createArticle', { body: payload as never })) as IDataObject)
+					: ((await client.execute('updateArticle', {
+							params: { id: this.getNodeParameter('articleId', index) as string },
+							body: payload as never,
+						})) as IDataObject);
 
 			return finalizeArticle(article);
 		}
 
 		case 'delete': {
 			const articleId = this.getNodeParameter('articleId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/help_center/articles/${articleId}`);
+			return (await client.execute('deleteArticle', { params: { id: articleId } })) as IDataObject;
 		}
 
 		case 'getManyCollections': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			const collections = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/help_center/collections', {}, returnAll, limit);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+			const collections = extractItems(await client.execute('listCollections', { query: { limit } }));
 			return collections.map(finalizeCollection);
 		}
 
 		case 'getCollection': {
 			const collectionId = this.getNodeParameter('collectionId', index) as string;
-			const collection = (await featurebaseApiRequest.call(this, 'GET', `/v2/help_center/collections/${collectionId}`)) as IDataObject;
+			const collection = (await client.execute('getCollection', { params: { id: collectionId } })) as IDataObject;
 			return finalizeCollection(collection);
 		}
 
@@ -297,20 +296,18 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 
 			const collection =
 				operation === 'createCollection'
-					? ((await featurebaseApiRequest.call(this, 'POST', '/v2/help_center/collections', payload)) as IDataObject)
-					: ((await featurebaseApiRequest.call(
-							this,
-							'PATCH',
-							`/v2/help_center/collections/${this.getNodeParameter('collectionId', index) as string}`,
-							payload,
-						)) as IDataObject);
+					? ((await client.execute('createCollection', { body: payload as never })) as IDataObject)
+					: ((await client.execute('updateCollection', {
+							params: { id: this.getNodeParameter('collectionId', index) as string },
+							body: payload as never,
+						})) as IDataObject);
 
 			return finalizeCollection(collection);
 		}
 
 		case 'deleteCollection': {
 			const collectionId = this.getNodeParameter('collectionId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/help_center/collections/${collectionId}`);
+			return (await client.execute('deleteCollection', { params: { id: collectionId } })) as IDataObject;
 		}
 
 		default:
