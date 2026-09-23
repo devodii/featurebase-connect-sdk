@@ -9,4 +9,6 @@ export type { RetryOptions } from './retry';
 export { buildUrl } from './url';
 export type { PathParams, QueryParams } from './url';
 export { htmlToText, markdownToHtml } from './transformers';
+export { defineSchemas } from './registry';
+export type { SchemaRegistry } from './registry';
 export type * as Types from './types';

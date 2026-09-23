@@ -1,6 +1,6 @@
 import type { EndpointSpec, OperationId } from './types';
-import type { ZodTypeAny } from 'zod';
 import type { Fetcher } from './fetcher';
+import type { SchemaRegistry } from './registry';
 import { withRetry, type RetryOptions } from './retry';
 import { buildUrl } from './url';
 
@@ -30,7 +30,7 @@ export interface FeaturebaseClientOptions {
 	baseUrl: string;
 	fetcher: Fetcher;
 	operations: OperationRegistry;
-	schemas?: Partial<Record<OperationId, ZodTypeAny>>;
+	schemas?: SchemaRegistry;
 	retry?: RetryOptions;
 	headers?: Record<string, string>;
 }

@@ -1,5 +1,4 @@
 import * as _$featurebaseconnect0 from '@featurebase-connect-sdk/core';
-import type { ZodTypeAny } from 'zod';
 import { notionOperations } from './operations';
 import { createPostSchema } from './schemas';
 
@@ -10,9 +9,9 @@ export interface CreateClientOptions {
 	fetcher?: _$featurebaseconnect0.Fetcher;
 }
 
-const notionSchemas: Record<string, ZodTypeAny> = {
+const notionSchemas = _$featurebaseconnect0.defineSchemas({
 	createPost: createPostSchema,
-};
+});
 
 export const defaultFetcher: _$featurebaseconnect0.Fetcher = async (request) => {
 	const response = await fetch(request.url, {
