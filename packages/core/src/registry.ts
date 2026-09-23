@@ -1,11 +1,30 @@
 import type { ZodType } from 'zod';
 import type { EndpointSpec, OperationId } from './types';
 
-export type SchemaRegistry = {
-	[TOp in OperationId]?: EndpointSpec<TOp>['body'] extends never ? never : ZodType<EndpointSpec<TOp>['body']>;
+/**
+ * The God-Tier Registry.
+ * If you try to register a Zod schema here that doesn't EXACTLY match
+ * the OpenAPI spec for that operation, TypeScript will throw a compilation error.
+ */
+export type OperationSchemaDefinition<TOp extends OperationId> = {
+	body?: EndpointSpec<TOp>['body'] extends never ? never : ZodType<EndpointSpec<TOp>['body']>;
+	query?: EndpointSpec<TOp>['query'] extends never ? never : ZodType<EndpointSpec<TOp>['query']>;
+	params?: EndpointSpec<TOp>['path'] extends never ? never : ZodType<EndpointSpec<TOp>['path']>;
 };
 
-/** Type-checks a schema registry against the OpenAPI spec: a schema whose output doesn't match an operation's body won't compile. */
+export type SchemaRegistry = {
+	[K in OperationId]?: OperationSchemaDefinition<K>;
+};
+
+/**
+ * A helper to build a type-safe registry.
+ * Usage:
+ * const schemas = defineSchemas({
+ *   createPost: {
+ *     body: z.object({ title: z.string(), boardId: z.string() }) // TS enforces this!
+ *   }
+ * })
+ */
 export function defineSchemas<T extends SchemaRegistry>(registry: T): T {
 	return registry;
 }
