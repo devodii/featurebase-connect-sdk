@@ -8,4 +8,4 @@ export { withRetry } from './retry';
 export type { RetryOptions } from './retry';
 export { buildUrl } from './url';
 export type { PathParams, QueryParams } from './url';
-export type * as Types from '@featurebase-connect-sdk/types';
+export type * as Types from './types';

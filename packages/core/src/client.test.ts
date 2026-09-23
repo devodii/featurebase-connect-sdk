@@ -1,4 +1,4 @@
-import type { Equal, Expect } from '@featurebase-connect-sdk/types';
+import type { Equal, Expect } from './types';
 import { z } from 'zod';
 import { FeaturebaseClient, FeaturebaseValidationError, type ExecuteArgs, type OperationRegistry } from './client';
 import type { FetchRequest, FetchResponse, Fetcher } from './fetcher';

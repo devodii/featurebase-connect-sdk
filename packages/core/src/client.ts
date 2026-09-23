@@ -1,4 +1,4 @@
-import type { ExtractBody, ExtractResponse, OperationId, OperationPath, OperationQuery } from '@featurebase-connect-sdk/types';
+import type { ExtractBody, ExtractResponse, OperationId, OperationPath, OperationQuery } from './types';
 import type { ZodTypeAny } from 'zod';
 import type { Fetcher } from './fetcher';
 import { withRetry, type RetryOptions } from './retry';
