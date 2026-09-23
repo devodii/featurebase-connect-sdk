@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
-import { limitField, pick, returnAllField, simplifyField } from './shared';
+import { getFeaturebaseClient } from '../featurebase-client';
+import { extractItems, limitField, pick, returnAllField, simplifyField } from './shared';
 import { WEBHOOK_TOPICS } from './webhook-topics';
 
 const WEBHOOK_SIMPLIFY_FIELDS = ['id', 'name', 'url', 'topics', 'status', 'secret', 'health'];
@@ -119,6 +119,7 @@ export const webhookFields: INodeProperties[] = [
 ];
 
 export async function executeWebhook(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const simplify = ['get', 'getMany', 'create', 'update', 'refreshSecret'].includes(operation)
 		? (this.getNodeParameter('simplify', index, true) as boolean)
 		: false;
@@ -127,14 +128,14 @@ export async function executeWebhook(this: IExecuteFunctions, index: number, ope
 	switch (operation) {
 		case 'getMany': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			const webhooks = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/webhooks', {}, returnAll, limit);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+			const webhooks = extractItems(await client.execute('listWebhooks', { query: { limit } }));
 			return webhooks.map(finalize);
 		}
 
 		case 'get': {
 			const webhookId = this.getNodeParameter('webhookId', index) as string;
-			const webhook = (await featurebaseApiRequest.call(this, 'GET', `/v2/webhooks/${webhookId}`)) as IDataObject;
+			const webhook = (await client.execute('getWebhookById', { params: { id: webhookId } })) as IDataObject;
 			return finalize(webhook);
 		}
 
@@ -145,25 +146,25 @@ export async function executeWebhook(this: IExecuteFunctions, index: number, ope
 			const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
 
 			const body: IDataObject = { name, url, topics, ...additionalFields };
-			const webhook = (await featurebaseApiRequest.call(this, 'POST', '/v2/webhooks', body)) as IDataObject;
+			const webhook = (await client.execute('createWebhook', { body: body as never })) as IDataObject;
 			return finalize(webhook);
 		}
 
 		case 'update': {
 			const webhookId = this.getNodeParameter('webhookId', index) as string;
 			const updateFields = this.getNodeParameter('updateFields', index, {}) as IDataObject;
-			const webhook = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/webhooks/${webhookId}`, updateFields)) as IDataObject;
+			const webhook = (await client.execute('updateWebhook', { params: { id: webhookId }, body: updateFields as never })) as IDataObject;
 			return finalize(webhook);
 		}
 
 		case 'delete': {
 			const webhookId = this.getNodeParameter('webhookId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/webhooks/${webhookId}`);
+			return (await client.execute('deleteWebhook', { params: { id: webhookId } })) as IDataObject;
 		}
 
 		case 'refreshSecret': {
 			const webhookId = this.getNodeParameter('webhookId', index) as string;
-			const webhook = (await featurebaseApiRequest.call(this, 'POST', `/v2/webhooks/${webhookId}/secret`)) as IDataObject;
+			const webhook = (await client.execute('refreshWebhookSecret', { params: { id: webhookId } })) as IDataObject;
 			return finalize(webhook);
 		}
 

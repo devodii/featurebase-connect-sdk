@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
-import { limitField, markdownToggleField, pick, returnAllField, simplifyField, withContentText } from './shared';
+import { getFeaturebaseClient } from '../featurebase-client';
+import { extractItems, limitField, markdownToggleField, pick, returnAllField, simplifyField, withContentText } from './shared';
 
 export const changelogOperations: INodeProperties = {
 	displayName: 'Operation',
@@ -181,6 +181,7 @@ function splitCommaList(value: unknown): string[] | undefined {
 }
 
 export async function executeChangelog(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const simplify = ['get', 'getMany', 'create', 'update', 'publish'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
 	const finalize = (changelog: IDataObject): IDataObject => {
 		const withText = withContentText(changelog);
@@ -192,18 +193,18 @@ export async function executeChangelog(this: IExecuteFunctions, index: number, o
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
 			const categories = splitCommaList(filters.categories);
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
 
-			const qs: IDataObject = { ...filters };
+			const qs: IDataObject = { ...filters, limit };
 			if (categories) qs.categories = categories;
 
-			const changelogs = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/changelogs', qs, returnAll, limit);
+			const changelogs = extractItems(await client.execute('listChangelogs', { query: qs as never }));
 			return changelogs.map(finalize);
 		}
 
 		case 'get': {
 			const changelogId = this.getNodeParameter('changelogId', index) as string;
-			const changelog = (await featurebaseApiRequest.call(this, 'GET', `/v2/changelogs/${changelogId}`)) as IDataObject;
+			const changelog = (await client.execute('getChangelog', { params: { id: changelogId } })) as IDataObject;
 			return finalize(changelog);
 		}
 
@@ -224,8 +225,11 @@ export async function executeChangelog(this: IExecuteFunctions, index: number, o
 
 			const changelog =
 				operation === 'create'
-					? ((await featurebaseApiRequest.call(this, 'POST', '/v2/changelogs', body)) as IDataObject)
-					: ((await featurebaseApiRequest.call(this, 'PATCH', `/v2/changelogs/${this.getNodeParameter('changelogId', index) as string}`, body)) as IDataObject);
+					? ((await client.execute('createChangelog', { body: body as never })) as IDataObject)
+					: ((await client.execute('updateChangelog', {
+							params: { id: this.getNodeParameter('changelogId', index) as string },
+							body: body as never,
+						})) as IDataObject);
 
 			return finalize(changelog);
 		}
@@ -239,30 +243,31 @@ export async function executeChangelog(this: IExecuteFunctions, index: number, o
 			if (locales) body.locales = locales;
 			if (options.scheduledDate) body.scheduledDate = options.scheduledDate;
 
-			const changelog = (await featurebaseApiRequest.call(this, 'POST', `/v2/changelogs/${changelogId}/publish`, body)) as IDataObject;
+			const changelog = (await client.execute('publishChangelog', { params: { id: changelogId }, body: body as never })) as IDataObject;
 			return finalize(changelog);
 		}
 
 		case 'unpublish': {
 			const changelogId = this.getNodeParameter('changelogId', index) as string;
-			return featurebaseApiRequest.call(this, 'POST', `/v2/changelogs/${changelogId}/unpublish`);
+			return (await client.execute('unpublishChangelog', { params: { id: changelogId }, body: {} as never })) as IDataObject;
 		}
 
 		case 'delete': {
 			const changelogId = this.getNodeParameter('changelogId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/changelogs/${changelogId}`);
+			return (await client.execute('deleteChangelog', { params: { id: changelogId } })) as IDataObject;
 		}
 
-		case 'addSubscribers':
-		case 'removeSubscribers': {
+		case 'addSubscribers': {
 			const emails = splitCommaList(this.getNodeParameter('emails', index) as string) ?? [];
 			const body: IDataObject = { emails };
-			if (operation === 'addSubscribers') {
-				const locale = this.getNodeParameter('locale', index, '') as string;
-				if (locale) body.locale = locale;
-			}
-			const method = operation === 'addSubscribers' ? 'POST' : 'DELETE';
-			return featurebaseApiRequest.call(this, method, '/v2/changelogs/subscribers', body);
+			const locale = this.getNodeParameter('locale', index, '') as string;
+			if (locale) body.locale = locale;
+			return (await client.execute('addChangelogSubscribers', { body: body as never })) as IDataObject;
+		}
+
+		case 'removeSubscribers': {
+			const emails = splitCommaList(this.getNodeParameter('emails', index) as string) ?? [];
+			return (await client.execute('removeChangelogSubscribers', { body: { emails } as never })) as IDataObject;
 		}
 
 		default:
