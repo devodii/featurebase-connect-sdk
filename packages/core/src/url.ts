@@ -1,5 +1,5 @@
 export type PathParams = Record<string, string | number>;
-export type QueryParams = Record<string, string | number | boolean | readonly (string | number)[] | undefined>;
+export type QueryParams = Record<string, string | number | boolean | readonly (string | number)[] | null | undefined>;
 
 export function buildUrl(baseUrl: string, pathTemplate: string, pathParams?: PathParams, query?: QueryParams): string {
 	const path = pathTemplate.replace(/\{([^}]+)\}/g, (match, name: string) => {
@@ -10,7 +10,7 @@ export function buildUrl(baseUrl: string, pathTemplate: string, pathParams?: Pat
 
 	const search = new URLSearchParams();
 	for (const [key, value] of Object.entries(query ?? {})) {
-		if (value === undefined) continue;
+		if (value === undefined || value === null) continue;
 		for (const entry of Array.isArray(value) ? value : [value]) {
 			search.append(key, String(entry));
 		}

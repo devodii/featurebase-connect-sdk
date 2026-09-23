@@ -1,23 +1,21 @@
-import type { operations } from './generated/openapi';
+import type { operations } from '../generated/openapi';
 
 export type OperationId = keyof operations;
 
+type Operation<TOp extends OperationId> = operations[TOp];
+
 type JsonContent<T> = T extends { content: { 'application/json': infer TBody } } ? TBody : never;
 
-/** Request body type for an operationId, or `never` if it takes no body. */
-export type ExtractBody<TOp extends OperationId> = 'requestBody' extends keyof operations[TOp]
-	? JsonContent<NonNullable<operations[TOp]['requestBody']>>
-	: never;
+type SuccessStatus<TResponses> = {
+	[K in keyof TResponses]: `${K & (string | number)}` extends `2${string}` ? K : never;
+}[keyof TResponses];
 
-type SuccessResponses<T> = {
-	[K in keyof T as `${K & (string | number)}` extends `2${string}` ? K : never]: T[K];
-};
+type SuccessResponse<TOp extends OperationId> = JsonContent<Operation<TOp>['responses'][SuccessStatus<Operation<TOp>['responses']>]>;
 
-/** Success (2xx) response body type for an operationId. */
-export type ExtractResponse<TOp extends OperationId> = JsonContent<
-	SuccessResponses<operations[TOp]['responses']>[keyof SuccessResponses<operations[TOp]['responses']>]
->;
-
-export type OperationQuery<TOp extends OperationId> = NonNullable<operations[TOp]['parameters']['query']>;
-
-export type OperationPath<TOp extends OperationId> = NonNullable<operations[TOp]['parameters']['path']>;
+/** Every shape derivable from an operationId: request body, query/path params, and the success response. */
+export interface EndpointSpec<TOp extends OperationId> {
+	body: JsonContent<NonNullable<Operation<TOp>['requestBody']>>;
+	query: NonNullable<Operation<TOp>['parameters']['query']>;
+	path: NonNullable<Operation<TOp>['parameters']['path']>;
+	response: SuccessResponse<TOp>;
+}

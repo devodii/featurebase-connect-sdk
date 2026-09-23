@@ -46,4 +46,6 @@ export const createPostSchema = z
 	.strict();
 
 export type CreatePostBody = z.infer<typeof createPostSchema>;
-export type _CreatePostBodyMatchesSpec = _$featurebaseconnect0.Types.Expect<_$featurebaseconnect0.Types.Equal<CreatePostBody, _$featurebaseconnect0.Types.ExtractBody<'createPost'>>>;
+export type _CreatePostBodyMatchesSpec = _$featurebaseconnect0.Types.Expect<
+	_$featurebaseconnect0.Types.Equal<CreatePostBody, _$featurebaseconnect0.Types.EndpointSpec<'createPost'>['body']>
+>;
