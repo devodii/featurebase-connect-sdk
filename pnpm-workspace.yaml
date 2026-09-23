@@ -7,6 +7,7 @@ packages:
 # them), so none are allowed to run, following least-privilege for installs.
 allowBuilds:
   cpu-features: false
+  esbuild: true
   eslint-plugin-n8n-nodes-base: false
   isolated-vm: false
   ssh2: false
