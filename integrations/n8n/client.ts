@@ -10,8 +10,8 @@ export interface CreateClientOptions {
 }
 
 const n8nSchemas = _$featurebaseconnect0.defineSchemas({
-	createPost: createPostSchema,
-	updatePost: updatePostSchema,
+	createPost: { body: createPostSchema },
+	updatePost: { body: updatePostSchema },
 });
 
 export const defaultFetcher: _$featurebaseconnect0.Fetcher = async (request) => {
@@ -24,16 +24,14 @@ export const defaultFetcher: _$featurebaseconnect0.Fetcher = async (request) => 
 	return { status: response.status, headers: Object.fromEntries(response.headers), body };
 };
 
-export function createFeaturebaseClient(options: CreateClientOptions): _$featurebaseconnect0.FeaturebaseClient {
-	return new _$featurebaseconnect0.FeaturebaseClient({
+export function createFeaturebaseClient(options: CreateClientOptions) {
+	return _$featurebaseconnect0.createFeaturebase({
+		apiKey: options.apiKey,
 		baseUrl: options.baseUrl ?? 'https://do.featurebase.app',
+		apiVersion: options.apiVersion,
 		fetcher: options.fetcher ?? defaultFetcher,
 		operations: n8nOperations,
-		schemas: n8nSchemas,
 		retry: _$featurebaseconnect0.featurebaseRetryOptions(),
-		headers: {
-			Authorization: `Bearer ${options.apiKey}`,
-			...(options.apiVersion ? { 'Featurebase-Version': options.apiVersion } : {}),
-		},
+		plugins: [_$featurebaseconnect0.createFormattingPlugin(), _$featurebaseconnect0.createValidationPlugin(n8nSchemas)],
 	});
 }

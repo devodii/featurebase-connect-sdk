@@ -13,8 +13,10 @@ export interface NotionPropertyNames {
 	featurebasePostId: string;
 }
 
+type FeaturebaseClient = ReturnType<typeof _$featurebaseconnect0.createFeaturebase>;
+
 export interface SyncOptions {
-	featurebase: _$featurebaseconnect0.FeaturebaseClient;
+	featurebase: FeaturebaseClient;
 	notion: NotionClient;
 	databaseId: string;
 	propertyNames: NotionPropertyNames;
@@ -25,14 +27,14 @@ export interface SyncResult {
 	updated: number;
 }
 
-async function fetchAllPosts(featurebase: _$featurebaseconnect0.FeaturebaseClient): Promise<Post[]> {
+async function fetchAllPosts(featurebase: FeaturebaseClient): Promise<Post[]> {
 	return _$featurebaseconnect0.collectAll<Post>(async (cursor) => {
-		const page = await featurebase.execute('listPosts', undefined, { query: { cursor } });
+		const page = await featurebase.execute('listPosts', { query: { cursor } });
 		return { items: page.data, nextCursor: page.nextCursor };
 	});
 }
 
-async function fetchBoardNames(featurebase: _$featurebaseconnect0.FeaturebaseClient): Promise<Map<string, string>> {
+async function fetchBoardNames(featurebase: FeaturebaseClient): Promise<Map<string, string>> {
 	// listBoards returns a plain array, not a paginated { data, nextCursor } shape.
 	const boards = await featurebase.execute('listBoards');
 	return new Map(boards.map((board) => [board.id, board.name]));
