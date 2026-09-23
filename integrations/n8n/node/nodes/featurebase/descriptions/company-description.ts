@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
-import { limitField, pick, returnAllField, simplifyField } from './shared';
+import { getFeaturebaseClient } from '../featurebase-client';
+import { extractItems, limitField, pick, returnAllField, simplifyField } from './shared';
 
 const COMPANY_SIMPLIFY_FIELDS = ['id', 'companyId', 'name', 'monthlySpend', 'industry', 'website', 'plan', 'companySize'];
 
@@ -96,20 +96,21 @@ export const companyFields: INodeProperties[] = [
 ];
 
 export async function executeCompany(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const simplify = ['get', 'getMany', 'upsert'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
 	const finalize = (company: IDataObject): IDataObject => (simplify ? pick(company, COMPANY_SIMPLIFY_FIELDS) : company);
 
 	switch (operation) {
 		case 'getMany': {
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			const companies = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/companies', {}, returnAll, limit);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+			const companies = extractItems(await client.execute('listCompanies', { query: { limit } }));
 			return companies.map(finalize);
 		}
 
 		case 'get': {
 			const companyId = this.getNodeParameter('companyId', index) as string;
-			const company = (await featurebaseApiRequest.call(this, 'GET', `/v2/companies/${companyId}`)) as IDataObject;
+			const company = (await client.execute('getCompanyById', { params: { id: companyId } })) as IDataObject;
 			return finalize(company);
 		}
 
@@ -126,32 +127,32 @@ export async function executeCompany(this: IExecuteFunctions, index: number, ope
 				body.customFields = typeof additionalFields.customFields === 'string' ? JSON.parse(additionalFields.customFields) : additionalFields.customFields;
 			}
 
-			const company = (await featurebaseApiRequest.call(this, 'POST', '/v2/companies', body)) as IDataObject;
+			const company = (await client.execute('upsertCompany', { body: body as never })) as IDataObject;
 			return finalize(company);
 		}
 
 		case 'delete': {
 			const companyId = this.getNodeParameter('companyId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/companies/${companyId}`);
+			return (await client.execute('deleteCompanyById', { params: { id: companyId } })) as IDataObject;
 		}
 
 		case 'listContacts': {
 			const companyId = this.getNodeParameter('companyId', index) as string;
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			return (featurebaseApiRequestAllItems<IDataObject>).call(this, `/v2/companies/${companyId}/contacts`, {}, returnAll, limit);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+			return extractItems(await client.execute('listCompanyContacts', { params: { id: companyId }, query: { limit } }));
 		}
 
 		case 'attachContact': {
 			const companyId = this.getNodeParameter('companyId', index) as string;
 			const contactId = this.getNodeParameter('contactId', index) as string;
-			return featurebaseApiRequest.call(this, 'POST', `/v2/companies/${companyId}/contacts`, { contactId });
+			return (await client.execute('attachContactToCompany', { params: { id: companyId }, body: { contactId } })) as IDataObject;
 		}
 
 		case 'detachContact': {
 			const companyId = this.getNodeParameter('companyId', index) as string;
 			const contactId = this.getNodeParameter('contactId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/companies/${companyId}/contacts/${contactId}`);
+			return (await client.execute('removeContactFromCompany', { params: { id: companyId, contactId } })) as IDataObject;
 		}
 
 		default:

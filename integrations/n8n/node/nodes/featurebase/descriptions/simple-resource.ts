@@ -2,7 +2,7 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import type { Types } from '@featurebase-connect-sdk/core';
 
 import { getFeaturebaseClient } from '../featurebase-client';
-import { extractId, limitField, pick, resourceLocatorField, returnAllField, simplifyField } from './shared';
+import { extractId, extractItems, limitField, pick, resourceLocatorField, returnAllField, simplifyField } from './shared';
 
 export interface SimpleResourceConfig {
 	resource: string;
@@ -12,13 +12,6 @@ export interface SimpleResourceConfig {
 	searchListMethod: string;
 	idFieldDescription: string;
 	simplifyFields: string[];
-}
-
-/** Normalizes list responses that are sometimes a plain array, sometimes `{ data }`. */
-function extractItems(response: unknown): IDataObject[] {
-	if (Array.isArray(response)) return response as IDataObject[];
-	if (response && typeof response === 'object' && 'data' in response) return (response as { data: IDataObject[] }).data;
-	return [];
 }
 
 /**

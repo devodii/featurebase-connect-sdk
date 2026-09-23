@@ -1,18 +1,7 @@
 import type { IDataObject, ILoadOptionsFunctions, INodeListSearchResult, INodePropertyOptions } from 'n8n-workflow';
 
 import { getFeaturebaseClient } from '../featurebase-client';
-
-/**
- * Featurebase list endpoints don't share one response shape: some return a
- * plain array (BoardList, PostStatusList), some return { data } with no
- * pagination (TeamList), and others return { data, nextCursor, ... }. This
- * normalizes all of them to an item array without assuming pagination exists.
- */
-function extractItems<T>(response: unknown): T[] {
-	if (Array.isArray(response)) return response as T[];
-	if (response && typeof response === 'object' && 'data' in response) return (response as { data: T[] }).data;
-	return [];
-}
+import { extractItems } from '../descriptions/shared';
 
 function toOptions(items: IDataObject[], nameKey: string, valueKey = 'id'): INodePropertyOptions[] {
 	return items.map((item) => ({
@@ -23,13 +12,13 @@ function toOptions(items: IDataObject[], nameKey: string, valueKey = 'id'): INod
 
 export async function getBoards(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const boards = extractItems<IDataObject>(await client.execute('listBoards'));
+	const boards = extractItems(await client.execute('listBoards'));
 	return toOptions(boards, 'name');
 }
 
 export async function getPostStatuses(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const statuses = extractItems<IDataObject>(await client.execute('listPostStatuses'));
+	const statuses = extractItems(await client.execute('listPostStatuses'));
 	return statuses.map((status) => ({
 		name: `${status.name as string} (${status.type as string})`,
 		value: String(status.id),
@@ -38,31 +27,31 @@ export async function getPostStatuses(this: ILoadOptionsFunctions): Promise<INod
 
 export async function getAdmins(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const admins = extractItems<IDataObject>(await client.execute('listAdmins', { query: { limit: 100 } }));
+	const admins = extractItems(await client.execute('listAdmins', { query: { limit: 100 } }));
 	return toOptions(admins, 'name');
 }
 
 export async function getTeams(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const teams = extractItems<IDataObject>(await client.execute('listTeams'));
+	const teams = extractItems(await client.execute('listTeams'));
 	return toOptions(teams, 'name');
 }
 
 export async function getBrands(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const brands = extractItems<IDataObject>(await client.execute('listBrands', { query: { limit: 100 } }));
+	const brands = extractItems(await client.execute('listBrands', { query: { limit: 100 } }));
 	return toOptions(brands, 'name');
 }
 
 export async function getCustomFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const fields = extractItems<IDataObject>(await client.execute('listCustomFields', { query: { limit: 100 } }));
+	const fields = extractItems(await client.execute('listCustomFields', { query: { limit: 100 } }));
 	return toOptions(fields, 'label');
 }
 
 export async function getHelpCenterCollections(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const collections = extractItems<IDataObject>(await client.execute('listCollections', { query: { limit: 100 } }));
+	const collections = extractItems(await client.execute('listCollections', { query: { limit: 100 } }));
 	return toOptions(collections, 'name');
 }
 
@@ -73,7 +62,7 @@ export async function getHelpCenterCollections(this: ILoadOptionsFunctions): Pro
  */
 export async function getPostTags(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const posts = extractItems<IDataObject>(await client.execute('listPosts', { query: { limit: 100 } }));
+	const posts = extractItems(await client.execute('listPosts', { query: { limit: 100 } }));
 	const tagNames = new Set<string>();
 
 	for (const post of posts) {
@@ -96,7 +85,7 @@ export async function getPostTags(this: ILoadOptionsFunctions): Promise<INodePro
 function listSearchFactory(operation: 'listBoards' | 'listPostStatuses' | 'listAdmins' | 'listTeams' | 'listBrands' | 'listCustomFields' | 'listCollections', nameKey: string) {
 	return async function listSearch(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 		const client = await getFeaturebaseClient(this);
-		const items = extractItems<IDataObject>(await client.execute(operation, { query: { limit: 100 } } as never));
+		const items = extractItems(await client.execute(operation, { query: { limit: 100 } } as never));
 		const results = items
 			.map((item) => ({ name: String(item[nameKey] ?? item.id), value: String(item.id) }))
 			.filter((item) => !filter || item.name.toLowerCase().includes(filter.toLowerCase()));
@@ -115,7 +104,7 @@ export const searchHelpCenterCollections = listSearchFactory('listCollections', 
 
 export async function searchPosts(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 	const client = await getFeaturebaseClient(this);
-	const posts = extractItems<IDataObject>(await client.execute('listPosts', { query: { limit: 50, q: filter || undefined, sortBy: 'recent' } }));
+	const posts = extractItems(await client.execute('listPosts', { query: { limit: 50, q: filter || undefined, sortBy: 'recent' } }));
 
 	return {
 		results: posts.map((post) => ({
@@ -127,7 +116,7 @@ export async function searchPosts(this: ILoadOptionsFunctions, filter?: string):
 
 export async function searchComments(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 	const client = await getFeaturebaseClient(this);
-	const comments = extractItems<IDataObject>(await client.execute('listComments', { query: { limit: 50 } }));
+	const comments = extractItems(await client.execute('listComments', { query: { limit: 50 } }));
 
 	const results = comments
 		.map((comment) => {

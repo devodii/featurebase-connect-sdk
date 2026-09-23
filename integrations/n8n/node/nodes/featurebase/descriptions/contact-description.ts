@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
-import { limitField, pick, returnAllField, simplifyField } from './shared';
+import { getFeaturebaseClient } from '../featurebase-client';
+import { extractItems, limitField, pick, returnAllField, simplifyField } from './shared';
 
 const CONTACT_SIMPLIFY_FIELDS = ['id', 'name', 'email', 'userId', 'type', 'companies', 'locale', 'verified', 'subscribedToChangelog'];
 
@@ -133,6 +133,7 @@ function splitCommaList(value: unknown): string[] | undefined {
 }
 
 export async function executeContact(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const simplify = ['get', 'getMany', 'upsert'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
 	const finalize = (contact: IDataObject): IDataObject => (simplify ? pick(contact, CONTACT_SIMPLIFY_FIELDS) : contact);
 
@@ -140,14 +141,14 @@ export async function executeContact(this: IExecuteFunctions, index: number, ope
 		case 'getMany': {
 			const filters = this.getNodeParameter('filters', index, {}) as IDataObject;
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			const contacts = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/contacts', filters, returnAll, limit);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+			const contacts = extractItems(await client.execute('listContacts', { query: { ...filters, limit } as never }));
 			return contacts.map(finalize);
 		}
 
 		case 'get': {
 			const contactId = this.getNodeParameter('contactId', index) as string;
-			const contact = (await featurebaseApiRequest.call(this, 'GET', `/v2/contacts/${contactId}`)) as IDataObject;
+			const contact = (await client.execute('getContactById', { params: { id: contactId } })) as IDataObject;
 			return finalize(contact);
 		}
 
@@ -169,19 +170,23 @@ export async function executeContact(this: IExecuteFunctions, index: number, ope
 				body.customFields = typeof additionalFields.customFields === 'string' ? JSON.parse(additionalFields.customFields) : additionalFields.customFields;
 			}
 
-			const contact = (await featurebaseApiRequest.call(this, 'POST', '/v2/contacts', body)) as IDataObject;
+			const contact = (await client.execute('upsertContact', { body: body as never })) as IDataObject;
 			return finalize(contact);
 		}
 
 		case 'delete': {
 			const contactId = this.getNodeParameter('contactId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/contacts/${contactId}`);
+			return (await client.execute('deleteContactById', { params: { id: contactId } })) as IDataObject;
 		}
 
-		case 'block':
+		case 'block': {
+			const contactId = this.getNodeParameter('contactId', index) as string;
+			return (await client.execute('blockContactById', { params: { id: contactId } })) as IDataObject;
+		}
+
 		case 'unblock': {
 			const contactId = this.getNodeParameter('contactId', index) as string;
-			return featurebaseApiRequest.call(this, 'POST', `/v2/contacts/${contactId}/${operation}`);
+			return (await client.execute('unblockContactById', { params: { id: contactId } })) as IDataObject;
 		}
 
 		default:

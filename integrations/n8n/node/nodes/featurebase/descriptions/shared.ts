@@ -163,3 +163,10 @@ export function pick(item: IDataObject, fields: string[]): IDataObject {
 	}
 	return result;
 }
+
+/** Normalizes list responses that are sometimes a plain array, sometimes `{ data }`. */
+export function extractItems(response: unknown): IDataObject[] {
+	if (Array.isArray(response)) return response as IDataObject[];
+	if (response && typeof response === 'object' && 'data' in response) return (response as { data: IDataObject[] }).data;
+	return [];
+}
