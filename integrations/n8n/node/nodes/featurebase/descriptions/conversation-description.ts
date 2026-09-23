@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
-import { limitField, pick, resourceLocatorField, returnAllField, simplifyField } from './shared';
+import { getFeaturebaseClient } from '../featurebase-client';
+import { extractItems, limitField, pick, resourceLocatorField, returnAllField, simplifyField } from './shared';
 
 const CONVERSATION_SIMPLIFY_FIELDS = [
 	'id',
@@ -208,9 +208,9 @@ export const conversationFields: INodeProperties[] = [
 	{
 		...resourceLocatorField('actingAdminId', 'Acting Admin', 'searchAdmins', {
 			required: false,
-			description: 'Required for Attach Tag. Optional for participant changes (defaults to the system bot user).',
+			description: 'Required for Attach Tag and Detach Tag. Optional for participant changes (defaults to the system bot user).',
 		}),
-		displayOptions: { show: { resource: ['conversation'], operation: ['attachTag', 'removeParticipant', 'addParticipant'] } },
+		displayOptions: { show: { resource: ['conversation'], operation: ['attachTag', 'detachTag', 'removeParticipant', 'addParticipant'] } },
 	},
 	{
 		displayName: 'Tag IDs',
@@ -244,6 +244,7 @@ function extractId(value: unknown): string | undefined {
 }
 
 export async function executeConversation(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const simplify = ['get', 'getMany', 'create', 'update'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
 	const finalize = (conversation: IDataObject): IDataObject => (simplify ? pick(conversation, CONVERSATION_SIMPLIFY_FIELDS) : conversation);
 
@@ -251,16 +252,16 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 		case 'getMany': {
 			const tagIds = this.getNodeParameter('tagIds', index, '') as string;
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
-			const qs: IDataObject = {};
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+			const qs: IDataObject = { limit };
 			if (tagIds) qs.tagIds = tagIds;
-			const conversations = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/conversations', qs, returnAll, limit);
+			const conversations = extractItems(await client.execute('listConversations', { query: qs as never }));
 			return conversations.map(finalize);
 		}
 
 		case 'get': {
 			const conversationId = this.getNodeParameter('conversationId', index) as string;
-			const conversation = (await featurebaseApiRequest.call(this, 'GET', `/v2/conversations/${conversationId}`)) as IDataObject;
+			const conversation = (await client.execute('getConversationById', { params: { id: conversationId } })) as IDataObject;
 			return finalize(conversation);
 		}
 
@@ -271,7 +272,7 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 			const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
 
 			const body: IDataObject = { from: { type: fromType, id: fromId }, bodyMarkdown, ...additionalFields };
-			const conversation = (await featurebaseApiRequest.call(this, 'POST', '/v2/conversations', body)) as IDataObject;
+			const conversation = (await client.execute('createConversation', { body: body as never })) as IDataObject;
 			return finalize(conversation);
 		}
 
@@ -290,13 +291,13 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 				body.customAttributes = typeof fields.customAttributes === 'string' ? JSON.parse(fields.customAttributes) : fields.customAttributes;
 			}
 
-			const conversation = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/conversations/${conversationId}`, body)) as IDataObject;
+			const conversation = (await client.execute('updateConversation', { params: { id: conversationId }, body: body as never })) as IDataObject;
 			return finalize(conversation);
 		}
 
 		case 'delete': {
 			const conversationId = this.getNodeParameter('conversationId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/conversations/${conversationId}`);
+			return (await client.execute('deleteConversation', { params: { id: conversationId } })) as IDataObject;
 		}
 
 		case 'reply':
@@ -314,7 +315,7 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 				skipNotifications,
 			};
 
-			return featurebaseApiRequest.call(this, 'POST', `/v2/conversations/${conversationId}/reply`, body);
+			return (await client.execute('replyToConversation', { params: { id: conversationId }, body: body as never })) as IDataObject;
 		}
 
 		case 'addParticipant': {
@@ -325,7 +326,7 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 			const body: IDataObject = { participant };
 			if (actingAdminId) body.actingAdminId = actingAdminId;
 
-			return featurebaseApiRequest.call(this, 'POST', `/v2/conversations/${conversationId}/participants`, body);
+			return (await client.execute('addParticipantToConversation', { params: { id: conversationId }, body: body as never })) as IDataObject;
 		}
 
 		case 'removeParticipant': {
@@ -336,7 +337,7 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 			const body: IDataObject = { id: contactId };
 			if (actingAdminId) body.actingAdminId = actingAdminId;
 
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/conversations/${conversationId}/participants`, body);
+			return (await client.execute('removeParticipantFromConversation', { params: { id: conversationId }, body: body as never })) as IDataObject;
 		}
 
 		case 'attachTag': {
@@ -344,16 +345,20 @@ export async function executeConversation(this: IExecuteFunctions, index: number
 			const tagId = this.getNodeParameter('tagId', index) as string;
 			const actingAdminId = extractId(this.getNodeParameter('actingAdminId', index));
 
-			return featurebaseApiRequest.call(this, 'POST', `/v2/conversations/${conversationId}/tags`, {
-				tagId,
-				actingAdminId,
-			});
+			return (await client.execute('attachConversationTag', {
+				params: { id: conversationId },
+				body: { tagId, actingAdminId } as never,
+			})) as IDataObject;
 		}
 
 		case 'detachTag': {
 			const conversationId = this.getNodeParameter('conversationId', index) as string;
 			const tagId = this.getNodeParameter('tagId', index) as string;
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/conversations/${conversationId}/tags/${tagId}`);
+			const actingAdminId = extractId(this.getNodeParameter('actingAdminId', index));
+			return (await client.execute('detachConversationTag', {
+				params: { id: conversationId, tagId },
+				body: { actingAdminId } as never,
+			})) as IDataObject;
 		}
 
 		default:
