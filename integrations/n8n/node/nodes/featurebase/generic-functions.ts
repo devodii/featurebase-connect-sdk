@@ -9,10 +9,10 @@ import type {
 	IWebhookFunctions,
 	JsonObject,
 } from 'n8n-workflow';
-import { NodeApiError, sleep } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
+import { buildUrl, collectAll, featurebaseRetryOptions, withRetry, type CursorPage, type FetchRequest } from '@featurebase-connect-sdk/core';
 
-import type { CursorPage } from './utils/pagination';
-import { collectAllPages } from './utils/pagination';
+import { createN8nFetcher, type N8nContext } from './n8n-fetcher';
 
 type FeaturebaseContext = IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions | IWebhookFunctions;
 
@@ -22,49 +22,11 @@ interface FeaturebaseErrorBody {
 		code?: string;
 		message?: string;
 		param?: string;
-		status?: number;
 	};
-}
-
-const MAX_RATE_LIMIT_RETRIES = 5;
-const BASE_BACKOFF_MS = 500;
-
-function extractErrorBody(error: unknown): FeaturebaseErrorBody | undefined {
-	const err = error as {
-		response?: { body?: unknown; data?: unknown; headers?: Record<string, string> };
-		cause?: { response?: { body?: unknown; data?: unknown } };
-	};
-
-	const candidate = err.response?.body ?? err.response?.data ?? err.cause?.response?.body;
-
-	if (candidate && typeof candidate === 'object' && 'error' in candidate) {
-		return candidate as FeaturebaseErrorBody;
-	}
-
-	return undefined;
-}
-
-function extractStatusCode(error: unknown): number | undefined {
-	const err = error as { response?: { statusCode?: number; status?: number }; statusCode?: number };
-	return err.response?.statusCode ?? err.response?.status ?? err.statusCode;
-}
-
-function extractRetryAfterMs(error: unknown): number | undefined {
-	const err = error as { response?: { headers?: Record<string, string> } };
-	const header = err.response?.headers?.['retry-after'] ?? err.response?.headers?.['Retry-After'];
-	if (!header) return undefined;
-
-	const seconds = Number(header);
-	return Number.isFinite(seconds) ? seconds * 1000 : undefined;
-}
-
-function isRateLimitError(error: unknown): boolean {
-	const body = extractErrorBody(error);
-	return body?.error?.type === 'rate_limit_error' || extractStatusCode(error) === 429;
 }
 
 function buildReadableMessage(error: unknown): string {
-	const body = extractErrorBody(error);
+	const body = (error as { response?: { body?: unknown } }).response?.body as FeaturebaseErrorBody | undefined;
 
 	if (body?.error) {
 		const { type, code, message, param } = body.error;
@@ -73,29 +35,6 @@ function buildReadableMessage(error: unknown): string {
 	}
 
 	return error instanceof Error ? error.message : 'Unknown Featurebase API error';
-}
-
-async function requestWithRetry(context: FeaturebaseContext, options: IDataObject): Promise<IDataObject> {
-	let attempt = 0;
-
-	while (true) {
-		try {
-			return (await context.helpers.httpRequestWithAuthentication.call(context, 'featurebaseApi', options as never)) as IDataObject;
-		} catch (error) {
-			if (isRateLimitError(error) && attempt < MAX_RATE_LIMIT_RETRIES) {
-				attempt += 1;
-				const retryAfter = extractRetryAfterMs(error);
-				const backoff = retryAfter ?? BASE_BACKOFF_MS * 2 ** (attempt - 1);
-				const jitter = Math.random() * backoff * 0.25;
-				await sleep(backoff + jitter);
-				continue;
-			}
-
-			throw new NodeApiError(context.getNode(), error as JsonObject, {
-				message: buildReadableMessage(error),
-			});
-		}
-	}
 }
 
 export async function featurebaseApiRequest(
@@ -107,19 +46,20 @@ export async function featurebaseApiRequest(
 ): Promise<IDataObject> {
 	const credentials = await this.getCredentials('featurebaseApi');
 	const baseUrl = (credentials.baseUrl as string) || 'https://do.featurebase.app';
+	const fetcher = createN8nFetcher(this as N8nContext);
 
-	const options: IDataObject = {
+	const request: FetchRequest = {
 		method,
-		url: `${baseUrl}${endpoint}`,
-		json: true,
-		qs,
+		url: buildUrl(baseUrl, endpoint, undefined, qs as never),
+		body: Object.keys(body).length > 0 ? body : undefined,
 	};
 
-	if (Object.keys(body).length > 0) {
-		options.body = body;
+	try {
+		const response = await withRetry(() => fetcher(request), featurebaseRetryOptions());
+		return response.body as IDataObject;
+	} catch (error) {
+		throw new NodeApiError(this.getNode(), error as JsonObject, { message: buildReadableMessage(error) });
 	}
-
-	return requestWithRetry(this, options);
 }
 
 export async function featurebaseApiRequestAllItems<T = IDataObject>(
@@ -132,12 +72,12 @@ export async function featurebaseApiRequestAllItems<T = IDataObject>(
 	const fetchPage = async (cursor: string | undefined): Promise<CursorPage<T>> => {
 		const response = await featurebaseApiRequest.call(this, 'GET', endpoint, {}, { ...qs, cursor });
 		return {
-			data: (response.data as T[]) ?? [],
+			items: (response.data as T[]) ?? [],
 			nextCursor: (response.nextCursor as string | null) ?? null,
 		};
 	};
 
-	return collectAllPages<T>(fetchPage, returnAll ? undefined : (limit ?? (qs.limit as number)));
+	return collectAll<T>(fetchPage, returnAll ? undefined : (limit ?? (qs.limit as number)));
 }
 
 function toOptions(items: IDataObject[], nameKey: string, valueKey = 'id'): INodePropertyOptions[] {

@@ -1,8 +1,8 @@
 import type { IDataObject, IHookFunctions, IWebhookFunctions, IWebhookResponseData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
-import { WEBHOOK_TOPICS } from './descriptions/webhookTopics';
-import { featurebaseApiRequest, featurebaseApiRequestAllItems, getAdmins, getBoards, getPostStatuses, getPostTags } from './GenericFunctions';
+import { WEBHOOK_TOPICS } from './descriptions/webhook-topics';
+import { featurebaseApiRequest, featurebaseApiRequestAllItems, getAdmins, getBoards, getPostStatuses, getPostTags } from './generic-functions';
 import { htmlToText } from './utils/html';
 import { verifyHmacSha256 } from './utils/hmac';
 

@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
+import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { markdownToHtml } from '../utils/markdown';
+import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
 import {
 	authorCollectionField,
 	cleanAuthorInput,
@@ -246,7 +246,7 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 			const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
 
 			const body: IDataObject = {
-				content: useMarkdown ? markdownToHtml(content) : content,
+				content: useMarkdown ? ContentTransformer.markdownToHtml(content) : content,
 				...buildCommentBody(additionalFields),
 			};
 
@@ -260,7 +260,7 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 			const updateFields = this.getNodeParameter('updateFields', index, {}) as IDataObject;
 
 			const body: IDataObject = {
-				content: useMarkdown ? markdownToHtml(content) : content,
+				content: useMarkdown ? ContentTransformer.markdownToHtml(content) : content,
 				...buildCommentBody(updateFields),
 			};
 

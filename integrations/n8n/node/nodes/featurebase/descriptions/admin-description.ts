@@ -1,4 +1,4 @@
-import { buildSimpleResource } from './simpleResource';
+import { buildSimpleResource } from './simple-resource';
 
 export const {
 	operations: adminOperations,
@@ -7,7 +7,8 @@ export const {
 } = buildSimpleResource({
 	resource: 'admin',
 	resourceName: 'admin',
-	endpoint: '/v2/admins',
+	getOperation: 'getAdmin',
+	listOperation: 'listAdmins',
 	searchListMethod: 'searchAdmins',
 	idFieldDescription: 'The admin to look up',
 	simplifyFields: ['id', 'name', 'email', 'roleId'],

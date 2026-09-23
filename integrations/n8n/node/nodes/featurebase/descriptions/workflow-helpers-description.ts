@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
+import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { markdownToHtml } from '../utils/markdown';
+import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
 import { titleSimilarity } from '../utils/similarity';
 import { authorCollectionField, cleanAuthorInput, extractId, resourceLocatorField, withContentText } from './shared';
 
@@ -264,7 +264,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 				if (content) {
 					await featurebaseApiRequest.call(this, 'POST', '/v2/comments', {
 						postId: bestMatch.id,
-						content: markdownToHtml(content),
+						content: ContentTransformer.markdownToHtml(content),
 						isPrivate: Boolean(options.commentIsPrivate),
 						author,
 					});
@@ -278,7 +278,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 			const created = (await featurebaseApiRequest.call(this, 'POST', '/v2/posts', {
 				title,
 				boardId,
-				content: markdownToHtml(content),
+				content: ContentTransformer.markdownToHtml(content),
 				...(author ? { author } : {}),
 				...(tags ? { tags } : {}),
 			})) as IDataObject;
@@ -331,7 +331,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 					const body: IDataObject = {
 						title: row.title,
 						boardId: resolveId(boards, row.board as string),
-						content: markdownToHtml(String(row.content ?? '')),
+						content: ContentTransformer.markdownToHtml(String(row.content ?? '')),
 					};
 
 					if (row.authorEmail || row.authorName) {

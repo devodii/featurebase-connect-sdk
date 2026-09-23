@@ -1,4 +1,4 @@
-import { buildSimpleResource } from './simpleResource';
+import { buildSimpleResource } from './simple-resource';
 
 export const {
 	operations: postStatusOperations,
@@ -7,7 +7,8 @@ export const {
 } = buildSimpleResource({
 	resource: 'postStatus',
 	resourceName: 'post status',
-	endpoint: '/v2/post_statuses',
+	getOperation: 'getPostStatus',
+	listOperation: 'listPostStatuses',
 	searchListMethod: 'searchPostStatuses',
 	idFieldDescription: 'The post status to look up',
 	simplifyFields: ['id', 'name', 'color', 'type', 'isDefault'],

@@ -1,4 +1,4 @@
-import { buildSimpleResource } from './simpleResource';
+import { buildSimpleResource } from './simple-resource';
 
 export const {
 	operations: teamOperations,
@@ -7,7 +7,8 @@ export const {
 } = buildSimpleResource({
 	resource: 'team',
 	resourceName: 'team',
-	endpoint: '/v2/teams',
+	getOperation: 'getTeamById',
+	listOperation: 'listTeams',
 	searchListMethod: 'searchTeams',
 	idFieldDescription: 'The team to look up',
 	simplifyFields: ['id', 'name', 'color', 'members'],

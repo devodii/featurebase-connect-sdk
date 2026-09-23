@@ -9,22 +9,22 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
-import { adminFields, adminOperations, executeAdmin } from './descriptions/AdminDescription';
-import { boardFields, boardOperations, executeBoard } from './descriptions/BoardDescription';
-import { brandFields, brandOperations, executeBrand } from './descriptions/BrandDescription';
-import { changelogFields, changelogOperations, executeChangelog } from './descriptions/ChangelogDescription';
-import { commentFields, commentOperations, executeComment } from './descriptions/CommentDescription';
-import { companyFields, companyOperations, executeCompany } from './descriptions/CompanyDescription';
-import { contactFields, contactOperations, executeContact } from './descriptions/ContactDescription';
-import { conversationFields, conversationOperations, executeConversation } from './descriptions/ConversationDescription';
-import { customFieldFields, customFieldOperations, executeCustomField } from './descriptions/CustomFieldDescription';
-import { executeHelpCenter, helpCenterFields, helpCenterOperations } from './descriptions/HelpCenterDescription';
-import { executePost, postFields, postOperations } from './descriptions/PostDescription';
-import { executePostStatus, postStatusFields, postStatusOperations } from './descriptions/PostStatusDescription';
-import { executeSurvey, surveyFields, surveyOperations } from './descriptions/SurveyDescription';
-import { executeTeam, teamFields, teamOperations } from './descriptions/TeamDescription';
-import { executeWebhook, webhookFields, webhookOperations } from './descriptions/WebhookDescription';
-import { executeWorkflowHelper, workflowHelperFields, workflowHelperOperations } from './descriptions/WorkflowHelpersDescription';
+import { adminFields, adminOperations, executeAdmin } from './descriptions/admin-description';
+import { boardFields, boardOperations, executeBoard } from './descriptions/board-description';
+import { brandFields, brandOperations, executeBrand } from './descriptions/brand-description';
+import { changelogFields, changelogOperations, executeChangelog } from './descriptions/changelog-description';
+import { commentFields, commentOperations, executeComment } from './descriptions/comment-description';
+import { companyFields, companyOperations, executeCompany } from './descriptions/company-description';
+import { contactFields, contactOperations, executeContact } from './descriptions/contact-description';
+import { conversationFields, conversationOperations, executeConversation } from './descriptions/conversation-description';
+import { customFieldFields, customFieldOperations, executeCustomField } from './descriptions/custom-field-description';
+import { executeHelpCenter, helpCenterFields, helpCenterOperations } from './descriptions/help-center-description';
+import { executePost, postFields, postOperations } from './descriptions/post-description';
+import { executePostStatus, postStatusFields, postStatusOperations } from './descriptions/post-status-description';
+import { executeSurvey, surveyFields, surveyOperations } from './descriptions/survey-description';
+import { executeTeam, teamFields, teamOperations } from './descriptions/team-description';
+import { executeWebhook, webhookFields, webhookOperations } from './descriptions/webhook-description';
+import { executeWorkflowHelper, workflowHelperFields, workflowHelperOperations } from './descriptions/workflow-helpers-description';
 import {
 	getAdmins,
 	getBoards,
@@ -43,7 +43,7 @@ import {
 	searchPostStatuses,
 	searchPosts,
 	searchTeams,
-} from './GenericFunctions';
+} from './generic-functions';
 
 type ResourceExecutor = (this: IExecuteFunctions, index: number, operation: string) => Promise<IDataObject | IDataObject[]>;
 

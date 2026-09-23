@@ -1,4 +1,4 @@
-import { buildSimpleResource } from './simpleResource';
+import { buildSimpleResource } from './simple-resource';
 
 export const {
 	operations: customFieldOperations,
@@ -7,7 +7,8 @@ export const {
 } = buildSimpleResource({
 	resource: 'customField',
 	resourceName: 'custom field',
-	endpoint: '/v2/custom_fields',
+	getOperation: 'getCustomField',
+	listOperation: 'listCustomFields',
 	searchListMethod: 'searchCustomFields',
 	idFieldDescription: 'The custom field to look up',
 	simplifyFields: ['id', 'label', 'type', 'required', 'options'],

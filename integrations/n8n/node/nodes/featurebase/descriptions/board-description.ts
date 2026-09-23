@@ -1,4 +1,4 @@
-import { buildSimpleResource } from './simpleResource';
+import { buildSimpleResource } from './simple-resource';
 
 export const {
 	operations: boardOperations,
@@ -7,7 +7,8 @@ export const {
 } = buildSimpleResource({
 	resource: 'board',
 	resourceName: 'board',
-	endpoint: '/v2/boards',
+	getOperation: 'getBoard',
+	listOperation: 'listBoards',
 	searchListMethod: 'searchBoards',
 	idFieldDescription: 'The board (category) to look up',
 	simplifyFields: ['id', 'name'],

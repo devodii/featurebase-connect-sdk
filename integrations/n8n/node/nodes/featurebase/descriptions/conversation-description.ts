@@ -1,7 +1,7 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
+import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
 import { limitField, pick, resourceLocatorField, returnAllField, simplifyField } from './shared';
 
 const CONVERSATION_SIMPLIFY_FIELDS = [

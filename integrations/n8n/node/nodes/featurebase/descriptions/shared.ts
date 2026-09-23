@@ -1,6 +1,6 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 
-import { htmlToText } from '../utils/html';
+import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
 /**
  * Builds a resourceLocator field with a dropdown (backed by a loadOptions
@@ -150,7 +150,7 @@ export function cleanAuthorInput(value: IDataObject | undefined): IDataObject | 
  */
 export function withContentText<T extends IDataObject>(item: T, field = 'content'): T {
 	if (typeof item[field] === 'string') {
-		return { ...item, contentText: htmlToText(item[field] as string) };
+		return { ...item, contentText: ContentTransformer.htmlToText(item[field] as string) };
 	}
 	return item;
 }

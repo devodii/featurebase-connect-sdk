@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
+import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { markdownToHtml } from '../utils/markdown';
+import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
 import {
 	authorCollectionField,
 	cleanAuthorInput,
@@ -469,7 +469,7 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const body: IDataObject = {
 				title,
 				boardId,
-				content: useMarkdown ? markdownToHtml(content) : content,
+				content: useMarkdown ? ContentTransformer.markdownToHtml(content) : content,
 				...buildPostBody(additionalFields, true),
 			};
 
@@ -483,7 +483,7 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const updateFields = this.getNodeParameter('updateFields', index, {}) as IDataObject;
 
 			const body: IDataObject = buildPostBody(updateFields, false);
-			if (content) body.content = useMarkdown ? markdownToHtml(content) : content;
+			if (content) body.content = useMarkdown ? ContentTransformer.markdownToHtml(content) : content;
 
 			const post = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/posts/${postId}`, body)) as IDataObject;
 			return finalize(post);

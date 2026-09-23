@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - integrations/*
+  - integrations/n8n/node
 
 # None of these native build scripts are needed for this package's own
 # build/lint/test/pack pipeline (verified: all pass without approving any of

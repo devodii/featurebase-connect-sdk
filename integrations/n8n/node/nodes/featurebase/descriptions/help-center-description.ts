@@ -1,8 +1,8 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
+import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../GenericFunctions';
-import { markdownToHtml } from '../utils/markdown';
+import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
 import { limitField, markdownToggleField, pick, resourceLocatorField, returnAllField, simplifyField, withContentText } from './shared';
 
 const ARTICLE_SIMPLIFY_FIELDS = [
@@ -243,7 +243,7 @@ export async function executeHelpCenter(this: IExecuteFunctions, index: number, 
 			const payload: IDataObject = {};
 			const title = this.getNodeParameter('title', index, '') as string;
 			if (title) payload.title = title;
-			if (body) payload.body = useMarkdown ? markdownToHtml(body) : body;
+			if (body) payload.body = useMarkdown ? ContentTransformer.markdownToHtml(body) : body;
 			if (fields.description) payload.description = fields.description;
 			if (fields.state) payload.state = fields.state;
 			if (fields.formatter) payload.formatter = fields.formatter;

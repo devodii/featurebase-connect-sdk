@@ -1,4 +1,4 @@
-import { buildSimpleResource } from './simpleResource';
+import { buildSimpleResource } from './simple-resource';
 
 export const {
 	operations: brandOperations,
@@ -7,7 +7,8 @@ export const {
 } = buildSimpleResource({
 	resource: 'brand',
 	resourceName: 'brand',
-	endpoint: '/v2/brands',
+	getOperation: 'getBrandById',
+	listOperation: 'listBrands',
 	searchListMethod: 'searchBrands',
 	idFieldDescription: 'The brand to look up',
 	simplifyFields: ['id', 'name', 'isDefault', 'helpCenterId'],

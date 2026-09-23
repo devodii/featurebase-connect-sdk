@@ -18,9 +18,9 @@
 		"directory": "integrations/n8n/node"
 	},
 	"scripts": {
-		"build": "n8n-node build",
+		"build": "node scripts/build.mjs",
 		"clean": "rm -rf dist .tsbuildinfo",
-		"dev": "n8n-node dev",
+		"dev": "npm run build && n8n-node dev",
 		"lint": "n8n-node lint",
 		"lintfix": "n8n-node lint --fix",
 		"format": "prettier --write .",
@@ -46,6 +46,7 @@
 		"@n8n/node-cli": "^0.48.4",
 		"@types/jest": "^29.5.14",
 		"eslint": "^9.39.4",
+		"fast-glob": "^3.3.3",
 		"jest": "^29.7.0",
 		"prettier": "^3.8.3",
 		"ts-jest": "^29.2.5",
@@ -53,5 +54,8 @@
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
+	},
+	"dependencies": {
+		"@featurebase-connect-sdk/core": "workspace:*"
 	}
 }
