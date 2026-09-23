@@ -2,9 +2,9 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
+import { getFeaturebaseClient } from '../featurebase-client';
 import { titleSimilarity } from '../utils/similarity';
-import { authorCollectionField, cleanAuthorInput, extractId, resourceLocatorField, withContentText } from './shared';
+import { authorCollectionField, cleanAuthorInput, extractId, extractItems, resourceLocatorField, withContentText } from './shared';
 
 export const workflowHelperOperations: INodeProperties = {
 	displayName: 'Operation',
@@ -231,6 +231,8 @@ function scorePost(post: IDataObject, divisor: number): IDataObject {
 }
 
 export async function executeWorkflowHelper(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
+
 	switch (operation) {
 		case 'upsertFeedback': {
 			const title = this.getNodeParameter('title', index) as string;
@@ -240,7 +242,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 			const options = this.getNodeParameter('options', index, {}) as IDataObject;
 			const threshold = typeof options.threshold === 'number' ? options.threshold : 0.7;
 
-			const candidates = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/posts', { q: title, sortBy: 'recent', limit: 25 }, false, 25);
+			const candidates = extractItems(await client.execute('listPosts', { query: { q: title, sortBy: 'recent', limit: 25 } }));
 
 			let bestMatch: IDataObject | undefined;
 			let bestScore = 0;
@@ -255,32 +257,36 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 			if (bestMatch && bestScore >= threshold) {
 				if (author) {
 					try {
-						await featurebaseApiRequest.call(this, 'POST', `/v2/posts/${bestMatch.id as string}/voters`, author);
+						await client.execute('addVoter', { params: { id: bestMatch.id as string }, body: author as never });
 					} catch {
 						// Voter may already exist; the match/comment result is what matters here.
 					}
 				}
 
 				if (content) {
-					await featurebaseApiRequest.call(this, 'POST', '/v2/comments', {
-						postId: bestMatch.id,
-						content: ContentTransformer.markdownToHtml(content),
-						isPrivate: Boolean(options.commentIsPrivate),
-						author,
+					await client.execute('createComment', {
+						body: {
+							postId: bestMatch.id,
+							content: ContentTransformer.markdownToHtml(content),
+							isPrivate: Boolean(options.commentIsPrivate),
+							author,
+						} as never,
 					});
 				}
 
-				const refreshed = (await featurebaseApiRequest.call(this, 'GET', `/v2/posts/${bestMatch.id as string}`)) as IDataObject;
+				const refreshed = (await client.execute('getPost', { params: { id: bestMatch.id as string } })) as IDataObject;
 				return { ...withContentText(refreshed), matched: true, similarityScore: bestScore };
 			}
 
 			const tags = typeof options.tags === 'string' && options.tags ? options.tags.split(',').map((t) => t.trim()) : undefined;
-			const created = (await featurebaseApiRequest.call(this, 'POST', '/v2/posts', {
-				title,
-				boardId,
-				content: ContentTransformer.markdownToHtml(content),
-				...(author ? { author } : {}),
-				...(tags ? { tags } : {}),
+			const created = (await client.execute('createPost', {
+				body: {
+					title,
+					boardId,
+					content: ContentTransformer.markdownToHtml(content),
+					...(author ? { author } : {}),
+					...(tags ? { tags } : {}),
+				} as never,
 			})) as IDataObject;
 
 			return { ...withContentText(created), matched: false, similarityScore: bestScore };
@@ -292,18 +298,14 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 
 			if (source === 'single') {
 				const postId = extractId(this.getNodeParameter('postId', index));
-				const post = (await featurebaseApiRequest.call(this, 'GET', `/v2/posts/${postId}`)) as IDataObject;
+				const post = (await client.execute('getPost', { params: { id: postId } })) as IDataObject;
 				return scorePost(post, divisor);
 			}
 
 			const queryOptions = this.getNodeParameter('queryOptions', index, {}) as IDataObject;
 			const limit = typeof queryOptions.limit === 'number' ? queryOptions.limit : 10;
-			const posts = await (featurebaseApiRequestAllItems<IDataObject>).call(
-				this,
-				'/v2/posts',
-				{ sortBy: queryOptions.sortBy ?? 'trending', q: queryOptions.q || undefined },
-				false,
-				limit,
+			const posts = extractItems(
+				await client.execute('listPosts', { query: { sortBy: queryOptions.sortBy ?? 'trending', q: queryOptions.q || undefined, limit } as never }),
 			);
 
 			return posts.map((post) => scorePost(post, divisor)).sort((a, b) => (b.arrWeight as number) - (a.arrWeight as number));
@@ -314,8 +316,8 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 			const rows: IDataObject[] = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
 			const [boards, statuses] = await Promise.all([
-				(featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/boards'),
-				(featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/post_statuses'),
+				extractItems(await client.execute('listBoards')),
+				extractItems(await client.execute('listPostStatuses')),
 			]);
 
 			const resolveId = (list: IDataObject[], nameOrId: string | undefined): string | undefined => {
@@ -348,7 +350,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 									.map((t) => t.trim());
 					}
 
-					const post = await featurebaseApiRequest.call(this, 'POST', '/v2/posts', body);
+					const post = await client.execute('createPost', { body: body as never });
 					results.push({ success: true, row, post });
 				} catch (error) {
 					results.push({ success: false, row, error: error instanceof Error ? error.message : String(error) });
@@ -365,7 +367,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 
 			const updateBody: IDataObject = { statusId };
 			if (options.eta) updateBody.eta = options.eta;
-			const post = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/posts/${postId}`, updateBody)) as IDataObject;
+			const post = (await client.execute('updatePost', { params: { id: postId }, body: updateBody as never })) as IDataObject;
 
 			const changelogBody: IDataObject = { title: options.changelogTitle || post.title };
 			if (options.changelogContent) {
@@ -374,7 +376,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 				changelogBody.htmlContent = post.content;
 			}
 
-			const changelog = await featurebaseApiRequest.call(this, 'POST', '/v2/changelogs', changelogBody);
+			const changelog = await client.execute('createChangelog', { body: changelogBody as never });
 
 			return { post: withContentText(post), changelog };
 		}
