@@ -8,11 +8,14 @@
 	"scripts": {
 		"generate:types": "openapi-typescript ../../reference/openapi.json -o src/generated/openapi.ts --default-non-nullable false",
 		"generate:zod": "openapi-zod-client ../../reference/openapi.json -o src/generated/schemas.ts --export-schemas",
-		"generate": "pnpm run generate:types && pnpm run generate:zod",
+		"generate:operations": "node scripts/generate-operations.mjs",
+		"generate:schema-registry": "node scripts/generate-schema-registry.mjs",
+		"generate": "pnpm run generate:types && pnpm run generate:zod && pnpm run generate:operations && pnpm run generate:schema-registry",
 		"typecheck": "tsc --noEmit",
 		"test": "jest"
 	},
 	"dependencies": {
+		"@zodios/core": "^10.9.6",
 		"html-to-text": "^9.0.4",
 		"marked": "^18.0.14",
 		"zod": "^3.24.1"

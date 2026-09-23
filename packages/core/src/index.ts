@@ -13,4 +13,6 @@ export { createFormattingPlugin } from './plugins/formatting';
 export { createValidationPlugin } from './plugins/validation';
 export { defineSchemas } from './registry';
 export type { OperationSchemaDefinition, SchemaRegistry } from './registry';
+export { operationRegistry } from './generated/operations';
+export { generatedSchemas } from './generated/schema-registry';
 export type * as Types from './types';
