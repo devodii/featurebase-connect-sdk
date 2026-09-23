@@ -2,11 +2,12 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 import { NodeOperationError } from 'n8n-workflow';
 import { ContentTransformer } from '@featurebase-connect-sdk/core';
 
-import { featurebaseApiRequest, featurebaseApiRequestAllItems } from '../generic-functions';
+import { getFeaturebaseClient } from '../featurebase-client';
 import {
 	authorCollectionField,
 	cleanAuthorInput,
 	extractId,
+	extractItems,
 	limitField,
 	markdownToggleField,
 	pick,
@@ -216,6 +217,7 @@ function buildCommentBody(fields: IDataObject): IDataObject {
 }
 
 export async function executeComment(this: IExecuteFunctions, index: number, operation: string): Promise<IDataObject | IDataObject[]> {
+	const client = await getFeaturebaseClient(this);
 	const useMarkdown = ['create', 'update'].includes(operation) ? (this.getNodeParameter('markdown', index, true) as boolean) : false;
 	const simplify = ['get', 'getMany', 'create', 'update'].includes(operation) ? (this.getNodeParameter('simplify', index, true) as boolean) : false;
 	const finalize = (comment: IDataObject): IDataObject => {
@@ -229,15 +231,15 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 			if (filters.postId) filters.postId = extractId(filters.postId);
 			const sortBy = this.getNodeParameter('sortBy', index) as string;
 			const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-			const limit = returnAll ? undefined : (this.getNodeParameter('limit', index) as number);
+			const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
 
-			const comments = await (featurebaseApiRequestAllItems<IDataObject>).call(this, '/v2/comments', { sortBy, ...filters }, returnAll, limit);
+			const comments = extractItems(await client.execute('listComments', { query: { sortBy, ...filters, limit } as never }));
 			return comments.map(finalize);
 		}
 
 		case 'get': {
 			const commentId = extractId(this.getNodeParameter('commentId', index));
-			const comment = (await featurebaseApiRequest.call(this, 'GET', `/v2/comments/${commentId}`)) as IDataObject;
+			const comment = (await client.execute('getComment', { params: { id: commentId } })) as IDataObject;
 			return finalize(comment);
 		}
 
@@ -250,7 +252,7 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 				...buildCommentBody(additionalFields),
 			};
 
-			const comment = (await featurebaseApiRequest.call(this, 'POST', '/v2/comments', body)) as IDataObject;
+			const comment = (await client.execute('createComment', { body: body as never })) as IDataObject;
 			return finalize(comment);
 		}
 
@@ -264,13 +266,13 @@ export async function executeComment(this: IExecuteFunctions, index: number, ope
 				...buildCommentBody(updateFields),
 			};
 
-			const comment = (await featurebaseApiRequest.call(this, 'PATCH', `/v2/comments/${commentId}`, body)) as IDataObject;
+			const comment = (await client.execute('updateComment', { params: { id: commentId }, body: body as never })) as IDataObject;
 			return finalize(comment);
 		}
 
 		case 'delete': {
 			const commentId = extractId(this.getNodeParameter('commentId', index));
-			return featurebaseApiRequest.call(this, 'DELETE', `/v2/comments/${commentId}`);
+			return (await client.execute('deleteComment', { params: { id: commentId } })) as IDataObject;
 		}
 
 		default:
