@@ -35,11 +35,11 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/Credentials/FeaturebaseApi.credentials.js"
+			"dist/credentials/FeaturebaseApi.credentials.js"
 		],
 		"nodes": [
-			"dist/Nodes/Featurebase/Featurebase.node.js",
-			"dist/Nodes/Featurebase/FeaturebaseTrigger.node.js"
+			"dist/nodes/featurebase/Featurebase.node.js",
+			"dist/nodes/featurebase/FeaturebaseTrigger.node.js"
 		]
 	},
 	"devDependencies": {
