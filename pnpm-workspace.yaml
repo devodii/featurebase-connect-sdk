@@ -1,7 +1,6 @@
 packages:
   - packages/*
   - integrations/*
-  - integrations/n8n/node
 
 # esbuild's postinstall just fetches its platform binary (needed to bundle the n8n
 # node's build). None of the rest are needed for this workspace's build/lint/test/pack

@@ -43,7 +43,7 @@
 		]
 	},
 	"devDependencies": {
-		"@featurebase-connect-sdk/core": "workspace:*",
+		"@featurebase-connect-sdk/core": "file:../../../packages/core",
 		"@n8n/node-cli": "^0.48.4",
 		"@types/jest": "^29.5.14",
 		"esbuild": "^0.28.2",
