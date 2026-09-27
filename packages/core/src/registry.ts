@@ -1,11 +1,6 @@
 import type { ZodType } from 'zod';
 import type { EndpointSpec, OperationId } from './types';
 
-/**
- * The God-Tier Registry.
- * If you try to register a Zod schema here that doesn't EXACTLY match
- * the OpenAPI spec for that operation, TypeScript will throw a compilation error.
- */
 export type OperationSchemaDefinition<TOp extends OperationId> = {
 	body?: EndpointSpec<TOp>['body'] extends never ? never : ZodType<EndpointSpec<TOp>['body']>;
 	query?: EndpointSpec<TOp>['query'] extends never ? never : ZodType<EndpointSpec<TOp>['query']>;
