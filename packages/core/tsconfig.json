@@ -4,7 +4,7 @@
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"target": "es2022",
-		"lib": ["es2022"],
+		"lib": ["es2022", "dom", "dom.iterable"],
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,

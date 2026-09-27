@@ -14,7 +14,7 @@ export const defaultFetcher: _$featurebaseconnect0.Fetcher = async (request) => 
 		body: request.body === undefined ? undefined : JSON.stringify(request.body),
 	});
 	const body = await response.json().catch(() => undefined);
-	return { status: response.status, headers: Object.fromEntries(response.headers), body };
+	return { status: response.status, headers: Object.fromEntries(response.headers.entries()), body };
 };
 
 export function createFeaturebaseClient(options: CreateClientOptions) {

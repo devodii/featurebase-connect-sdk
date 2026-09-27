@@ -112,5 +112,5 @@ const defaultFetcher: Fetcher = async (request) => {
 	});
 
 	const body = await response.json().catch(() => undefined);
-	return { status: response.status, headers: Object.fromEntries(response.headers), body };
+	return { status: response.status, headers: Object.fromEntries(response.headers.entries()), body };
 };

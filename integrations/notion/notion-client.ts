@@ -36,7 +36,7 @@ export const defaultNotionFetcher: _$featurebaseconnect0.Fetcher = async (reques
 		body: request.body === undefined ? undefined : JSON.stringify(request.body),
 	});
 	const body = await response.json().catch(() => undefined);
-	return { status: response.status, headers: Object.fromEntries(response.headers), body };
+	return { status: response.status, headers: Object.fromEntries(response.headers.entries()), body };
 };
 
 // @unchecked-notion-rate-limit: Notion documents "an average of 3 requests per second"
