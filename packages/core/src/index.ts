@@ -8,7 +8,7 @@ export { withRetry } from './retry';
 export type { RetryOptions } from './retry';
 export { buildUrl } from './url';
 export type { PathParams, QueryParams } from './url';
-export { ContentTransformer } from './transformers';
+export { htmlToText, markdownToHtml } from './transformers';
 export { createFormattingPlugin } from './plugins/formatting';
 export { createValidationPlugin } from './plugins/validation';
 export { defineSchemas } from './registry';

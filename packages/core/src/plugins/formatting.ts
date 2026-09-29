@@ -1,5 +1,5 @@
 import type { FeaturebasePlugin } from '../client';
-import { ContentTransformer } from '../transformers';
+import { htmlToText } from '../transformers';
 
 /**
  * Recursively walks a JSON object and applies a visitor function.
@@ -27,11 +27,11 @@ export function createFormattingPlugin(): FeaturebasePlugin {
 				walk(data, (node) => {
 					// Post and Comment resources use `content`
 					if (typeof node.content === 'string') {
-						node.contentText = ContentTransformer.htmlToText(node.content);
+						node.contentText = htmlToText(node.content);
 					}
 					// Help Center articles use `body`
 					if (typeof node.body === 'string') {
-						node.contentText = ContentTransformer.htmlToText(node.body);
+						node.contentText = htmlToText(node.body);
 					}
 				});
 				return data;
