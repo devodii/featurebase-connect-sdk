@@ -1,7 +1,7 @@
 import type { IDataObject, IHookFunctions, IWebhookFunctions, IWebhookResponseData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
-import { ContentTransformer } from '@featurebase-connect-sdk/core';
+import { htmlToText } from '@featurebase-connect-sdk/core';
 
 import { WEBHOOK_TOPICS } from './descriptions/webhook-topics';
 import { extractItems } from './descriptions/shared';
@@ -407,7 +407,7 @@ export class FeaturebaseTrigger implements INodeType {
 			signatureVerified,
 		};
 
-		if (contentField) outputItem.contentText = ContentTransformer.htmlToText(contentField);
+		if (contentField) outputItem.contentText = htmlToText(contentField);
 		if (item.postUrl) outputItem.postUrl = item.postUrl;
 		if (includeRaw) outputItem.raw = body;
 

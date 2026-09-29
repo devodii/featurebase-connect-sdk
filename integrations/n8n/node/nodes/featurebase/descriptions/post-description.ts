@@ -1,6 +1,6 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
-import { ContentTransformer } from '@featurebase-connect-sdk/core';
+import { markdownToHtml } from '@featurebase-connect-sdk/core';
 
 import { getFeaturebaseClient } from '../featurebase-client';
 import {
@@ -471,7 +471,7 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const body: IDataObject = {
 				title,
 				boardId,
-				content: useMarkdown ? ContentTransformer.markdownToHtml(content) : content,
+				content: useMarkdown ? markdownToHtml(content) : content,
 				...buildPostBody(additionalFields, true),
 			};
 
@@ -485,7 +485,7 @@ export async function executePost(this: IExecuteFunctions, index: number, operat
 			const updateFields = this.getNodeParameter('updateFields', index, {}) as IDataObject;
 
 			const body: IDataObject = buildPostBody(updateFields, false);
-			if (content) body.content = useMarkdown ? ContentTransformer.markdownToHtml(content) : content;
+			if (content) body.content = useMarkdown ? markdownToHtml(content) : content;
 
 			const post = (await client.execute('updatePost', { params: { id: postId }, body: body as never })) as IDataObject;
 			return finalize(post);

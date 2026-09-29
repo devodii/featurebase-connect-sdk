@@ -1,6 +1,6 @@
 import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
-import { ContentTransformer } from '@featurebase-connect-sdk/core';
+import { markdownToHtml } from '@featurebase-connect-sdk/core';
 
 import { getFeaturebaseClient } from '../featurebase-client';
 import { titleSimilarity } from '../utils/similarity';
@@ -267,7 +267,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 					await client.execute('createComment', {
 						body: {
 							postId: bestMatch.id,
-							content: ContentTransformer.markdownToHtml(content),
+							content: markdownToHtml(content),
 							isPrivate: Boolean(options.commentIsPrivate),
 							author,
 						} as never,
@@ -283,7 +283,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 				body: {
 					title,
 					boardId,
-					content: ContentTransformer.markdownToHtml(content),
+					content: markdownToHtml(content),
 					...(author ? { author } : {}),
 					...(tags ? { tags } : {}),
 				} as never,
@@ -330,7 +330,7 @@ export async function executeWorkflowHelper(this: IExecuteFunctions, index: numb
 					const body: IDataObject = {
 						title: row.title,
 						boardId: resolveId(boards, row.board as string),
-						content: ContentTransformer.markdownToHtml(String(row.content ?? '')),
+						content: markdownToHtml(String(row.content ?? '')),
 					};
 
 					if (row.authorEmail || row.authorName) {
