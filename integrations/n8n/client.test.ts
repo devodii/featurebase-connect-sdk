@@ -1,4 +1,10 @@
-import { defaultFetcher as coreDefaultFetcher, FeaturebaseApiError, FeaturebaseValidationError, type FetchRequest, type FetchResponse } from '@featurebase-connect-sdk/core';
+import {
+	defaultFetcher as coreDefaultFetcher,
+	FeaturebaseApiError,
+	FeaturebaseValidationError,
+	type FetchRequest,
+	type FetchResponse,
+} from '@featurebase-connect-sdk/core';
 import { createFeaturebaseClient, defaultFetcher } from './client';
 
 function fakeFetcher(handler: (request: FetchRequest) => FetchResponse) {
@@ -76,7 +82,7 @@ describe('defaultFetcher', () => {
 		globalThis.fetch = originalFetch;
 	});
 
-	it('re-exports core\'s defaultFetcher rather than a local duplicate', () => {
+	it("re-exports core's defaultFetcher rather than a local duplicate", () => {
 		expect(defaultFetcher).toBe(coreDefaultFetcher);
 	});
 
