@@ -9,7 +9,7 @@
 				"output": {}
 			},
 			"name": "Featurebase Trigger",
-			"type": "n8n-nodes-featurebase.featurebaseTrigger",
+			"type": "n8n-nodes-featurebase-connect.featurebaseTrigger",
 			"typeVersion": 1,
 			"position": [260, 300],
 			"webhookId": "high-vote-post-to-slack",

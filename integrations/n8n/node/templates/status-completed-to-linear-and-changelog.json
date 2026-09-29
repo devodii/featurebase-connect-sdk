@@ -9,7 +9,7 @@
 				"output": {}
 			},
 			"name": "Featurebase Trigger",
-			"type": "n8n-nodes-featurebase.featurebaseTrigger",
+			"type": "n8n-nodes-featurebase-connect.featurebaseTrigger",
 			"typeVersion": 1,
 			"position": [260, 300],
 			"webhookId": "status-completed-to-linear-and-changelog",
@@ -37,7 +37,7 @@
 				"changelogOptions": {}
 			},
 			"name": "Set Status with Changelog Draft",
-			"type": "n8n-nodes-featurebase.featurebase",
+			"type": "n8n-nodes-featurebase-connect.featurebase",
 			"typeVersion": 1,
 			"position": [520, 300],
 			"credentials": {

@@ -23,7 +23,7 @@
 				"simplify": true
 			},
 			"name": "Post: Get Many (Trending)",
-			"type": "n8n-nodes-featurebase.featurebase",
+			"type": "n8n-nodes-featurebase-connect.featurebase",
 			"typeVersion": 1,
 			"position": [520, 300],
 			"credentials": {
@@ -46,7 +46,7 @@
 				"divisor": 1000
 			},
 			"name": "Revenue-Weighted Score",
-			"type": "n8n-nodes-featurebase.featurebase",
+			"type": "n8n-nodes-featurebase-connect.featurebase",
 			"typeVersion": 1,
 			"position": [780, 300],
 			"credentials": {

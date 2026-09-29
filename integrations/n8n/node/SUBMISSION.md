@@ -1,10 +1,10 @@
 # Publishing and verification
 
-This documents the exact current process for publishing `n8n-nodes-featurebase` to npm and submitting it for n8n community node verification, as of the sources checked while building this package: `docs.n8n.io/integrations/community-nodes/building-community-nodes`, `docs.n8n.io/connect/create-nodes/build-your-node/reference/verification-guidelines`, and `docs.n8n.io/connect/create-nodes/deploy-your-node/submit-community-nodes`.
+This documents the exact current process for publishing `n8n-nodes-featurebase-connect` to npm and submitting it for n8n community node verification, as of the sources checked while building this package: `docs.n8n.io/integrations/community-nodes/building-community-nodes`, `docs.n8n.io/connect/create-nodes/build-your-node/reference/verification-guidelines`, and `docs.n8n.io/connect/create-nodes/deploy-your-node/submit-community-nodes`.
 
 ## Pre-publish checklist
 
-- [x] Package name starts with `n8n-nodes-` (`n8n-nodes-featurebase`).
+- [x] Package name starts with `n8n-nodes-` (`n8n-nodes-featurebase-connect`).
 - [x] `package.json` keywords include `n8n-community-node-package`.
 - [x] `package.json`'s `n8n` block lists the credential and both nodes.
 - [x] Zero runtime dependencies (`n8n-workflow` is a `peerDependency`, everything else is a `devDependency`).
@@ -61,7 +61,7 @@ npm pack --dry-run
 After the package is live on npm, run the official scanner (it fetches the published package from the registry, so it cannot run against a local, unpublished checkout):
 
 ```bash
-npx @n8n/scan-community-package n8n-nodes-featurebase
+npx @n8n/scan-community-package n8n-nodes-featurebase-connect
 ```
 
 ## Submitting for verification

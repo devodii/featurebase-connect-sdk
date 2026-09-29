@@ -1,4 +1,4 @@
-# n8n-nodes-featurebase
+# n8n-nodes-featurebase-connect
 
 An n8n community node package for [Featurebase](https://featurebase.app): feedback boards, changelogs, help center, and support conversations. Featurebase's own feedback board has [an open request for this integration](https://feedback.featurebase.app/p/support-connecting-and-interacting-with-n8n) with 145 upvotes, posted by a Featurebase team member and marked "In Review" - this package is the implementation.
 
@@ -7,12 +7,12 @@ An n8n community node package for [Featurebase](https://featurebase.app): feedba
 **n8n Cloud or self-hosted with the community nodes panel:**
 
 1. Go to **Settings > Community Nodes**.
-2. Select **Install**, enter `n8n-nodes-featurebase`, and confirm.
+2. Select **Install**, enter `n8n-nodes-featurebase-connect`, and confirm.
 
 **Self-hosted with npm:**
 
 ```bash
-npm install n8n-nodes-featurebase
+npm install n8n-nodes-featurebase-connect
 ```
 
 Then restart n8n. See [n8n's community nodes documentation](https://docs.n8n.io/integrations/community-nodes/installation-and-management/) for details specific to your setup (npm, Docker, or a custom image).
