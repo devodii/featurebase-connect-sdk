@@ -7,15 +7,10 @@ export interface CreateClientOptions {
 	fetcher?: _$featurebaseconnect0.Fetcher;
 }
 
-export const defaultFetcher: _$featurebaseconnect0.Fetcher = async (request) => {
-	const response = await fetch(request.url, {
-		method: request.method,
-		headers: request.headers,
-		body: request.body === undefined ? undefined : JSON.stringify(request.body),
-	});
-	const body = await response.json().catch(() => undefined);
-	return { status: response.status, headers: Object.fromEntries(response.headers.entries()), body };
-};
+// Re-exported for backwards compatibility with existing imports of this module;
+// the implementation lives in core (`@featurebase-connect-sdk/core`'s
+// `defaultFetcher`) so the throw-on-4xx/5xx fix only needs to live in one place.
+export const defaultFetcher = _$featurebaseconnect0.defaultFetcher;
 
 export function createFeaturebaseClient(options: CreateClientOptions) {
 	return _$featurebaseconnect0.createFeaturebase({

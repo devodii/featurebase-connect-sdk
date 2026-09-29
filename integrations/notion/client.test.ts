@@ -1,5 +1,5 @@
-import { FeaturebaseValidationError, type FetchRequest, type FetchResponse } from '@featurebase-connect-sdk/core';
-import { createFeaturebaseClient } from './client';
+import { defaultFetcher as coreDefaultFetcher, FeaturebaseApiError, FeaturebaseValidationError, type FetchRequest, type FetchResponse } from '@featurebase-connect-sdk/core';
+import { createFeaturebaseClient, defaultFetcher } from './client';
 
 function fakeFetcher(handler: (request: FetchRequest) => FetchResponse) {
 	const requests: FetchRequest[] = [];
@@ -71,5 +71,27 @@ describe('createFeaturebaseClient', () => {
 		await client.execute('listPosts', { query: {} });
 
 		expect(requests[0].headers?.['Featurebase-Version']).toBe('2026-01-01.nova');
+	});
+});
+
+describe('defaultFetcher', () => {
+	const originalFetch = globalThis.fetch;
+
+	afterEach(() => {
+		globalThis.fetch = originalFetch;
+	});
+
+	it('re-exports core\'s defaultFetcher rather than a local duplicate', () => {
+		expect(defaultFetcher).toBe(coreDefaultFetcher);
+	});
+
+	it('throws a FeaturebaseApiError for a 4xx response', async () => {
+		globalThis.fetch = jest.fn().mockResolvedValue({
+			status: 401,
+			headers: new Headers(),
+			json: async () => ({ success: false, message: 'Invalid API Key' }),
+		}) as unknown as typeof fetch;
+
+		await expect(defaultFetcher({ method: 'GET', url: 'https://do.featurebase.app/v2/boards' })).rejects.toBeInstanceOf(FeaturebaseApiError);
 	});
 });

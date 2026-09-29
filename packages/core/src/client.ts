@@ -2,6 +2,7 @@ import type { EndpointSpec, ExecuteArgs, OperationId } from './types';
 import type { Fetcher, FetchRequest } from './fetcher';
 import { withRetry, type RetryOptions } from './retry';
 import { buildUrl } from './url';
+import { FeaturebaseApiError } from './errors';
 
 export interface OperationDescriptor {
 	method: string;
@@ -98,7 +99,7 @@ export function createFeaturebase(options: FeaturebaseConnectOptions) {
 	};
 }
 
-const defaultFetcher: Fetcher = async (request) => {
+export const defaultFetcher: Fetcher = async (request) => {
 	const response = await fetch(request.url, {
 		method: request.method,
 		headers: request.headers,
@@ -106,5 +107,11 @@ const defaultFetcher: Fetcher = async (request) => {
 	});
 
 	const body = await response.json().catch(() => undefined);
-	return { status: response.status, headers: Object.fromEntries(response.headers.entries()), body };
+	const headers = Object.fromEntries(response.headers.entries());
+
+	if (response.status >= 400) {
+		throw new FeaturebaseApiError(response.status, body, headers);
+	}
+
+	return { status: response.status, headers, body };
 };
