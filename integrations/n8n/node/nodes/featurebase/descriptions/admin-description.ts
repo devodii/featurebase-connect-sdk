@@ -9,6 +9,7 @@ export const {
 	resourceName: 'admin',
 	getOperation: 'getAdmin',
 	listOperation: 'listAdmins',
+	supportsServerLimit: false,
 	searchListMethod: 'searchAdmins',
 	idFieldDescription: 'The admin to look up',
 	simplifyFields: ['id', 'name', 'email', 'roleId'],

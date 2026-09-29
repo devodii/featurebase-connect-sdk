@@ -27,7 +27,7 @@ export async function getPostStatuses(this: ILoadOptionsFunctions): Promise<INod
 
 export async function getAdmins(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const admins = extractItems(await client.execute('listAdmins', { query: { limit: 100 } }));
+	const admins = extractItems(await client.execute('listAdmins'));
 	return toOptions(admins, 'name');
 }
 
@@ -45,7 +45,7 @@ export async function getBrands(this: ILoadOptionsFunctions): Promise<INodePrope
 
 export async function getCustomFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const client = await getFeaturebaseClient(this);
-	const fields = extractItems(await client.execute('listCustomFields', { query: { limit: 100 } }));
+	const fields = extractItems(await client.execute('listCustomFields'));
 	return toOptions(fields, 'label');
 }
 
@@ -77,18 +77,16 @@ export async function getPostTags(this: ILoadOptionsFunctions): Promise<INodePro
 		.map((name) => ({ name, value: name }));
 }
 
-/**
- * Builds a resourceLocator "From List" search method for a given list
- * operation. Featurebase list endpoints don't support server-side name
- * search, so filtering happens client-side over the fetched page.
- */
 function listSearchFactory(
 	operation: 'listBoards' | 'listPostStatuses' | 'listAdmins' | 'listTeams' | 'listBrands' | 'listCustomFields' | 'listCollections',
 	nameKey: string,
+	supportsLimit: boolean,
 ) {
 	return async function listSearch(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 		const client = await getFeaturebaseClient(this);
-		const items = extractItems(await client.execute(operation, { query: { limit: 100 } } as never));
+		const items = extractItems(
+			await (supportsLimit ? client.execute(operation, { query: { limit: 100 } } as never) : client.execute(operation, undefined as never)),
+		);
 		const results = items
 			.map((item) => ({ name: String(item[nameKey] ?? item.id), value: String(item.id) }))
 			.filter((item) => !filter || item.name.toLowerCase().includes(filter.toLowerCase()));
@@ -97,13 +95,13 @@ function listSearchFactory(
 	};
 }
 
-export const searchBoards = listSearchFactory('listBoards', 'name');
-export const searchPostStatuses = listSearchFactory('listPostStatuses', 'name');
-export const searchAdmins = listSearchFactory('listAdmins', 'name');
-export const searchTeams = listSearchFactory('listTeams', 'name');
-export const searchBrands = listSearchFactory('listBrands', 'name');
-export const searchCustomFields = listSearchFactory('listCustomFields', 'label');
-export const searchHelpCenterCollections = listSearchFactory('listCollections', 'name');
+export const searchBoards = listSearchFactory('listBoards', 'name', false);
+export const searchPostStatuses = listSearchFactory('listPostStatuses', 'name', false);
+export const searchAdmins = listSearchFactory('listAdmins', 'name', false);
+export const searchTeams = listSearchFactory('listTeams', 'name', false);
+export const searchBrands = listSearchFactory('listBrands', 'name', true);
+export const searchCustomFields = listSearchFactory('listCustomFields', 'label', false);
+export const searchHelpCenterCollections = listSearchFactory('listCollections', 'name', true);
 
 export async function searchPosts(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 	const client = await getFeaturebaseClient(this);

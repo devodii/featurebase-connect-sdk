@@ -9,6 +9,7 @@ export const {
 	resourceName: 'board',
 	getOperation: 'getBoard',
 	listOperation: 'listBoards',
+	supportsServerLimit: false,
 	searchListMethod: 'searchBoards',
 	idFieldDescription: 'The board (category) to look up',
 	simplifyFields: ['id', 'name'],
