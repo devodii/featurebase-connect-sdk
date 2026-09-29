@@ -25,7 +25,6 @@ export class FeaturebaseValidationError extends Error {
 	}
 }
 
-// Define what a Plugin looks like
 export interface FeaturebasePlugin {
 	id: string;
 	hooks?: {
@@ -50,11 +49,9 @@ export function createFeaturebase(options: FeaturebaseConnectOptions) {
 	const fetcher = options.fetcher ?? defaultFetcher;
 	const plugins = options.plugins ?? [];
 
-	// The core execute function, highly typed.
 	async function execute<TOp extends OperationId>(operation: TOp, ...args: ExecuteArgs<TOp>): Promise<EndpointSpec<TOp>['response']> {
 		let modifiedArgs: unknown[] = args;
 
-		// Run beforeExecute hooks (validation happens here)
 		for (const plugin of plugins) {
 			if (plugin.hooks?.beforeExecute) {
 				modifiedArgs = await plugin.hooks.beforeExecute(operation, modifiedArgs);
@@ -77,7 +74,6 @@ export function createFeaturebase(options: FeaturebaseConnectOptions) {
 			},
 		};
 
-		// Run beforeRequest hooks (plugins modifying the outgoing request)
 		for (const plugin of plugins) {
 			if (plugin.hooks?.beforeRequest) {
 				request = await plugin.hooks.beforeRequest(request);
@@ -86,7 +82,6 @@ export function createFeaturebase(options: FeaturebaseConnectOptions) {
 
 		const response = await withRetry(() => fetcher(request), options.retry);
 
-		// Run afterResponse hooks
 		let data: unknown = response.body;
 		for (const plugin of plugins) {
 			if (plugin.hooks?.afterResponse) {
@@ -99,7 +94,6 @@ export function createFeaturebase(options: FeaturebaseConnectOptions) {
 
 	return {
 		execute,
-		// Expose plugin utilities if integrations need to bind to the client
 		$plugins: plugins.reduce<Record<string, FeaturebasePlugin>>((acc, plugin) => ({ ...acc, [plugin.id]: plugin }), {}),
 	};
 }
