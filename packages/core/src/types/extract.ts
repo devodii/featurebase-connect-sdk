@@ -11,8 +11,7 @@ type SuccessResponse<T> = {
 };
 
 /**
- * The Ultimate Endpoint Resolver.
- * Maps any OpenAPI OperationId to its exact Body, Query, Path, and Response types.
+ * Extracts the exact Body, Query, Path, and Response types for any OpenAPI OperationId.
  */
 export type EndpointSpec<T extends OperationId> = {
 	body: 'requestBody' extends keyof operations[T] ? JsonPayload<NonNullable<operations[T]['requestBody']>> : never;
@@ -31,11 +30,6 @@ export type EndpointSpec<T extends OperationId> = {
 		: never;
 };
 
-/**
- * Creates a deeply inferred arguments object.
- * If an endpoint doesn't require a body, query, or path params, they are omitted from the type signature.
- * If they are required, TypeScript will enforce them.
- */
 export type Prettify<T> = {
 	[K in keyof T]: T[K];
 } & {};
@@ -46,5 +40,4 @@ export type RequestArgs<T extends OperationId, Spec extends EndpointSpec<T> = En
 		(Spec['path'] extends never ? {} : { params: Spec['path'] })
 >;
 
-// Conditional tuple: if RequestArgs is an empty object, the arguments are optional.
 export type ExecuteArgs<TOp extends OperationId> = keyof RequestArgs<TOp> extends never ? [options?: RequestArgs<TOp>] : [options: RequestArgs<TOp>];
