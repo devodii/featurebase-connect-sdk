@@ -1,9 +1,6 @@
 import type { FeaturebasePlugin } from '../client';
 import { htmlToText } from '../transformers';
 
-/**
- * Recursively walks a JSON object and applies a visitor function.
- */
 function walk(obj: unknown, visitor: (node: Record<string, unknown>) => void) {
 	if (obj === null || typeof obj !== 'object') return;
 	visitor(obj as Record<string, unknown>);
@@ -14,11 +11,6 @@ function walk(obj: unknown, visitor: (node: Record<string, unknown>) => void) {
 	}
 }
 
-/**
- * A Core Plugin that automatically enhances API responses.
- * If any object returned by the API has a `content` or `body` field containing HTML,
- * this plugin automatically generates and attaches a clean `contentText` field.
- */
 export function createFormattingPlugin(): FeaturebasePlugin {
 	return {
 		id: 'featurebase-auto-formatter',
