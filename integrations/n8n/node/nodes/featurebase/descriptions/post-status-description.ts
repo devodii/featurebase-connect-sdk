@@ -9,6 +9,7 @@ export const {
 	resourceName: 'post status',
 	getOperation: 'getPostStatus',
 	listOperation: 'listPostStatuses',
+	supportsServerLimit: false,
 	searchListMethod: 'searchPostStatuses',
 	idFieldDescription: 'The post status to look up',
 	simplifyFields: ['id', 'name', 'color', 'type', 'isDefault'],

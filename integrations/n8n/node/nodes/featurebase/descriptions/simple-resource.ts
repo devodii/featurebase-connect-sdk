@@ -9,6 +9,8 @@ export interface SimpleResourceConfig {
 	resourceName: string;
 	getOperation: Types.OperationId;
 	listOperation: Types.OperationId;
+	/** Whether listOperation's openapi.json query params include `limit` — Featurebase rejects unrecognized query keys with a 400. */
+	supportsServerLimit: boolean;
 	searchListMethod: string;
 	idFieldDescription: string;
 	simplifyFields: string[];
@@ -25,7 +27,7 @@ export function buildSimpleResource(config: SimpleResourceConfig): {
 	fields: INodeProperties[];
 	execute: (this: IExecuteFunctions, index: number, operation: string) => Promise<IDataObject | IDataObject[]>;
 } {
-	const { resource, resourceName, getOperation, listOperation, searchListMethod, idFieldDescription, simplifyFields } = config;
+	const { resource, resourceName, getOperation, listOperation, supportsServerLimit, searchListMethod, idFieldDescription, simplifyFields } = config;
 	const idField = `${resource}Id`;
 
 	const operations: INodeProperties = {
@@ -84,9 +86,14 @@ export function buildSimpleResource(config: SimpleResourceConfig): {
 		}
 
 		const returnAll = this.getNodeParameter('returnAll', index) as boolean;
-		// This resource's list endpoint doesn't reliably support cursor pagination across
-		// all six resources sharing this factory, so "return all" is capped at one generous page.
 		const limit = returnAll ? 100 : (this.getNodeParameter('limit', index) as number);
+
+		if (!supportsServerLimit) {
+			const response = await client.execute(listOperation, undefined as never);
+			const items = extractItems(response).map(finalize);
+			return returnAll ? items : items.slice(0, limit);
+		}
+
 		const response = await client.execute(listOperation, { query: { limit } } as never);
 		return extractItems(response).map(finalize);
 	}

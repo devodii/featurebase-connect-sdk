@@ -9,6 +9,7 @@ export const {
 	resourceName: 'brand',
 	getOperation: 'getBrandById',
 	listOperation: 'listBrands',
+	supportsServerLimit: true,
 	searchListMethod: 'searchBrands',
 	idFieldDescription: 'The brand to look up',
 	simplifyFields: ['id', 'name', 'isDefault', 'helpCenterId'],
