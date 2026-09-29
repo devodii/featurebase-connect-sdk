@@ -1,48 +1,49 @@
-# Publishes this n8n community node package to npm on every version tag push.
+# Versions and publishes the n8n community node package with Changesets.
 #
-# Starting May 1 2026, n8n requires all community nodes to be published via
-# GitHub Actions with npm provenance statements. This workflow satisfies that
-# requirement. Provenance lets anyone cryptographically verify that a package
-# was built by this exact workflow, from this exact repository and commit.
+# Changesets is scoped to integrations/n8n/node only (see its .changeset/
+# config.json) and treated as a standalone, single-package project there -
+# it is not part of the pnpm workspace at the repo root.
 #
-# ─── ONE-TIME SETUP ────────────────────────────────────────────────────────────
+# ─── HOW THIS WORKS ─────────────────────────────────────────────────────────
 #
-# Option A - OIDC Trusted Publishing (recommended, no long-lived secrets):
-#   1. Log in to npmjs.com and open your package's settings.
-#   2. Under "Publish access" -> "Trusted Publishers", click "Add a publisher".
-#   3. Select GitHub Actions and fill in:
-#        Repository owner: devodii
-#        Repository name:  featurebase-connect-sdk
-#        Workflow name:    publish.yml
-#        Environment:      (leave blank unless you use GitHub Environments)
-#   4. Leave the NPM_TOKEN secret unset in this repository. GitHub's OIDC
-#      token is used instead - no secret ever touches your repo settings.
+# 1. Contributors describe their change with `npx changeset add` (run from
+#    integrations/n8n/node) and commit the generated .changeset/*.md file
+#    alongside their change.
+# 2. On every push to main, this workflow runs. If there are unreleased
+#    changesets, changesets/action opens or updates a "Version Packages" pull
+#    request that bumps package.json's version, updates CHANGELOG.md, and
+#    removes the consumed changeset files.
+# 3. Merging that pull request pushes to main with no pending changesets, so
+#    the next run of this workflow instead lints, builds, and publishes to
+#    npm with a provenance attestation - satisfying n8n's May 1 2026
+#    requirement that all community nodes publish via GitHub Actions with
+#    provenance.
 #
-# Option B - npm Automation Token (fallback):
-#   1. On npmjs.com: Access Tokens -> Generate New Token -> Granular Access Token.
-#      Scope it to this package with "Read and write" publish permission.
-#   2. In GitHub: Settings -> Secrets and variables -> Actions -> New secret.
-#      Name it NPM_TOKEN and paste the token value.
+# package.json's `prepublishOnly` script (`n8n-node prerelease`) still guards
+# against an accidental `npm publish`: it only allows the publish to proceed
+# when `RELEASE_MODE=true` is set, which this workflow sets for the real,
+# CI-driven publish below.
 #
-# ─── TAG CONVENTION ────────────────────────────────────────────────────────────
+# ─── ONE-TIME SETUP ─────────────────────────────────────────────────────────
 #
-# This workflow triggers on tags matching "*.*.*" (e.g. 0.1.0).
-#
-# ─── RELEASE PROCESS ───────────────────────────────────────────────────────────
-#
-# Run `npm run release` locally to lint, build, bump the version, update the
-# changelog, commit, tag, and push - which triggers this workflow.
+# In GitHub: Settings -> Secrets and variables -> Actions -> New repository
+# secret. Name it NPM_TOKEN and paste an npm granular access token scoped to
+# this package with "Read and write" publish permission.
 
 name: Publish
 
 on:
   push:
-    tags:
-      - '*.*.*'
+    branches:
+      - main
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   publish:
-    name: Publish to npm
+    name: Version or publish
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -50,10 +51,13 @@ jobs:
 
     permissions:
       id-token: write
-      contents: read
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -61,13 +65,22 @@ jobs:
           node-version: 'lts/*'
           cache: 'npm'
           cache-dependency-path: integrations/n8n/node/package-lock.json
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install core's dependencies
+        working-directory: packages/core
+        run: npm install
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Release
-        run: |
-          [ -n "$NPM_TOKEN" ] && npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
-          npm run release
+      - name: Create Version Packages PR or publish to npm
+        uses: changesets/action@v1
+        with:
+          cwd: integrations/n8n/node
+          publish: npm run ci:publish
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_MODE: 'true'
+          NPM_CONFIG_PROVENANCE: 'true'

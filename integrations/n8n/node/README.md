@@ -1,4 +1,4 @@
-# n8n-nodes-featurebase
+# n8n-nodes-featurebase-connect
 
 An n8n community node package for [Featurebase](https://featurebase.app): feedback boards, changelogs, help center, and support conversations. Featurebase's own feedback board has [an open request for this integration](https://feedback.featurebase.app/p/support-connecting-and-interacting-with-n8n) with 145 upvotes, posted by a Featurebase team member and marked "In Review" - this package is the implementation.
 
@@ -7,12 +7,12 @@ An n8n community node package for [Featurebase](https://featurebase.app): feedba
 **n8n Cloud or self-hosted with the community nodes panel:**
 
 1. Go to **Settings > Community Nodes**.
-2. Select **Install**, enter `n8n-nodes-featurebase`, and confirm.
+2. Select **Install**, enter `n8n-nodes-featurebase-connect`, and confirm.
 
 **Self-hosted with npm:**
 
 ```bash
-npm install n8n-nodes-featurebase
+npm install n8n-nodes-featurebase-connect
 ```
 
 Then restart n8n. See [n8n's community nodes documentation](https://docs.n8n.io/integrations/community-nodes/installation-and-management/) for details specific to your setup (npm, Docker, or a custom image).
@@ -147,14 +147,21 @@ Reads a Canny CSV export, maps its columns, and runs Bulk Import.
 
 ```bash
 npm install
-npm run build     # compile and copy static assets
-npm run dev        # watch mode
-npm run lint        # n8n-nodes-base + community-node lint rules
+npm run build   # compile and copy static assets
+npm run dev     # watch mode
+npm run lint    # n8n-nodes-base + community-node lint rules
 npm run lintfix
-npm run format      # prettier --write .
-npm test            # jest
-npm run format:push # format, lint --fix, typecheck, commit, and push
+npm run format  # prettier --write .
+npm test        # jest
 ```
+
+Releases are managed with [Changesets](https://github.com/changesets/changesets), scoped to this directory (see `.changeset/config.json`) rather than to the repository root. If your change should ship in the next release, describe it with:
+
+```bash
+npx changeset add
+```
+
+and commit the generated `.changeset/*.md` file alongside your change. Merging to `main` takes care of the rest: `.github/workflows/publish.yml` opens or updates a "Version Packages" pull request that bumps the version and updates `CHANGELOG.md`; merging that pull request triggers the real publish to npm with a provenance attestation. There's nothing to run locally to cut a release.
 
 `../../../reference/` (at the repository root) holds everything this package was built from: the OpenAPI spec (`openapi.json`), recovered docs pages, and `FINDINGS.md`, which records every place the spec and this README's claims come from, plus every documented gap. Anything not backed by that spec was deliberately left out rather than guessed.
 

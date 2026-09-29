@@ -53,7 +53,7 @@
 				}
 			},
 			"name": "Upsert Feedback",
-			"type": "n8n-nodes-featurebase.featurebase",
+			"type": "n8n-nodes-featurebase-connect.featurebase",
 			"typeVersion": 1,
 			"position": [780, 260],
 			"credentials": {

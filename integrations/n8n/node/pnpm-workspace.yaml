@@ -1,0 +1,10 @@
+# This file is NOT for pnpm - this directory is deliberately excluded from
+# the pnpm workspace at the repo root (see the root pnpm-workspace.yaml and
+# this package's own README). It exists purely so that @changesets/cli's
+# root-detection (via @manypkg/find-root) stops climbing directories right
+# here, instead of continuing up and locking onto the repo root's real
+# pnpm-workspace.yaml - which would make Changesets operate on the whole
+# pnpm workspace instead of just this standalone npm package. Do not remove
+# this file or add real packages to it.
+packages:
+  - '.'

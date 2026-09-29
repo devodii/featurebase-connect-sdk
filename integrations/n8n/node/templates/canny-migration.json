@@ -56,7 +56,7 @@
 				"items": "={{$json.items}}"
 			},
 			"name": "Bulk Import",
-			"type": "n8n-nodes-featurebase.featurebase",
+			"type": "n8n-nodes-featurebase-connect.featurebase",
 			"typeVersion": 1,
 			"position": [1460, 300],
 			"credentials": {
