@@ -50,7 +50,6 @@ export class FeaturebaseApi implements ICredentialType {
 		request: {
 			baseURL: '={{$credentials.baseUrl}}',
 			url: '/v2/boards',
-			qs: { limit: 1 },
 		},
 	};
 }
