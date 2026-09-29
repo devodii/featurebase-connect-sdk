@@ -2,17 +2,13 @@ import type { operations } from '../generated/openapi';
 
 export type OperationId = keyof operations;
 
-// Helper to extract JSON content safely
 type JsonPayload<T> = T extends { content: { 'application/json': infer U } } ? U : never;
 
-// Ensure we only extract 2xx success responses (status keys are numeric literals, so coerce to string to pattern-match)
+// Status keys are numeric literals, so coerce to string to pattern-match against `2${string}`.
 type SuccessResponse<T> = {
 	[K in keyof T as `${K & (string | number)}` extends `2${string}` ? K : never]: T[K];
 };
 
-/**
- * Extracts the exact Body, Query, Path, and Response types for any OpenAPI OperationId.
- */
 export type EndpointSpec<T extends OperationId> = {
 	body: 'requestBody' extends keyof operations[T] ? JsonPayload<NonNullable<operations[T]['requestBody']>> : never;
 	query: 'parameters' extends keyof operations[T]
@@ -30,11 +26,11 @@ export type EndpointSpec<T extends OperationId> = {
 		: never;
 };
 
-export type Prettify<T> = {
+type Prettify<T> = {
 	[K in keyof T]: T[K];
 } & {};
 
-export type RequestArgs<T extends OperationId, Spec extends EndpointSpec<T> = EndpointSpec<T>> = Prettify<
+type RequestArgs<T extends OperationId, Spec extends EndpointSpec<T> = EndpointSpec<T>> = Prettify<
 	(Spec['body'] extends never ? {} : { body: Spec['body'] }) &
 		(Spec['query'] extends never ? {} : { query: Spec['query'] }) &
 		(Spec['path'] extends never ? {} : { params: Spec['path'] })

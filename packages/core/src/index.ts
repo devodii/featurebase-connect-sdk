@@ -1,6 +1,7 @@
-export { createFeaturebase, FeaturebaseValidationError } from './client';
+export { createFeaturebase, defaultFetcher, FeaturebaseValidationError } from './client';
 export type { FeaturebaseConnectOptions, FeaturebasePlugin, OperationDescriptor, OperationRegistry, ValidationIssue } from './client';
 export type { FetchRequest, FetchResponse, Fetcher } from './fetcher';
+export { extractErrorMessage, FeaturebaseApiError } from './errors';
 export { featurebaseRetryOptions } from './featurebase-retry';
 export { collectAll, paginate } from './pagination';
 export type { CursorPage } from './pagination';

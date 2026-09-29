@@ -1,5 +1,7 @@
-import { createFeaturebase, FeaturebaseValidationError, type FeaturebasePlugin, type OperationRegistry } from './client';
+import { createFeaturebase, defaultFetcher, FeaturebaseValidationError, type FeaturebasePlugin, type OperationRegistry } from './client';
 import type { FetchRequest, FetchResponse, Fetcher } from './fetcher';
+import { FeaturebaseApiError } from './errors';
+import { featurebaseRetryOptions } from './featurebase-retry';
 
 const OPERATIONS: OperationRegistry = {
 	listBoards: { method: 'GET', path: '/v2/boards' },
@@ -174,6 +176,83 @@ describe('createFeaturebase().execute', () => {
 		});
 
 		expect(client.$plugins['my-plugin']).toBe(plugin);
+	});
+});
+
+describe('defaultFetcher', () => {
+	const originalFetch = globalThis.fetch;
+
+	afterEach(() => {
+		globalThis.fetch = originalFetch;
+	});
+
+	function mockFetchOnce(status: number, body: unknown, headers: Record<string, string> = {}) {
+		globalThis.fetch = jest.fn().mockResolvedValue({
+			status,
+			headers: new Headers(headers),
+			json: async () => body,
+		}) as unknown as typeof fetch;
+	}
+
+	it('returns the parsed response for a successful request', async () => {
+		mockFetchOnce(200, { data: [], nextCursor: null });
+
+		const result = await defaultFetcher({ method: 'GET', url: 'https://do.featurebase.app/v2/boards' });
+
+		expect(result).toEqual({ status: 200, headers: {}, body: { data: [], nextCursor: null } });
+	});
+
+	it('throws a FeaturebaseApiError, instead of returning normally, for a 4xx/5xx response', async () => {
+		mockFetchOnce(404, { error: { type: 'invalid_request_error', code: 'resource_not_found', message: 'Post not found', param: 'post' } });
+
+		await expect(defaultFetcher({ method: 'GET', url: 'https://do.featurebase.app/v2/posts/bad-id' })).rejects.toMatchObject({
+			name: 'FeaturebaseApiError',
+			status: 404,
+			message: 'Post not found',
+		});
+	});
+
+	// Regression test for the dead-retry bug: previously `defaultFetcher` returned
+	// a response object no matter the status, so `withRetry` (which only retries
+	// inside a `catch`) never saw a 429 as retryable. This must actually retry.
+	it('actually triggers a retry via withRetry + featurebaseRetryOptions on a 429', async () => {
+		let calls = 0;
+		globalThis.fetch = jest.fn().mockImplementation(async () => {
+			calls += 1;
+			if (calls < 3) {
+				return {
+					status: 429,
+					headers: new Headers({ 'retry-after': '0' }),
+					json: async () => ({ success: false, message: 'Too many requests' }),
+				};
+			}
+			return { status: 200, headers: new Headers(), json: async () => ({ data: [], nextCursor: null }) };
+		}) as unknown as typeof fetch;
+
+		const client = createFeaturebase({
+			apiKey: 'sk_test',
+			fetcher: defaultFetcher,
+			operations: OPERATIONS,
+			retry: featurebaseRetryOptions({ sleep: async () => {} }),
+		});
+
+		const result = await client.execute('listBoards');
+
+		expect(calls).toBe(3);
+		expect(result).toEqual({ data: [], nextCursor: null });
+	});
+
+	it('does not retry a non-retryable 4xx and rejects with FeaturebaseApiError', async () => {
+		mockFetchOnce(401, { success: false, message: 'Invalid API Key' });
+
+		const client = createFeaturebase({
+			apiKey: 'sk_test',
+			fetcher: defaultFetcher,
+			operations: OPERATIONS,
+			retry: featurebaseRetryOptions({ sleep: async () => {} }),
+		});
+
+		await expect(client.execute('listBoards')).rejects.toBeInstanceOf(FeaturebaseApiError);
 	});
 });
 
