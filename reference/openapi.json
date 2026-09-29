@@ -315,6 +315,42 @@
           "error"
         ]
       },
+      "AuthenticationError": {
+        "type": "object",
+        "description": "Undocumented in the original spec; confirmed by a real request to GET /v2/boards with an invalid bearer token, which returned this exact shape with HTTP 401. See reference/FINDINGS.md §4.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "Invalid API Key"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "RequestValidationError": {
+        "type": "object",
+        "description": "Confirmed by a real POST /v2/posts request with a too-short title, which returned this flat shape with HTTP 400 - not the ValidationError/{error:{...}} envelope this spec otherwise documents. See reference/FINDINGS.md §4.",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "example": "Validation error: body.title: String must contain at least 2 character(s)"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
       "FeaturebaseVersion": {
         "type": "string",
         "example": "2026-01-01.nova"
@@ -12732,6 +12768,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key. Confirmed via a real request with a garbage bearer token (see reference/FINDINGS.md §4); not documented elsewhere in this spec, but reasonably assumed to apply globally since auth middleware runs before any operation-specific logic.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request - Validation error or invalid parameters",
             "content": {
@@ -13205,61 +13251,11 @@
             }
           },
           "400": {
-            "description": "Bad Request\n\nPossible error codes:\n- `invalid_request`: Invalid or missing required fields",
+            "description": "Bad Request\n\nPossible error codes:\n- `invalid_request`: Invalid or missing required fields\n\nNote: confirmed via a real request (see reference/FINDINGS.md §4) to return the flat RequestValidationError shape, not the ValidationError envelope documented elsewhere in this spec.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "invalid_request_error"
-                          ],
-                          "description": "The type of error returned",
-                          "example": "invalid_request_error"
-                        },
-                        "code": {
-                          "type": "string",
-                          "enum": [
-                            "invalid_request"
-                          ],
-                          "description": "Machine-readable error code",
-                          "example": "invalid_request"
-                        },
-                        "message": {
-                          "type": "string",
-                          "description": "Human-readable error message",
-                          "example": "An error occurred"
-                        },
-                        "param": {
-                          "type": "string",
-                          "description": "The parameter that caused the error (if applicable)",
-                          "example": "id"
-                        },
-                        "status": {
-                          "type": "number",
-                          "enum": [
-                            400
-                          ],
-                          "description": "HTTP status code",
-                          "example": 400
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "code",
-                        "message",
-                        "status"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ]
+                  "$ref": "#/components/schemas/RequestValidationError"
                 }
               }
             }

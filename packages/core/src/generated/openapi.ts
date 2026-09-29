@@ -5525,6 +5525,20 @@ export interface components {
                 status: 500;
             };
         };
+        /** @description Undocumented in the original spec; confirmed by a real request to GET /v2/boards with an invalid bearer token, which returned this exact shape with HTTP 401. See reference/FINDINGS.md §4. */
+        AuthenticationError: {
+            /** @example false */
+            success: boolean;
+            /** @example Invalid API Key */
+            message: string;
+        };
+        /** @description Confirmed by a real POST /v2/posts request with a too-short title, which returned this flat shape with HTTP 400 - not the ValidationError/{error:{...}} envelope this spec otherwise documents. See reference/FINDINGS.md §4. */
+        RequestValidationError: {
+            /** @example 400 */
+            code: number;
+            /** @example Validation error: body.title: String must contain at least 2 character(s) */
+            message: string;
+        };
         /** @example 2026-01-01.nova */
         FeaturebaseVersion: string;
         BoardAccess: {
@@ -12522,6 +12536,15 @@ export interface operations {
                     "application/json": components["schemas"]["ValidationError"];
                 };
             };
+            /** @description Unauthorized - invalid or missing API key. Confirmed via a real request with a garbage bearer token (see reference/FINDINGS.md §4); not documented elsewhere in this spec, but reasonably assumed to apply globally since auth middleware runs before any operation-specific logic. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthenticationError"];
+                };
+            };
             /** @description Not Found - Resource does not exist */
             404: {
                 headers: {
@@ -12765,44 +12788,15 @@ export interface operations {
              *
              *     Possible error codes:
              *     - `invalid_request`: Invalid or missing required fields
+             *
+             *     Note: confirmed via a real request (see reference/FINDINGS.md §4) to return the flat RequestValidationError shape, not the ValidationError envelope documented elsewhere in this spec.
              */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        error: {
-                            /**
-                             * @description The type of error returned
-                             * @example invalid_request_error
-                             * @enum {string}
-                             */
-                            type: "invalid_request_error";
-                            /**
-                             * @description Machine-readable error code
-                             * @example invalid_request
-                             * @enum {string}
-                             */
-                            code: "invalid_request";
-                            /**
-                             * @description Human-readable error message
-                             * @example An error occurred
-                             */
-                            message: string;
-                            /**
-                             * @description The parameter that caused the error (if applicable)
-                             * @example id
-                             */
-                            param?: string;
-                            /**
-                             * @description HTTP status code
-                             * @example 400
-                             * @enum {number}
-                             */
-                            status: 400;
-                        };
-                    };
+                    "application/json": components["schemas"]["RequestValidationError"];
                 };
             };
             /**
