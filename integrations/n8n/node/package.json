@@ -25,7 +25,8 @@
 		"lintfix": "n8n-node lint --fix",
 		"format": "prettier --write .",
 		"test": "jest",
-		"release": "n8n-node release",
+		"changeset-publish": "changeset publish",
+		"ci:publish": "npm run lint && npm run build && npm run changeset-publish",
 		"prepublishOnly": "n8n-node prerelease"
 	},
 	"files": [
@@ -43,6 +44,7 @@
 		]
 	},
 	"devDependencies": {
+		"@changesets/cli": "^2.31.1",
 		"@featurebase-connect-sdk/core": "file:../../../packages/core",
 		"@n8n/node-cli": "^0.48.4",
 		"@types/jest": "^29.5.14",
