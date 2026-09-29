@@ -10,17 +10,13 @@ interface RequestOptions {
 	params?: unknown;
 }
 
-/**
- * Automatically intercepts every `.execute()` call and validates the arguments
- * against the provided Schema Registry.
- */
 export function createValidationPlugin(registry: SchemaRegistry): FeaturebasePlugin {
 	return {
 		id: 'featurebase-schema-validator',
 		hooks: {
 			beforeExecute(operation: OperationId, args: unknown[]) {
 				const schema = registry[operation];
-				if (!schema) return args; // No validation registered for this op, pass through
+				if (!schema) return args;
 
 				const requestOptions = (args[0] ?? {}) as RequestOptions;
 				const issues: { path: (string | number)[]; message: string }[] = [];

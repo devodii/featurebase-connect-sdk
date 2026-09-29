@@ -9,4 +9,9 @@ module.exports = {
 	transform: {
 		'^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
 	},
+	// marked only ships an ESM build with no "require" export condition, so point jest's
+	// CommonJS runtime at its UMD build instead of trying (and failing) to transform ESM.
+	moduleNameMapper: {
+		'^marked$': '<rootDir>/node_modules/@featurebase-connect-sdk/core/node_modules/marked/lib/marked.umd.js',
+	},
 };
