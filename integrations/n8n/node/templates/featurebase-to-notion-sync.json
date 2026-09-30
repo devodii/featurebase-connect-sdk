@@ -142,10 +142,7 @@
 			"main": [[{ "node": "Already in Notion?", "type": "main", "index": 0 }]]
 		},
 		"Already in Notion?": {
-			"main": [
-				[{ "node": "Notion: Update Page", "type": "main", "index": 0 }],
-				[{ "node": "Notion: Create Page", "type": "main", "index": 0 }]
-			]
+			"main": [[{ "node": "Notion: Update Page", "type": "main", "index": 0 }], [{ "node": "Notion: Create Page", "type": "main", "index": 0 }]]
 		}
 	},
 	"active": false,

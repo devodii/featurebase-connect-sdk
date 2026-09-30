@@ -30,22 +30,22 @@ Every Featurebase node in your workflows can now use it.
 
 The Trigger node watches Featurebase and starts a workflow when something happens:
 
-| Category | Events |
-| --- | --- |
-| Feedback | New post, post updated or deleted, post upvoted |
-| Comments | New comment, comment updated or deleted |
-| Changelog | Changelog published |
+| Category      | Events                                                 |
+| ------------- | ------------------------------------------------------ |
+| Feedback      | New post, post updated or deleted, post upvoted        |
+| Comments      | New comment, comment updated or deleted                |
+| Changelog     | Changelog published                                    |
 | Conversations | New message, replies, handovers, assignments, and more |
 
 You can also react to higher-level moments:
 
-| When this happens | You could |
-| --- | --- |
-| A post crosses a vote count you choose | Alert the team the first time it happens |
-| A post's status changes to something specific, e.g. Completed | Kick off a release announcement |
-| A post gets linked to Linear, Jira, GitHub, HubSpot, etc. | React in that other tool |
-| A target date is set on a post | Notify whoever's waiting on it |
-| An AI conversation needs a human | Alert whoever's on call |
+| When this happens                                             | You could                                |
+| ------------------------------------------------------------- | ---------------------------------------- |
+| A post crosses a vote count you choose                        | Alert the team the first time it happens |
+| A post's status changes to something specific, e.g. Completed | Kick off a release announcement          |
+| A post gets linked to Linear, Jira, GitHub, HubSpot, etc.     | React in that other tool                 |
+| A target date is set on a post                                | Notify whoever's waiting on it           |
+| An AI conversation needs a human                              | Alert whoever's on call                  |
 
 ## What you can do
 
