@@ -14,4 +14,3 @@ Initial release.
 - `Featurebase Trigger` node: real webhook registration and lifecycle management, all 26 confirmed webhook topics, event filters, seven derived events, event deduplication, and best-effort signature verification.
 - Zero-dependency utilities for markdown-to-HTML conversion, HTML-to-text stripping, title similarity scoring, and HMAC-SHA256 signing.
 - Six workflow templates in `templates/`.
-- `reference/openapi.json` and `reference/FINDINGS.md`, documenting every operation's source and every known gap in Featurebase's published docs.
