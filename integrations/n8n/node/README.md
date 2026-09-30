@@ -68,6 +68,7 @@ Working example workflows live in `templates/`. Import any of them from n8n's Wo
 - Support ticket to feedback: turns a tagged Zendesk or Intercom conversation into tracked feedback.
 - AI handover to Slack: pings the team when an AI conversation needs a human.
 - Canny migration: imports a CSV export from Canny.
+- Featurebase to Notion sync: mirrors your feedback into a Notion database on a schedule, no coding or hosting needed.
 
 ## Good to know
 

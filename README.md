@@ -14,7 +14,7 @@ See [how to install and use it](integrations/n8n/node/README.md).
 
 ### 2. A Notion sync
 
-Mirrors your Featurebase feedback into a Notion database on a schedule. Add a few credentials as GitHub secrets and it runs on its own.
+Mirrors your Featurebase feedback into a Notion database on a schedule. Available as a ready-made template for the n8n integration above, no code needed, or as a small standalone library if you want to run it yourself.
 
 See [how to set it up](integrations/notion/README.md).
 
