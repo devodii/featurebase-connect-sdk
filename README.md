@@ -1,10 +1,10 @@
-# Featurebase Connect
+# Featurebase Connect SDK
 
-Integrations that let Featurebase connect to the tools you already use, without writing code.
+An n8n integration for Featurebase, and the SDK it's built on.
 
 ## What's in here
 
-### 1. An n8n integration
+### The n8n integration
 
 Featurebase's own feedback board has [an open request for n8n support](https://feedback.featurebase.app/p/support-connecting-and-interacting-with-n8n), 145 upvotes, posted by a Featurebase team member, marked "In Review." This is that integration.
 
@@ -12,15 +12,9 @@ It gives you a trigger that reacts the moment something happens in Featurebase (
 
 See [how to install and use it](integrations/n8n/node/README.md).
 
-### 2. A Notion sync
+### The core SDK
 
-Mirrors your Featurebase feedback into a Notion database on a schedule. Available as a ready-made template for the n8n integration above, no code needed, or as a small standalone library if you want to run it yourself.
-
-See [how to set it up](integrations/notion/README.md).
-
-### 3. The core SDK
-
-The API client both integrations above are built on. Anyone can use it to build another integration on top of Featurebase.
+The API client the integration above is built on. Anyone can use it to build another integration on top of Featurebase.
 
 ## How it's built
 
@@ -32,7 +26,7 @@ Content formatting. Feedback content (a post description, a comment, a changelog
 
 Request validation. Before a request reaches the API, it's checked against the API's real schema. A mistake is caught immediately with a clear message instead of failing silently or reaching the API malformed.
 
-Both integrations have been tested against real Featurebase and Notion accounts.
+Tested against a real Featurebase account.
 
 ## License
 
