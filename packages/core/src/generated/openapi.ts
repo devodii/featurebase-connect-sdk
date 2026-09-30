@@ -5525,14 +5525,14 @@ export interface components {
                 status: 500;
             };
         };
-        /** @description Undocumented in the original spec; confirmed by a real request to GET /v2/boards with an invalid bearer token, which returned this exact shape with HTTP 401. See reference/FINDINGS.md §4. */
+        /** @description Undocumented in the original spec; confirmed by a real request to GET /v2/boards with an invalid bearer token, which returned this exact shape with HTTP 401. */
         AuthenticationError: {
             /** @example false */
             success: boolean;
             /** @example Invalid API Key */
             message: string;
         };
-        /** @description Confirmed by a real POST /v2/posts request with a too-short title, which returned this flat shape with HTTP 400 - not the ValidationError/{error:{...}} envelope this spec otherwise documents. See reference/FINDINGS.md §4. */
+        /** @description Confirmed by a real POST /v2/posts request with a too-short title, which returned this flat shape with HTTP 400 - not the ValidationError/{error:{...}} envelope this spec otherwise documents. */
         RequestValidationError: {
             /** @example 400 */
             code: number;
@@ -12536,7 +12536,7 @@ export interface operations {
                     "application/json": components["schemas"]["ValidationError"];
                 };
             };
-            /** @description Unauthorized - invalid or missing API key. Confirmed via a real request with a garbage bearer token (see reference/FINDINGS.md §4); not documented elsewhere in this spec, but reasonably assumed to apply globally since auth middleware runs before any operation-specific logic. */
+            /** @description Unauthorized - invalid or missing API key. Confirmed via a real request with a garbage bearer token; not documented elsewhere in this spec, but reasonably assumed to apply globally since auth middleware runs before any operation-specific logic. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -12789,7 +12789,7 @@ export interface operations {
              *     Possible error codes:
              *     - `invalid_request`: Invalid or missing required fields
              *
-             *     Note: confirmed via a real request (see reference/FINDINGS.md §4) to return the flat RequestValidationError shape, not the ValidationError envelope documented elsewhere in this spec.
+             *     Note: confirmed via a real request to return the flat RequestValidationError shape, not the ValidationError envelope documented elsewhere in this spec.
              */
             400: {
                 headers: {

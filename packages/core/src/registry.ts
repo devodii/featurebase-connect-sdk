@@ -11,15 +11,6 @@ export type SchemaRegistry = {
 	[K in OperationId]?: OperationSchemaDefinition<K>;
 };
 
-/**
- * A helper to build a type-safe registry.
- * Usage:
- * const schemas = defineSchemas({
- *   createPost: {
- *     body: z.object({ title: z.string(), boardId: z.string() }) // TS enforces this!
- *   }
- * })
- */
 export function defineSchemas<T extends SchemaRegistry>(registry: T): T {
 	return registry;
 }

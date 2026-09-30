@@ -1,8 +1,5 @@
 import { extractErrorMessage, FeaturebaseApiError } from './errors';
 
-// Fixtures below are the exact, real response bodies observed by hitting the
-// live Featurebase API directly (see reference/FINDINGS.md §4) - not invented.
-
 const NOT_FOUND_BODY = {
 	error: { type: 'invalid_request_error', code: 'resource_not_found', message: 'Post not found', param: 'post' },
 };
