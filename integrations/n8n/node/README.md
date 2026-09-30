@@ -30,22 +30,22 @@ Every Featurebase node in your workflows can now use it.
 
 The Trigger node watches Featurebase and starts a workflow when something happens:
 
-| Category | Events |
-| --- | --- |
-| Feedback | New post, post updated or deleted, post upvoted |
-| Comments | New comment, comment updated or deleted |
-| Changelog | Changelog published |
+| Category      | Events                                                 |
+| ------------- | ------------------------------------------------------ |
+| Feedback      | New post, post updated or deleted, post upvoted        |
+| Comments      | New comment, comment updated or deleted                |
+| Changelog     | Changelog published                                    |
 | Conversations | New message, replies, handovers, assignments, and more |
 
 You can also react to higher-level moments:
 
-| When this happens | You could |
-| --- | --- |
-| A post crosses a vote count you choose | Alert the team the first time it happens |
-| A post's status changes to something specific, e.g. Completed | Kick off a release announcement |
-| A post gets linked to Linear, Jira, GitHub, HubSpot, etc. | React in that other tool |
-| A target date is set on a post | Notify whoever's waiting on it |
-| An AI conversation needs a human | Alert whoever's on call |
+| When this happens                                             | You could                                |
+| ------------------------------------------------------------- | ---------------------------------------- |
+| A post crosses a vote count you choose                        | Alert the team the first time it happens |
+| A post's status changes to something specific, e.g. Completed | Kick off a release announcement          |
+| A post gets linked to Linear, Jira, GitHub, HubSpot, etc.     | React in that other tool                 |
+| A target date is set on a post                                | Notify whoever's waiting on it           |
+| An AI conversation needs a human                              | Alert whoever's on call                  |
 
 ## What you can do
 
@@ -69,6 +69,8 @@ Working example workflows live in `templates/`. Import any of them from n8n's Wo
 - AI handover to Slack: pings the team when an AI conversation needs a human.
 - Canny migration: imports a CSV export from Canny.
 - Featurebase to Notion sync: mirrors your feedback into a Notion database on a schedule, no coding or hosting needed.
+- Changelog published to Slack: announces every new release to your team the moment it goes live, no more manually pasting release notes into Slack.
+- Intercom conversations migration: brings your support history over from Intercom, so nothing gets lost when you switch.
 
 ## Good to know
 
