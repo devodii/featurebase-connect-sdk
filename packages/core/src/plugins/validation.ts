@@ -10,7 +10,7 @@ interface RequestOptions {
 	params?: unknown;
 }
 
-export function createValidationPlugin(registry: SchemaRegistry): FeaturebasePlugin {
+export function applyValidation(registry: SchemaRegistry): FeaturebasePlugin {
 	return {
 		id: 'featurebase-schema-validator',
 		hooks: {
@@ -21,7 +21,6 @@ export function createValidationPlugin(registry: SchemaRegistry): FeaturebasePlu
 				const requestOptions = (args[0] ?? {}) as RequestOptions;
 				const issues: { path: (string | number)[]; message: string }[] = [];
 
-				// Validate Body
 				if (schema.body && requestOptions.body) {
 					const result = schema.body.safeParse(requestOptions.body);
 					if (!result.success) {
@@ -31,7 +30,6 @@ export function createValidationPlugin(registry: SchemaRegistry): FeaturebasePlu
 					}
 				}
 
-				// Validate Query
 				if (schema.query && requestOptions.query) {
 					const result = schema.query.safeParse(requestOptions.query);
 					if (!result.success) {
@@ -41,7 +39,6 @@ export function createValidationPlugin(registry: SchemaRegistry): FeaturebasePlu
 					}
 				}
 
-				// Validate Path Params
 				if (schema.params && requestOptions.params) {
 					const result = schema.params.safeParse(requestOptions.params);
 					if (!result.success) {

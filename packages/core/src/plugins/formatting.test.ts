@@ -1,8 +1,8 @@
-import { createFormattingPlugin } from './formatting';
+import { applyFormatting } from './formatting';
 
-describe('createFormattingPlugin', () => {
+describe('applyFormatting', () => {
 	it('adds contentText from a content field', () => {
-		const plugin = createFormattingPlugin();
+		const plugin = applyFormatting();
 
 		const result = plugin.hooks!.afterResponse!({ id: 'p1', content: '<p>Hello <strong>world</strong></p>' }, { operation: 'getPost' as never }) as Record<
 			string,
@@ -13,7 +13,7 @@ describe('createFormattingPlugin', () => {
 	});
 
 	it('adds contentText from a body field', () => {
-		const plugin = createFormattingPlugin();
+		const plugin = applyFormatting();
 
 		const result = plugin.hooks!.afterResponse!({ id: 'a1', body: '<p>Article body</p>' }, { operation: 'getArticle' as never }) as Record<string, unknown>;
 
@@ -21,7 +21,7 @@ describe('createFormattingPlugin', () => {
 	});
 
 	it('recurses into nested objects and arrays', () => {
-		const plugin = createFormattingPlugin();
+		const plugin = applyFormatting();
 
 		const result = plugin.hooks!.afterResponse!(
 			{
@@ -39,7 +39,7 @@ describe('createFormattingPlugin', () => {
 	});
 
 	it('leaves non-string content and body fields alone', () => {
-		const plugin = createFormattingPlugin();
+		const plugin = applyFormatting();
 
 		const result = plugin.hooks!.afterResponse!({ id: 'p1', content: null, body: 42 }, { operation: 'getPost' as never }) as Record<string, unknown>;
 
@@ -47,7 +47,7 @@ describe('createFormattingPlugin', () => {
 	});
 
 	it('leaves data with neither a content nor a body field untouched', () => {
-		const plugin = createFormattingPlugin();
+		const plugin = applyFormatting();
 
 		const result = plugin.hooks!.afterResponse!({ id: 'b1', name: 'Feature Requests' }, { operation: 'listBoards' as never }) as Record<string, unknown>;
 
@@ -55,7 +55,7 @@ describe('createFormattingPlugin', () => {
 	});
 
 	it('passes primitive and null responses through untouched', () => {
-		const plugin = createFormattingPlugin();
+		const plugin = applyFormatting();
 
 		expect(plugin.hooks!.afterResponse!(null, { operation: 'deletePost' as never })).toBeNull();
 		expect(plugin.hooks!.afterResponse!('ok', { operation: 'deletePost' as never })).toBe('ok');
