@@ -47,5 +47,5 @@ Run this on a schedule (a cron job, a GitHub Action, an n8n Schedule Trigger cal
 ## Notes
 
 - `propertyNames` exists because every Notion workspace names its database columns differently - there's no way to guess this correctly, so it's an explicit map instead of a hardcoded assumption.
-- The board name lookup (`listBoards`) runs once per sync, not once per post.
-- Anything tagged `@unchecked-*` in `notion-client.ts` (the exact API version string, the precise rate-limit threshold) reflects Notion's published docs at the time this was written, not something re-verified against a live account - worth a quick check against [developers.notion.com](https://developers.notion.com) before relying on it in production.
+- The board name lookup (`listBoards`) and the database's data source id lookup each run once per sync, not once per post. Only a single-data-source database is supported.
+- Pinned to Notion API version `2025-09-03`.

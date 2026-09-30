@@ -1,9 +1,7 @@
 import * as _$featurebaseconnect0 from '@featurebase-connect-sdk/core';
 
-// Pinned so every request parses the same way; bump this if you need a newer Notion
-// API version. https://developers.notion.com/reference/versioning
-// @unchecked-notion-api-version: current at the time this was written, not re-verified live.
-const NOTION_VERSION = '2022-06-28';
+// Pinned to Notion's current API version so requests always parse the same way.
+const NOTION_VERSION = '2025-09-03';
 const NOTION_API_BASE = 'https://api.notion.com/v1';
 
 export type NotionPropertyValue = Record<string, unknown>;
@@ -39,14 +37,16 @@ export const defaultNotionFetcher: _$featurebaseconnect0.Fetcher = async (reques
 	return { status: response.status, headers: Object.fromEntries(response.headers.entries()), body };
 };
 
-// @unchecked-notion-rate-limit: Notion documents "an average of 3 requests per second"
-// without an exact burst/window definition, so this retries on 429 with backoff rather
-// than assuming a precise threshold. https://developers.notion.com/reference/request-limits
+// Notion's rate limit varies by plan and workspace, so retry generically on 429 rather
+// than hardcode a threshold.
 function isRateLimited(error: unknown): boolean {
 	return error instanceof NotionApiError && error.status === 429;
 }
 
 export class NotionClient {
+	// Cached so a sync run resolves each database's data source id once, not once per page.
+	private readonly dataSourceIdCache = new Map<string, string>();
+
 	constructor(private readonly options: NotionClientOptions) {}
 
 	private async request<T>(req: Pick<_$featurebaseconnect0.FetchRequest, 'method' | 'url' | 'body'>): Promise<T> {
@@ -71,21 +71,45 @@ export class NotionClient {
 		return response.body as T;
 	}
 
+	// Only a single-data-source database is supported; fails loudly instead of guessing
+	// which data source a page belongs to.
+	private async resolveDataSourceId(databaseId: string): Promise<string> {
+		const cached = this.dataSourceIdCache.get(databaseId);
+		if (cached) return cached;
+
+		const database = await this.request<{ data_sources: { id: string; name: string }[] }>({
+			method: 'GET',
+			url: `${NOTION_API_BASE}/databases/${databaseId}`,
+		});
+
+		if (database.data_sources.length !== 1) {
+			throw new Error(
+				`Notion database ${databaseId} has ${database.data_sources.length} data sources; this integration only supports a database with exactly one data source.`,
+			);
+		}
+
+		const dataSourceId = database.data_sources[0].id;
+		this.dataSourceIdCache.set(databaseId, dataSourceId);
+		return dataSourceId;
+	}
+
 	/** Finds existing pages in a database matching a Notion filter object (same shape as the Notion API's own `filter`). */
 	async queryDatabase(databaseId: string, filter: Record<string, unknown>): Promise<NotionPage[]> {
+		const dataSourceId = await this.resolveDataSourceId(databaseId);
 		const result = await this.request<{ results: NotionPage[] }>({
 			method: 'POST',
-			url: `${NOTION_API_BASE}/databases/${databaseId}/query`,
+			url: `${NOTION_API_BASE}/data_sources/${dataSourceId}/query`,
 			body: { filter },
 		});
 		return result.results;
 	}
 
 	async createPage(databaseId: string, properties: NotionProperties): Promise<NotionPage> {
+		const dataSourceId = await this.resolveDataSourceId(databaseId);
 		return this.request<NotionPage>({
 			method: 'POST',
 			url: `${NOTION_API_BASE}/pages`,
-			body: { parent: { database_id: databaseId }, properties },
+			body: { parent: { type: 'data_source_id', data_source_id: dataSourceId }, properties },
 		});
 	}
 

@@ -59,6 +59,9 @@ function featurebaseFetcher() {
 
 function notionFetcher() {
 	return fakeFetcher((request) => {
+		if (request.method === 'GET' && request.url === 'https://api.notion.com/v1/databases/db1') {
+			return { status: 200, headers: {}, body: { data_sources: [{ id: 'ds1', name: 'Tasks' }] } };
+		}
 		if (request.method === 'POST' && request.url.endsWith('/query')) {
 			const body = request.body as { filter: { rich_text: { equals: string } } };
 			const existing = body.filter.rich_text.equals === 'p2' ? [{ id: 'notion-page-2', properties: {} }] : [];
@@ -88,7 +91,7 @@ describe('syncPostsToNotion', () => {
 
 		const createRequest = notionApi.requests.find((r) => r.method === 'POST' && r.url.endsWith('/pages'));
 		expect(createRequest?.body).toMatchObject({
-			parent: { database_id: 'db1' },
+			parent: { type: 'data_source_id', data_source_id: 'ds1' },
 			properties: {
 				Title: { title: [{ text: { content: 'Add dark mode' } }] },
 				Status: { select: { name: 'In Progress' } },
