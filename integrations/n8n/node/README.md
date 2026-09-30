@@ -1,5 +1,7 @@
 # n8n-nodes-featurebase-connect
 
+[![npm version](https://img.shields.io/npm/v/n8n-nodes-featurebase-connect.svg)](https://www.npmjs.com/package/n8n-nodes-featurebase-connect)
+
 Connects Featurebase to n8n, the automation tool that plugs into many other apps: Slack, email, databases, spreadsheets, and more. Once installed, you can build automations like "when a customer submits feedback, notify the team in Slack" or "when a post crosses 50 upvotes, create a task," without writing code.
 
 Featurebase's own feedback board has [an open request for exactly this](https://feedback.featurebase.app/p/support-connecting-and-interacting-with-n8n), 145 upvotes, posted by a Featurebase team member, marked "In Review." This package is that integration, tested against a real Featurebase account, and this repository is ready to transfer to the Featurebase team.
@@ -11,7 +13,7 @@ If you're on n8n Cloud or self-hosted n8n with the community nodes panel:
 1. In n8n, go to Settings, then Community Nodes.
 2. Click Install, type `n8n-nodes-featurebase-connect`, confirm.
 
-If you self-host n8n via npm instead:
+If you self-host n8n via npm instead, install [the package directly from npm](https://www.npmjs.com/package/n8n-nodes-featurebase-connect):
 
 ```bash
 npm install n8n-nodes-featurebase-connect

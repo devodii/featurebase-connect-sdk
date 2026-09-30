@@ -8,7 +8,7 @@ An n8n integration for Featurebase, and the SDK it's built on.
 
 Featurebase's own feedback board has [an open request for n8n support](https://feedback.featurebase.app/p/support-connecting-and-interacting-with-n8n), 145 upvotes, posted by a Featurebase team member, marked "In Review." This is that integration.
 
-It gives you a trigger that reacts the moment something happens in Featurebase (a new post, a comment, an upvote, a status change) and full coverage of everything Featurebase's API can do: posts, comments, changelogs, boards, contacts, companies, conversations, surveys, help center content, and more. It's published on npm and installs from n8n's Community Nodes panel, so nobody using it needs to open this repository.
+It gives you a trigger that reacts the moment something happens in Featurebase (a new post, a comment, an upvote, a status change) and full coverage of everything Featurebase's API can do: posts, comments, changelogs, boards, contacts, companies, conversations, surveys, help center content, and more. It's published on npm as [n8n-nodes-featurebase-connect](https://www.npmjs.com/package/n8n-nodes-featurebase-connect) and installs from n8n's Community Nodes panel.
 
 See [how to install and use it](integrations/n8n/node/README.md).
 
