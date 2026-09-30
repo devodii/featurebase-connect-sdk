@@ -1,4 +1,4 @@
-import { createFeaturebase, createFormattingPlugin, createValidationPlugin, operationRegistry, generatedSchemas } from '@featurebase-connect-sdk/core';
+import { createFeaturebase, applyFormatting, applyValidation, operationRegistry, generatedSchemas } from '@featurebase-connect-sdk/core';
 
 import { createN8nFetcher, type N8nContext } from './n8n-fetcher';
 
@@ -13,6 +13,6 @@ export async function getFeaturebaseClient(context: N8nContext) {
 		apiVersion,
 		operations: operationRegistry,
 		fetcher: createN8nFetcher(context),
-		plugins: [createFormattingPlugin(), createValidationPlugin(generatedSchemas)],
+		plugins: [applyFormatting(), applyValidation(generatedSchemas)],
 	});
 }

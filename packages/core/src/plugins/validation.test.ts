@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { FeaturebaseValidationError } from '../client';
 import type { SchemaRegistry } from '../registry';
-import { createValidationPlugin } from './validation';
+import { applyValidation } from './validation';
 
 const registry = {
 	createPost: {
@@ -15,9 +15,9 @@ const registry = {
 	},
 } as unknown as SchemaRegistry;
 
-describe('createValidationPlugin', () => {
+describe('applyValidation', () => {
 	it('passes a valid body through untouched and returns zod-parsed data', async () => {
-		const plugin = createValidationPlugin(registry);
+		const plugin = applyValidation(registry);
 		const [result] = await plugin.hooks!.beforeExecute!('createPost' as never, [{ body: { title: 'Add dark mode', boardId: 'b1' } }]);
 
 		expect(result).toEqual({ body: { title: 'Add dark mode', boardId: 'b1' } });
@@ -27,7 +27,7 @@ describe('createValidationPlugin', () => {
 		const schemaWithDefault = {
 			createPost: { body: z.object({ title: z.string(), notifyAdmins: z.boolean().default(false) }) },
 		} as unknown as SchemaRegistry;
-		const plugin = createValidationPlugin(schemaWithDefault);
+		const plugin = applyValidation(schemaWithDefault);
 
 		const [result] = (await plugin.hooks!.beforeExecute!('createPost' as never, [{ body: { title: 'hi' } }])) as [{ body: { notifyAdmins: boolean } }];
 
@@ -35,7 +35,7 @@ describe('createValidationPlugin', () => {
 	});
 
 	it('throws FeaturebaseValidationError with useful issues for an invalid body', () => {
-		const plugin = createValidationPlugin(registry);
+		const plugin = applyValidation(registry);
 
 		try {
 			plugin.hooks!.beforeExecute!('createPost' as never, [{ body: { title: 'x', boardId: 'b1' } }]);
@@ -50,19 +50,19 @@ describe('createValidationPlugin', () => {
 	});
 
 	it('throws FeaturebaseValidationError for an invalid query', () => {
-		const plugin = createValidationPlugin(registry);
+		const plugin = applyValidation(registry);
 
 		expect(() => plugin.hooks!.beforeExecute!('listPosts' as never, [{ query: { boardId: 42 } }])).toThrow(FeaturebaseValidationError);
 	});
 
 	it('throws FeaturebaseValidationError for invalid path params', () => {
-		const plugin = createValidationPlugin(registry);
+		const plugin = applyValidation(registry);
 
 		expect(() => plugin.hooks!.beforeExecute!('getPost' as never, [{ params: { id: 'not-a-uuid' } }])).toThrow(FeaturebaseValidationError);
 	});
 
 	it('passes operations with no registered schema through untouched', async () => {
-		const plugin = createValidationPlugin(registry);
+		const plugin = applyValidation(registry);
 		const args = [{ body: { anything: 'goes' } }];
 
 		const result = await plugin.hooks!.beforeExecute!('deletePost' as never, args);
@@ -71,7 +71,7 @@ describe('createValidationPlugin', () => {
 	});
 
 	it('defaults to an empty options object when no schema requires validation and no args are given', async () => {
-		const plugin = createValidationPlugin(registry);
+		const plugin = applyValidation(registry);
 
 		const result = await plugin.hooks!.beforeExecute!('deletePost' as never, []);
 

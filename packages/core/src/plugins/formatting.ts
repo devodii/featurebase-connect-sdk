@@ -11,7 +11,7 @@ function walk(obj: unknown, visitor: (node: Record<string, unknown>) => void) {
 	}
 }
 
-export function createFormattingPlugin(): FeaturebasePlugin {
+export function applyFormatting(): FeaturebasePlugin {
 	return {
 		id: 'featurebase-auto-formatter',
 		hooks: {

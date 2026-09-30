@@ -15,6 +15,6 @@ export function createFeaturebaseClient(options: CreateClientOptions) {
 		fetcher: options.fetcher ?? _$featurebaseconnect0.defaultFetcher,
 		operations: _$featurebaseconnect0.operationRegistry,
 		retry: _$featurebaseconnect0.featurebaseRetryOptions(),
-		plugins: [_$featurebaseconnect0.createFormattingPlugin(), _$featurebaseconnect0.createValidationPlugin(_$featurebaseconnect0.generatedSchemas)],
+		plugins: [_$featurebaseconnect0.applyFormatting(), _$featurebaseconnect0.applyValidation(_$featurebaseconnect0.generatedSchemas)],
 	});
 }
