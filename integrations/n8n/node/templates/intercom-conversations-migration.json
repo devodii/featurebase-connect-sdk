@@ -1,0 +1,100 @@
+{
+	"name": "Intercom conversations migration",
+	"nodes": [
+		{
+			"parameters": {},
+			"name": "Manual Trigger",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [260, 300]
+		},
+		{
+			"parameters": {
+				"operation": "read",
+				"fileSelector": "intercom-export.csv"
+			},
+			"name": "Read Intercom CSV",
+			"type": "n8n-nodes-base.readWriteFile",
+			"typeVersion": 1,
+			"position": [500, 300]
+		},
+		{
+			"parameters": {
+				"operation": "fromFile",
+				"fileFormat": "csv",
+				"options": {}
+			},
+			"name": "Parse CSV",
+			"type": "n8n-nodes-base.spreadsheetFile",
+			"typeVersion": 2,
+			"position": [740, 300]
+		},
+		{
+			"parameters": {
+				"jsCode": "return items.map((item) => ({\n  json: {\n    email: item.json['Requester Email'],\n    message: item.json['Message'],\n    createdAt: item.json['Created At'],\n  },\n}));"
+			},
+			"name": "Map Intercom Columns",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [980, 300]
+		},
+		{
+			"parameters": {
+				"resource": "contact",
+				"operation": "upsert",
+				"email": "={{ $json.email }}"
+			},
+			"name": "Contact: Upsert",
+			"type": "n8n-nodes-featurebase-connect.featurebase",
+			"typeVersion": 1,
+			"position": [1220, 300],
+			"credentials": {
+				"featurebaseApi": {
+					"id": "1",
+					"name": "Featurebase API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"resource": "conversation",
+				"operation": "create",
+				"fromType": "contact",
+				"fromId": "={{ $json.id }}",
+				"bodyMarkdown": "={{ $('Map Intercom Columns').item.json.message }}",
+				"additionalFields": {
+					"createdAt": "={{ $('Map Intercom Columns').item.json.createdAt }}"
+				}
+			},
+			"name": "Conversation: Create",
+			"type": "n8n-nodes-featurebase-connect.featurebase",
+			"typeVersion": 1,
+			"position": [1460, 300],
+			"credentials": {
+				"featurebaseApi": {
+					"id": "1",
+					"name": "Featurebase API"
+				}
+			}
+		}
+	],
+	"connections": {
+		"Manual Trigger": {
+			"main": [[{ "node": "Read Intercom CSV", "type": "main", "index": 0 }]]
+		},
+		"Read Intercom CSV": {
+			"main": [[{ "node": "Parse CSV", "type": "main", "index": 0 }]]
+		},
+		"Parse CSV": {
+			"main": [[{ "node": "Map Intercom Columns", "type": "main", "index": 0 }]]
+		},
+		"Map Intercom Columns": {
+			"main": [[{ "node": "Contact: Upsert", "type": "main", "index": 0 }]]
+		},
+		"Contact: Upsert": {
+			"main": [[{ "node": "Conversation: Create", "type": "main", "index": 0 }]]
+		}
+	},
+	"active": false,
+	"settings": { "executionOrder": "v1" }
+}

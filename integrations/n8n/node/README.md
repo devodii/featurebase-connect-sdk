@@ -69,6 +69,8 @@ Working example workflows live in `templates/`. Import any of them from n8n's Wo
 - AI handover to Slack: pings the team when an AI conversation needs a human.
 - Canny migration: imports a CSV export from Canny.
 - Featurebase to Notion sync: mirrors your feedback into a Notion database on a schedule, no coding or hosting needed.
+- Changelog published to Slack: announces every new release to your team the moment it goes live, no more manually pasting release notes into Slack.
+- Intercom conversations migration: brings your support history over from Intercom, so nothing gets lost when you switch.
 
 ## Good to know
 
